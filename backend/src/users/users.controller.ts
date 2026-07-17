@@ -28,6 +28,12 @@ import { UsersService } from './users.service';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
+  @Get('registered')
+  @ApiOperation({ summary: 'Get registered users' })
+  findRegistered(): Promise<SafeUserRow[]> {
+    return this.usersService.findAll();
+  }
+
   @Get()
   @ApiOperation({ summary: 'Get all users' })
   findAll(): Promise<SafeUserRow[]> {

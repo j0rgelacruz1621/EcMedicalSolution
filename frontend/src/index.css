@@ -1,0 +1,79 @@
+:root {
+  --text: #4d5046;
+  --text-h: #142118;
+  --bg: #f7f3ec;
+  --border: rgba(20, 33, 24, 0.12);
+  --code-bg: #ece5d8;
+  --accent: #0f766e;
+  --accent-bg: rgba(15, 118, 110, 0.1);
+  --accent-border: rgba(15, 118, 110, 0.35);
+  --social-bg: rgba(255, 255, 255, 0.6);
+  --shadow:
+    rgba(25, 37, 30, 0.12) 0 16px 30px -18px,
+    rgba(25, 37, 30, 0.08) 0 8px 16px -12px;
+
+  --sans: 'Plus Jakarta Sans', 'Segoe UI', sans-serif;
+  --heading: 'Fraunces', Georgia, serif;
+  --mono: ui-monospace, Consolas, monospace;
+
+  font: 18px/145% var(--sans);
+  letter-spacing: 0.18px;
+  color: var(--text);
+  background: var(--bg);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  @media (max-width: 1024px) {
+    font-size: 16px;
+  }
+}
+
+#root {
+  width: 100%;
+  min-height: 100svh;
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background:
+    radial-gradient(circle at top, rgba(210, 241, 228, 0.8), transparent 28%),
+    linear-gradient(180deg, #fbf8f2 0%, #f7f3ec 45%, #efe6d8 100%);
+  overflow-x: hidden;
+}
+
+h1,
+h2 {
+  font-family: var(--heading);
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+h1 {
+  font-size: clamp(2.75rem, 6vw, 4.8rem);
+  line-height: 0.95;
+  letter-spacing: -0.06em;
+  margin: 0 0 1.4rem;
+}
+
+h2 {
+  font-size: 24px;
+  line-height: 118%;
+  letter-spacing: -0.24px;
+  margin: 0 0 8px;
+}
+
+p {
+  margin: 0;
+}
+
+a {
+  color: inherit;
+}
+
+* {
+  box-sizing: border-box;
+}
