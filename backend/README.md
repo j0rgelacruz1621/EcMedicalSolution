@@ -23,7 +23,44 @@
 
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+Backend module for doctor and schedule management using NestJS + Prisma + PostgreSQL.
+
+## Doctors module
+
+### Endpoints
+
+- POST /doctors
+- GET /doctors
+- GET /doctors/:id
+- POST /doctors/:id/schedules
+
+### Example payloads
+
+Create doctor:
+
+```json
+{
+  "licenseNumber": "MED-001",
+  "nationalId": "1234567890",
+  "firstName": "Ana",
+  "lastName": "Pérez",
+  "email": "ana@example.com",
+  "phone": "0999999999",
+  "specialty": "Cardiología",
+  "officeId": 1
+}
+```
+
+Create schedules:
+
+```json
+{
+  "schedules": [
+    { "dayOfWeek": 1, "startTime": "09:00", "endTime": "11:00" },
+    { "dayOfWeek": 1, "startTime": "14:00", "endTime": "16:00" }
+  ]
+}
+```
 
 ## Project setup
 

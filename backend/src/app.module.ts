@@ -8,6 +8,8 @@ import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { RolesGuard } from './auth/roles.guard';
 import { SupabaseModule } from './supabase/supabase.module';
 import { UsersModule } from './users/users.module';
+import { DoctorsModule } from './doctors/doctors.module';
+import { PrismaModule } from './prisma/prisma.module';
 
 @Module({
   imports: [
@@ -16,8 +18,10 @@ import { UsersModule } from './users/users.module';
       envFilePath: ['.env', '../.env'],
     }),
     SupabaseModule,
+    PrismaModule,
     AuthModule,
     UsersModule,
+    DoctorsModule,
   ],
   controllers: [AppController],
   providers: [
