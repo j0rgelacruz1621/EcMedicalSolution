@@ -4,13 +4,13 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
 import { CreateDoctorDto } from './dto/create-doctor.dto.js';
 import { CreateDoctorSchedulesDto } from './dto/create-doctor-schedules.dto.js';
+import { DoctorsRepository } from './doctors.repository';
 
 @Injectable()
 export class DoctorsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly doctorsRepository: DoctorsRepository) {}
 
   private toJsonSafe<T>(value: T): T {
     const normalized = this.normalizeTimes(value);
@@ -84,15 +84,8 @@ export class DoctorsService {
     const skip = (safePage - 1) * safeLimit;
 
     const [doctors, total] = await Promise.all([
-      this.prisma.doctor.findMany({
-        include: {
-          schedules: true,
-        },
-        orderBy: { id: 'asc' },
-        skip,
-        take: safeLimit,
-      }),
-      this.prisma.doctor.count(),
+      this.doctorsRepository.findManyWithSchedules(skip, safeLimit),
+      this.doctorsRepository.countDoctors(),
     ]);
 
     const totalPages = Math.max(1, Math.ceil(total / safeLimit));
@@ -107,10 +100,7 @@ export class DoctorsService {
   }
 
   async findOne(id: number) {
-    const doctor = await this.prisma.doctor.findUnique({
-      where: { id: BigInt(id) },
-      include: { schedules: true },
-    });
+    const doctor = await this.doctorsRepository.findDoctorByIdWithSchedules(BigInt(id));
 
     if (!doctor) {
       throw new NotFoundException('Doctor not found.');
@@ -120,25 +110,18 @@ export class DoctorsService {
   }
 
   async create(payload: CreateDoctorDto) {
-    const existingDoctor = await this.prisma.doctor.findFirst({
-      where: {
-        OR: [
-          { licenseNumber: payload.licenseNumber },
-          { nationalId: payload.nationalId },
-          { email: payload.email },
-        ],
-      },
-    });
+    const existingDoctor = await this.doctorsRepository.findDoctorByUniqueFields(
+      payload.licenseNumber,
+      payload.nationalId,
+      payload.email,
+    );
 
     if (existingDoctor) {
       throw new ConflictException('Doctor already exists.');
     }
 
     if (payload.officeId !== undefined) {
-      const existingOffice = await this.prisma.$queryRawUnsafe(
-        'SELECT 1 FROM public.offices WHERE id = $1',
-        payload.officeId,
-      );
+      const existingOffice = await this.doctorsRepository.findOfficeById(payload.officeId);
 
       if (!Array.isArray(existingOffice) || existingOffice.length === 0) {
         throw new BadRequestException('The provided officeId does not exist.');
@@ -146,18 +129,7 @@ export class DoctorsService {
     }
 
     try {
-      const doctor = await this.prisma.doctor.create({
-        data: {
-          licenseNumber: payload.licenseNumber,
-          nationalId: payload.nationalId,
-          firstName: payload.firstName,
-          lastName: payload.lastName,
-          email: payload.email,
-          phone: payload.phone,
-          specialty: payload.specialty,
-          officeId: payload.officeId !== undefined ? BigInt(payload.officeId) : undefined,
-        },
-      });
+      const doctor = await this.doctorsRepository.createDoctor(payload);
 
       return this.toJsonSafe(doctor);
     } catch (error: unknown) {
@@ -180,17 +152,13 @@ export class DoctorsService {
   }
 
   async createSchedules(doctorId: number, payload: CreateDoctorSchedulesDto) {
-    const doctor = await this.prisma.doctor.findUnique({
-      where: { id: BigInt(doctorId) },
-    });
+    const doctor = await this.doctorsRepository.findDoctorById(BigInt(doctorId));
 
     if (!doctor) {
       throw new NotFoundException('Doctor not found.');
     }
 
-    const existingSchedules = await this.prisma.doctorSchedule.findMany({
-      where: { doctorId: BigInt(doctorId) },
-    });
+    const existingSchedules = await this.doctorsRepository.findSchedulesByDoctorId(BigInt(doctorId));
 
     const normalizedSchedules = payload.schedules.map((schedule) => ({
       doctorId: BigInt(doctorId),
@@ -246,17 +214,13 @@ export class DoctorsService {
       }
     }
 
-    const schedules = await this.prisma.$transaction(
-      normalizedSchedules.map((schedule) =>
-        this.prisma.doctorSchedule.create({
-          data: {
-            doctorId: schedule.doctorId,
-            dayOfWeek: schedule.dayOfWeek,
-            startTime: this.toDbTime(schedule.startTime),
-            endTime: this.toDbTime(schedule.endTime),
-          },
-        }),
-      ),
+    const schedules = await this.doctorsRepository.createSchedules(
+      normalizedSchedules.map((schedule) => ({
+        doctorId: schedule.doctorId,
+        dayOfWeek: schedule.dayOfWeek,
+        startTime: this.toDbTime(schedule.startTime),
+        endTime: this.toDbTime(schedule.endTime),
+      })),
     );
 
     return this.toJsonSafe(schedules);
