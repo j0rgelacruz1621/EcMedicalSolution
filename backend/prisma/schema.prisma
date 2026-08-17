@@ -21,8 +21,80 @@ model Doctor {
   createdAt     DateTime         @default(now()) @map("created_at")
   updatedAt     DateTime         @updatedAt @map("updated_at")
   schedules     DoctorSchedule[]
+  appointments  Appointment[]
+  office        Office?          @relation(fields: [officeId], references: [id])
 
   @@map("doctors")
+}
+
+model MedicalCenter {
+  id           BigInt   @id @default(autoincrement())
+  name         String
+  address      String?
+  phone        String?
+  isActive     Boolean? @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  offices      Office[]
+  appointments Appointment[]
+
+  @@map("medical_centers")
+}
+
+model Office {
+  id              BigInt        @id @default(autoincrement())
+  medicalCenterId BigInt?       @map("medical_center_id")
+  officeNumber    String        @map("office_number")
+  locationDetails String?       @map("location_details")
+  isActive        Boolean?      @default(true) @map("is_active")
+  createdAt       DateTime      @default(now()) @map("created_at")
+  medicalCenter   MedicalCenter? @relation(fields: [medicalCenterId], references: [id])
+  doctors         Doctor[]
+  appointments    Appointment[]
+
+  @@map("offices")
+}
+
+model Patient {
+  id                  BigInt        @id @default(autoincrement())
+  nationalId          String        @unique @map("national_id")
+  firstName           String        @map("first_name")
+  lastName            String        @map("last_name")
+  email               String
+  phone               String
+  dateOfBirth         DateTime      @map("date_of_birth") @db.Date
+  gender              String
+  medicalHistoryNotes String?       @map("medical_history_notes")
+  isActive            Boolean       @default(true) @map("is_active")
+  createdAt           DateTime      @default(now()) @map("created_at")
+  updatedAt           DateTime      @updatedAt @map("updated_at")
+  appointments Appointment[]
+
+  @@map("patients")
+}
+
+model Appointment {
+  id              BigInt   @id @default(autoincrement())
+  appointmentCode String   @unique @map("appointment_code")
+  patientId       BigInt   @map("patient_id")
+  doctorId        BigInt   @map("doctor_id")
+  medicalCenterId BigInt?  @map("medical_center_id")
+  officeId        BigInt?  @map("office_id")
+  appointmentDate DateTime @map("appointment_date") @db.Date
+  startTime       DateTime @map("start_time") @db.Time()
+  endTime         DateTime @map("end_time") @db.Time()
+  reasonForVisit  String?  @map("reason_for_visit")
+  status          String?
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+  doctor          Doctor   @relation(fields: [doctorId], references: [id])
+  patient         Patient  @relation(fields: [patientId], references: [id])
+  medicalCenter   MedicalCenter? @relation(fields: [medicalCenterId], references: [id])
+  office          Office?  @relation(fields: [officeId], references: [id])
+
+  @@index([doctorId, appointmentDate, startTime])
+  @@index([patientId, appointmentDate, startTime])
+  @@map("appointments")
 }
 
 model DoctorSchedule {

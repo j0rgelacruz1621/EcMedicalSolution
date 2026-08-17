@@ -10,6 +10,8 @@ import { SupabaseModule } from './supabase/supabase.module';
 import { UsersModule } from './users/users.module';
 import { DoctorsModule } from './doctors/doctors.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { AppointmentsModule } from './appointments/appointments.module';
+import { MedicalCentersModule } from './medical-centers/medical-centers.module';
 
 @Module({
   imports: [
@@ -22,6 +24,8 @@ import { PrismaModule } from './prisma/prisma.module';
     AuthModule,
     UsersModule,
     DoctorsModule,
+    AppointmentsModule,
+    MedicalCentersModule,
   ],
   controllers: [AppController],
   providers: [
