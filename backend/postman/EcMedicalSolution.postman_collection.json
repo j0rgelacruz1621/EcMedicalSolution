@@ -30,6 +30,21 @@
       "key": "userId",
       "value": "1",
       "type": "string"
+    },
+    {
+      "key": "taskId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "patientId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "reportId",
+      "value": "1",
+      "type": "string"
     }
   ],
   "item": [
@@ -79,6 +94,41 @@
             "body": {
               "mode": "raw",
               "raw": "{\n  \"user_name\": \"Jorge1621\",\n  \"password\": \"802170300\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Login as doctor",
+          "description": "Requiere que exista una cuenta en `users` con rol DOCTOR y user_name igual al email del medico (ver 'Create doctor login (SA)' en Users). El JWT resultante trae el claim `doctorId` verificado, usado por Tasks para el ownership check.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "const token = body.access_token || body.accessToken || body.token;",
+                  "if (token) pm.collectionVariables.set('token', token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_name\": \"ana.garcia@example.com\",\n  \"password\": \"doctor-pass-123\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/auth/login",
@@ -353,6 +403,28 @@
           }
         },
         {
+          "name": "Create doctor login (SA)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_name\": \"ana.garcia@example.com\",\n  \"password\": \"doctor-pass-123\",\n  \"rol\": \"DOCTOR\",\n  \"application\": \"medicalControl\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["users"]
+            },
+            "description": "user_name debe ser exactamente el email de un registro existente en doctors; asi el login (Auth > Login as doctor) puede resolver el doctorId real."
+          }
+        },
+        {
           "name": "Update user",
           "request": {
             "method": "PATCH",
@@ -382,6 +454,242 @@
               "raw": "{{baseUrl}}/users/{{userId}}",
               "host": ["{{baseUrl}}"],
               "path": ["users", "{{userId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Tasks",
+      "description": "Requiere Bearer token. Ejecuta primero Users > 'Create doctor login (SA)' y luego Auth > 'Login as doctor' para obtener un token con el claim `doctorId` verificado. Un medico solo puede ver/modificar tareas de su propio doctorId; las cuentas con rol SA pueden operar sobre cualquier doctor.",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{token}}",
+            "type": "string"
+          }
+        ]
+      },
+      "item": [
+        {
+          "name": "Create task",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "if (body.id) pm.collectionVariables.set('taskId', body.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Revisar examenes de laboratorio\",\n  \"description\": \"Paciente Maria Lopez\",\n  \"priority\": \"URGENT\",\n  \"due_date\": \"2026-08-20T10:00:00.000Z\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/doctors/{{doctorId}}/tasks",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "doctors", "{{doctorId}}", "tasks"]
+            }
+          }
+        },
+        {
+          "name": "List doctor tasks",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/doctors/{{doctorId}}/tasks?status=PENDING&sortBy=priority&order=desc&page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "doctors", "{{doctorId}}", "tasks"],
+              "query": [
+                {"key": "status", "value": "PENDING"},
+                {"key": "sortBy", "value": "priority"},
+                {"key": "order", "value": "desc"},
+                {"key": "page", "value": "1"},
+                {"key": "limit", "value": "10"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "Doctor tasks summary",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/doctors/{{doctorId}}/tasks/summary",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "doctors", "{{doctorId}}", "tasks", "summary"]
+            }
+          }
+        },
+        {
+          "name": "Update task status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"COMPLETED\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tasks/{{taskId}}/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "tasks", "{{taskId}}", "status"]
+            }
+          }
+        },
+        {
+          "name": "Delete task",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tasks/{{taskId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "tasks", "{{taskId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reports",
+      "item": [
+        {
+          "name": "Create report",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "if (body.id) pm.collectionVariables.set('reportId', body.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"patient_id\": {{patientId}},\n  \"doctor_id\": {{doctorId}},\n  \"title\": \"Informe de consulta general\",\n  \"content\": \"Paciente estable, sin hallazgos relevantes.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/reports",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "reports"]
+            }
+          }
+        },
+        {
+          "name": "List reports",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/reports?doctor_id={{doctorId}}&status=PENDING_REVIEW&page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "reports"],
+              "query": [
+                {"key": "patient_id", "value": "", "disabled": true},
+                {"key": "doctor_id", "value": "{{doctorId}}"},
+                {"key": "status", "value": "PENDING_REVIEW"},
+                {"key": "page", "value": "1"},
+                {"key": "limit", "value": "10"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get report",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/reports/{{reportId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "reports", "{{reportId}}"]
+            }
+          }
+        },
+        {
+          "name": "Update report status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"APPROVED\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/reports/{{reportId}}/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "reports", "{{reportId}}", "status"]
+            }
+          }
+        },
+        {
+          "name": "Attach report file",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"file_url\": \"https://storage.example.com/reports/1.pdf\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/reports/{{reportId}}/attachment",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "reports", "{{reportId}}", "attachment"]
+            }
+          }
+        },
+        {
+          "name": "Doctor pending reports count",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/doctors/{{doctorId}}/reports/pending-count",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "doctors", "{{doctorId}}", "reports", "pending-count"]
             }
           }
         }

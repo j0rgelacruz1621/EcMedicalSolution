@@ -1,6 +1,17 @@
 import { Injectable } from '@nestjs/common';
+import { day_of_week_enum } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateDoctorDto } from './dto/create-doctor.dto';
+
+const DAY_OF_WEEK_MAP: Record<string, day_of_week_enum> = {
+  MONDAY: 'Monday',
+  TUESDAY: 'Tuesday',
+  WEDNESDAY: 'Wednesday',
+  THURSDAY: 'Thursday',
+  FRIDAY: 'Friday',
+  SATURDAY: 'Saturday',
+  SUNDAY: 'Sunday',
+};
 
 @Injectable()
 export class DoctorsRepository {
@@ -74,7 +85,7 @@ export class DoctorsRepository {
         this.prisma.doctorSchedule.create({
           data: {
             doctorId: item.doctorId,
-            dayOfWeek: item.dayOfWeek,
+            dayOfWeek: DAY_OF_WEEK_MAP[item.dayOfWeek],
             startTime: item.startTime,
             endTime: item.endTime,
           },
