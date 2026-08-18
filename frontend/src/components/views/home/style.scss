@@ -1,0 +1,107 @@
+.home-view {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #f4f7fa;
+  color: #0f172a;
+}
+
+.home-view__login-card {
+  width: 480px; // Más ancho como pediste
+  max-width: calc(100% - 32px);
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 40px; // Más espacio interno para que no sea tan alto
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+  text-align: left; // Alineación base a la izquierda
+}
+
+.home-view__login-icon {
+  width: 60px;
+  height: 60px;
+  background: #eef2ff;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+}
+
+.home-view__login-card h3 {
+  font-size: 1.25rem;
+  color: #0b3b7a;
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+// Alineación de Usuario y Contraseña
+.form-label {
+  display: block;
+  text-align: left !important; // Obligamos a la izquierda
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 8px;
+}
+
+.input-group-text {
+  background-color: transparent !important;
+  border-right: none !important;
+  color: #94a3b8;
+}
+
+.form-control {
+  border-left: none !important;
+  &:focus {
+    box-shadow: none;
+    border-color: #cbd5e1;
+  }
+}
+
+// Corrección de Recordarme y Olvido Contraseña
+.home-view__options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 15px;
+  margin-bottom: 25px;
+  font-size: 0.9rem;
+
+  .form-check-label {
+    color: #64748b;
+  }
+
+  .home-view__link {
+    color: #0b3b7a;
+    text-decoration: none;
+    font-weight: 600;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+// Botón Azul con Hover Claro
+.home-view__submit {
+  background-color: #0b3b7a !important; // Azul oscuro base
+  border: none !important;
+  padding: 12px !important;
+  transition: background-color 0.3s ease !important;
+  font-weight: 700;
+
+  &:hover {
+    background-color: #1e4d8c !important; // Azul un poco más claro al pasar el mouse
+  }
+}
+
+.home-view__info {
+  margin-top: 25px;
+  padding: 15px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  display: flex;
+  gap: 12px;
+  font-size: 0.85rem;
+  color: #64748b;
+}

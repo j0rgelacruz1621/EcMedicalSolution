@@ -1,0 +1,122 @@
+.lsb {
+  width: 260px;
+  min-height: 100vh;
+  background: rgba(255, 255, 255, 0.4);
+  border-right: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 24px 18px 20px;
+  backdrop-filter: blur(4px);
+}
+
+.lsb-top {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.lsb-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 4px 10px;
+}
+
+.lsb-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: var(--primary-dark);
+  background: linear-gradient(135deg, #fde9eb 0%, #f4d3d7 100%);
+  box-shadow: inset 0 0 0 1px rgba(166, 29, 47, 0.08);
+}
+
+.lsb-name {
+  font-size: 1.05rem;
+  line-height: 1.15;
+  font-weight: 800;
+  color: var(--primary-dark);
+}
+
+.lsb-sub {
+  margin-top: 3px;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.lsb-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.lsb-nav a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 12px;
+  border-radius: 10px;
+  font-weight: 600;
+  color: #2f3a48;
+  transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+
+.nav-icon {
+  width: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.lsb-nav a.active {
+  background: rgba(166, 29, 47, 0.08);
+  color: var(--primary-dark);
+  box-shadow: inset 0 0 0 1px rgba(166, 29, 47, 0.08);
+}
+
+.lsb-nav a:hover {
+  background: rgba(148, 160, 175, 0.05);
+  transform: translateX(2px);
+}
+
+.lsb-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 18px;
+}
+
+.lsb-new,
+.lsb-logout {
+  border: 0;
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.lsb-new {
+  background: linear-gradient(135deg, #a61d2f 0%, #831b2b 100%);
+  color: #fff;
+  box-shadow: 0 12px 24px rgba(166, 29, 47, 0.18);
+}
+
+.lsb-new:hover,
+.lsb-logout:hover {
+  transform: translateY(-1px);
+}
+
+.lsb-logout {
+  background: transparent;
+  color: #45515f;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+}
+

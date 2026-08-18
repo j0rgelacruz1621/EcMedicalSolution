@@ -1,0 +1,55 @@
+.site-header {
+  width: 100%;
+  background: #fff;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.site-header__inner {
+  max-width: 1220px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 28px;
+  min-height: 72px;
+}
+
+.site-header__left { display: flex; align-items: center; gap: 16px }
+
+.site-header__logo { display: inline-grid; place-items: center }
+
+.site-header__logo-img { width: 44px; height: 44px; display: block; object-fit: contain }
+
+.site-header__brand {
+  color: #0b3b7a; /* deep blue matching hero */
+  font-weight: 800;
+  font-size: 18px;
+  letter-spacing: 0.02em;
+}
+
+.site-header__nav a {
+  color: #475569;
+  text-decoration: none;
+  margin-left: 24px;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 6px 8px;
+}
+
+.site-header__nav a:hover { color: #0b3b7a }
+
+.site-header--dark {
+  background: #072048;
+  border-bottom-color: rgba(255,255,255,0.06);
+}
+
+.site-header--dark .site-header__brand {
+  color: #fff;
+}
+
+.site-header--dark .site-header__nav a { color: #fff; }
+
+.animate__animated { animation-duration: .35s; animation-fill-mode: both }
+.animate__fadeInDown { animation-name: fadeInDown }
+
+@keyframes fadeInDown { from { opacity: 0; transform: translateY(-10px) } to { opacity: 1; transform: translateY(0) } }

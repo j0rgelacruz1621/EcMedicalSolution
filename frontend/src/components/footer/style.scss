@@ -1,0 +1,30 @@
+.site-footer {
+  width: 100%;
+  background: #f6f7f9;
+  border-top: 1px solid #e6eef7;
+}
+
+.site-footer__inner {
+  max-width: 1220px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 28px;
+  color: #475569;
+}
+
+.site-footer__left { color: #0b3b7a; font-weight: 800 }
+.site-footer__center { color: #8b90a0; font-size: 0.95rem }
+.site-footer__right a { margin-left: 14px; color: #475569; text-decoration: none; font-size: 14px }
+.site-footer__right a:hover { color: #0b3b7a }
+
+.animate__animated { animation-duration: .35s; animation-fill-mode: both }
+.animate__fadeInUp { animation-name: fadeInUp }
+
+@keyframes fadeInUp { from { opacity: 0; transform: translateY(10px) } to { opacity: 1; transform: translateY(0) } }
+
+@media (max-width: 640px) {
+  .site-footer__inner { flex-direction: column; gap: 8px; text-align: center }
+  .site-footer__right { display: flex; gap: 10px }
+}
