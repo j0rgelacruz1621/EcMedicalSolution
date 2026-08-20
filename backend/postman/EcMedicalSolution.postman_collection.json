@@ -333,6 +333,111 @@
       ]
     },
     {
+      "name": "Patients",
+      "description": "Requiere Bearer token (cualquier usuario autenticado, no solo SA). Ejecuta Auth > Login o Auth > Login as doctor primero para obtener el token.",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{token}}",
+            "type": "string"
+          }
+        ]
+      },
+      "item": [
+        {
+          "name": "Create patient (with triage vitals)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "if (body.patient && body.patient.id) pm.collectionVariables.set('patientId', body.patient.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nationalId\": \"0912345678\",\n  \"firstName\": \"Maria\",\n  \"lastName\": \"Lopez\",\n  \"email\": \"maria.lopez@example.com\",\n  \"phone\": \"0999999999\",\n  \"dateOfBirth\": \"1990-05-20\",\n  \"gender\": \"FEMENINO\",\n  \"medicalHistoryNotes\": \"Sin antecedentes relevantes\",\n  \"vitals\": {\n    \"bloodPressure\": \"120/80\",\n    \"heartRateBpm\": 78,\n    \"weightKg\": 65.5\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/patients",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "patients"]
+            }
+          }
+        },
+        {
+          "name": "List / search patients",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/patients?lastName=Lopez&page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "patients"],
+              "query": [
+                {"key": "nationalId", "value": "", "disabled": true},
+                {"key": "firstName", "value": "", "disabled": true},
+                {"key": "lastName", "value": "Lopez"},
+                {"key": "page", "value": "1"},
+                {"key": "limit", "value": "10"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get patient vitals history",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/patients/{{patientId}}/vitals?page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "patients", "{{patientId}}", "vitals"],
+              "query": [
+                {"key": "page", "value": "1"},
+                {"key": "limit", "value": "20"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update patient (and record new vitals)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"0988888888\",\n  \"vitals\": {\n    \"bloodPressure\": \"118/76\",\n    \"heartRateBpm\": 72,\n    \"weightKg\": 65.0\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/patients/{{patientId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "patients", "{{patientId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
       "name": "Users (requires SA token)",
       "auth": {
         "type": "bearer",

@@ -14,6 +14,7 @@ import { AppointmentsModule } from './appointments/appointments.module';
 import { MedicalCentersModule } from './medical-centers/medical-centers.module';
 import { TasksModule } from './tasks/tasks.module';
 import { ReportsModule } from './reports/reports.module';
+import { PatientsModule } from './patients/patients.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { ReportsModule } from './reports/reports.module';
     MedicalCentersModule,
     TasksModule,
     ReportsModule,
+    PatientsModule,
   ],
   controllers: [AppController],
   providers: [
