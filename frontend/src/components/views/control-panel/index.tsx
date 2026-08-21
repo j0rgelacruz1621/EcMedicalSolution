@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import LeftSideBar from '../../left-sideBar'
 import './style.scss'
+import { Bell, CircleHelp, ChevronLeft, ChevronRight, Plus } from 'lucide-react'
 
 const weekDays = ['L', 'M', 'M', 'J', 'V', 'S', 'D']
 
@@ -51,13 +52,13 @@ export default function ControlPanel() {
       <div className="cp-main">
         <header className="cp-header">
           <h1>Panel de Control</h1>
-          <div className="cp-header-right">
-            <button className="icon" aria-label="Notificaciones">🔔</button>
-            <button className="icon" aria-label="Ayuda">?</button>
-            <div className="cp-user">
-              <span>Dra. Josiana Piña</span>
+            <div className="cp-header-right">
+              <button className="icon" aria-label="Notificaciones"><Bell size={18} /></button>
+              <button className="icon" aria-label="Ayuda"><CircleHelp size={18} /></button>
+              <div className="cp-user">
+                <span>Dra. Josiana Piña</span>
+              </div>
             </div>
-          </div>
         </header>
 
         <section className="cp-kpis">
@@ -83,8 +84,8 @@ export default function ControlPanel() {
           <div className="cp-left">
             <div className="panel upcoming">
               <div className="panel-title">
-                <span>Próximas citas</span>
-                <button type="button" className="see">Ver agenda completa</button>
+                <span>Tareas pendientes</span>
+                <button className="add" type="button" aria-label="Agregar tarea"><Plus size={18} /></button>
               </div>
 
               <ul className="up-list">
@@ -167,22 +168,20 @@ export default function ControlPanel() {
             <div className="panel mini-cal">
               <div className="panel-title">
                 <span>{monthLabel}</span>
-                <div className="mini-cal-nav">
-                  <button
-                    type="button"
-                    aria-label="Mes anterior"
-                    onClick={() => setVisibleDate(date => new Date(date.getFullYear(), date.getMonth() - 1, 1))}
-                  >
-                    ‹
-                  </button>
-                  <button
-                    type="button"
-                    aria-label="Mes siguiente"
-                    onClick={() => setVisibleDate(date => new Date(date.getFullYear(), date.getMonth() + 1, 1))}
-                  >
-                    ›
-                  </button>
-                </div>
+                  <div className="mini-cal-nav">
+                    <button
+                      type="button"
+                      onClick={() => setVisibleDate(date => new Date(date.getFullYear(), date.getMonth() - 1, 1))}
+                    >
+                      <ChevronLeft size={20} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setVisibleDate(date => new Date(date.getFullYear(), date.getMonth() + 1, 1))}
+                    >
+                      <ChevronRight size={20} />
+                    </button>
+                  </div>
               </div>
 
               <div className="mini-cal-grid">

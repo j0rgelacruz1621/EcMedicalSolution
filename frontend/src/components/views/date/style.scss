@@ -1,9 +1,9 @@
 // Variables de diseño
-$color-primary: #7b0d14; // Borgoña corporativo
-$color-bg-page: #f8fafc;
-$color-border: #e2e8f0;
-$color-text-main: #1f2937;
-$color-text-muted: #64748b;
+$color-primary: #00317e;
+$color-bg-page: #f7f9fb;
+$color-border: #c3c6d5;
+$color-text-main: #191c1e;
+$color-text-muted: #737784;
 
 .date-view {
   width: 100%;
@@ -11,7 +11,8 @@ $color-text-muted: #64748b;
   display: flex;
   flex-direction: column;
   align-items: center; 
-  background-color: #fff;
+  background-color: $color-bg-page;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
   padding: 40px 0;
 
   // El contenedor ahora apila los elementos verticalmente
@@ -24,22 +25,23 @@ $color-text-muted: #64748b;
 
 // Título principal con el color del tema
   &__main-title {
-    color: $color-primary !important; // Forzamos el color borgoña #7b0d14
-    font-size: 2.5rem; // Tamaño llamativo
-    font-weight: 800;
+    color: $color-primary !important;
+    font-size: 2rem;
+    line-height: 1.25;
+    font-weight: 600;
     text-align: center;
     margin-bottom: 10px;
   }
 
   // Subtítulo con letra más grande
   &__subtitle {
-    font-size: 1.2rem; // Aumentado (antes era el estándar de 1rem)
-    color: #64748b; // Un gris suave profesional
+    font-size: 1rem;
+    color: $color-text-muted;
     max-width: 700px; // Evita que la línea sea demasiado larga
     margin: 0 auto;
     text-align: center;
     line-height: 1.6;
-    font-weight: 500;
+    font-weight: 400;
   }
 
   &__card {
@@ -59,7 +61,7 @@ $color-text-muted: #64748b;
     text-align: left;
     font-weight: 700;
     font-size: 0.85rem;
-    color: #334155;
+    color: #434653;
     margin-bottom: 8px;
     text-transform: none;
   }
@@ -140,7 +142,7 @@ $color-text-muted: #64748b;
       transition: all 0.2s ease;
 
       &:hover:not(.is-disabled) {
-        background-color: #fef2f2;
+        background-color: #dae2ff;
       }
 
       &.is-selected {
@@ -226,7 +228,7 @@ $color-text-muted: #64748b;
       color: $color-primary;
 
       &:hover {
-        background: #fef2f2;
+        background: #dae2ff;
       }
     }
 

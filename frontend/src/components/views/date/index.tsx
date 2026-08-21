@@ -5,6 +5,21 @@ import './style.scss'
 import ConfirmDatePreview from '../../modals/confirm-date-preview'
 import ConfirmDate from '../../modals/confirm-date'
 
+// Importamos los iconos profesionales
+import { 
+  User, 
+  IdCard, 
+  Fingerprint, 
+  Cake, 
+  Phone, 
+  Hospital, 
+  ChevronLeft, 
+  ChevronRight, 
+  Calendar as CalendarIcon, 
+  Clock, 
+  Info 
+} from 'lucide-react'
+
 // --- FUNCIONES AUXILIARES ---
 const weekDays = ['D', 'L', 'M', 'M', 'J', 'V', 'S']
 
@@ -150,7 +165,9 @@ export default function DateView() {
                 <div className="col-md-6">
                   <label className="form-label">Nombres</label>
                   <div className="input-group">
-                    <span className="input-group-text">👤</span>
+                    <span className="input-group-text">
+                      <User size={18} strokeWidth={2.5} />
+                    </span>
                     <input
                       className="form-control"
                       type="text"
@@ -163,7 +180,9 @@ export default function DateView() {
                 <div className="col-md-6">
                   <label className="form-label">Apellidos</label>
                   <div className="input-group">
-                    <span className="input-group-text">🪪</span>
+                    <span className="input-group-text">
+                      <IdCard size={18} strokeWidth={2.5} />
+                    </span>
                     <input
                       className="form-control"
                       type="text"
@@ -178,7 +197,9 @@ export default function DateView() {
                 <div className="col-md-6">
                   <label className="form-label">Cédula de Identidad</label>
                   <div className="input-group">
-                    <span className="input-group-text">☝️</span>
+                    <span className="input-group-text">
+                      <Fingerprint size={18} strokeWidth={2.5} />
+                    </span>
                     <input
                       className="form-control"
                       type="text"
@@ -191,7 +212,9 @@ export default function DateView() {
                 <div className="col-md-6">
                   <label className="form-label">Edad</label>
                   <div className="input-group">
-                    <span className="input-group-text">🎂</span>
+                    <span className="input-group-text">
+                      <Cake size={18} strokeWidth={2.5} />
+                    </span>
                     <input
                       className="form-control"
                       type="text"
@@ -206,7 +229,9 @@ export default function DateView() {
                 <div className="col-md-6">
                   <label className="form-label">Número de teléfono</label>
                   <div className="input-group">
-                    <span className="input-group-text">📞</span>
+                    <span className="input-group-text">
+                      <Phone size={18} strokeWidth={2.5} />
+                    </span>
                     <input
                       className="form-control"
                       type="tel"
@@ -219,7 +244,9 @@ export default function DateView() {
                 <div className="col-md-6">
                   <label className="form-label">Consultorio</label>
                   <div className="input-group">
-                    <span className="input-group-text">🏥</span>
+                    <span className="input-group-text">
+                      <Hospital size={18} strokeWidth={2.5} />
+                    </span>
                     <select className="form-select" value={selectedConsultory ?? ''} onChange={e => setSelectedConsultory(e.target.value)}>
                       <option value="">Seleccione ubicación</option>
                       {consultories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
@@ -238,17 +265,17 @@ export default function DateView() {
                       <div className="d-flex gap-3">
                         <button
                           type="button"
-                          className="border-0 bg-transparent"
+                          className="border-0 bg-transparent p-0"
                           onClick={() => setVisibleDate(date => new Date(date.getFullYear(), date.getMonth() - 1, 1))}
                         >
-                          ‹
+                          <ChevronLeft size={22} />
                         </button>
                         <button
                           type="button"
-                          className="border-0 bg-transparent"
+                          className="border-0 bg-transparent p-0"
                           onClick={() => setVisibleDate(date => new Date(date.getFullYear(), date.getMonth() + 1, 1))}
                         >
-                          ›
+                          <ChevronRight size={22} />
                         </button>
                       </div>
                     </div>
@@ -280,7 +307,9 @@ export default function DateView() {
                 <div className="col-lg-6">
                   <label className="form-label">Fecha seleccionada</label>
                   <div className="input-group mb-4">
-                    <span className="input-group-text">📅</span>
+                    <span className="input-group-text">
+                      <CalendarIcon size={18} strokeWidth={2.5} />
+                    </span>
                     <input className="form-control" type="text" readOnly value={formatLongDate(selectedDate)} />
                   </div>
 
@@ -288,7 +317,7 @@ export default function DateView() {
                     <>
                       <label className="form-label">Seleccionar hora</label>
                       <div className="time-picker-row">
-                        <span className="clock-icon">🕒</span>
+                        <Clock size={18} className="clock-icon" />
                         <select value={timeHour} onChange={e => setTimeHour(e.target.value)}>
                           {Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, '0')).map(h => <option key={h} value={h}>{h}</option>)}
                         </select>
@@ -305,14 +334,16 @@ export default function DateView() {
                           <option value="AM">a. m.</option>
                           <option value="PM">p. m.</option>
                         </select>
-                        <span className="ms-auto clock-icon">🕒</span>
+                        <Clock size={18} className="ms-auto clock-icon" />
                       </div>
                     </>
                   )}
 
-                  <div className="alert alert-light border mt-4 d-flex align-items-start gap-2">
-                    <span className="text-primary">ℹ️</span>
-                    <p className="m-0">Las citas están sujetas a disponibilidad. Recibirá una confirmación vía SMS en los próximos 15 minutos.</p>
+                  <div className="alert alert-light border mt-4 d-flex align-items-start gap-3">
+                    <Info size={20} className="text-primary mt-1" />
+                    <p className="m-0 text-secondary">
+                      Las citas están sujetas a disponibilidad. Recibirá una confirmación vía SMS en los próximos 15 minutos.
+                    </p>
                   </div>
                 </div>
               </div>

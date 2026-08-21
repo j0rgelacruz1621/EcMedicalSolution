@@ -1,7 +1,8 @@
 .site-header {
   width: 100%;
-  background: #fff;
-  border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+  background: #ffffff;
+  border-bottom: 1px solid #c3c6d5;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
 }
 
 .site-header__inner {
@@ -21,22 +22,22 @@
 .site-header__logo-img { width: 44px; height: 44px; display: block; object-fit: contain }
 
 .site-header__brand {
-  color: #0b3b7a; /* deep blue matching hero */
-  font-weight: 800;
+  color: #00317e;
+  font-weight: 700;
   font-size: 18px;
-  letter-spacing: 0.02em;
+  letter-spacing: 0;
 }
 
 .site-header__nav a {
-  color: #475569;
+  color: #434653;
   text-decoration: none;
   margin-left: 24px;
-  font-weight: 600;
+  font-weight: 500;
   font-size: 14px;
   padding: 6px 8px;
 }
 
-.site-header__nav a:hover { color: #0b3b7a }
+.site-header__nav a:hover { color: #00317e }
 
 .site-header--dark {
   background: #072048;

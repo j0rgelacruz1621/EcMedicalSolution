@@ -1,7 +1,8 @@
 .sr-header {
   width: 100%;
-  background: rgba(255, 255, 255, 0.8);
-  border-bottom: 1px solid rgba(148, 163, 184, 0.28);
+  background: #ffffff;
+  border-bottom: 1px solid #c3c6d5;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
 }
 
 .sr-header__inner {
@@ -26,15 +27,15 @@
 }
 
 .sr-brand__text {
-  color: #0a3d8f;
-  font-size: 1.3rem;
-  font-weight: 800;
-  letter-spacing: -0.02em;
+  color: #00317e;
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 0;
 }
 
 .sr-login-link {
-  color: #0b4fbc;
-  font-weight: 700;
+  color: #00317e;
+  font-weight: 500;
   text-decoration: none;
 }
 
@@ -43,14 +44,14 @@
   display: grid;
   place-items: center;
   padding: 40px 20px;
-  background: #f3f5f7;
+  background: #f7f9fb;
   animation: sr-page-enter 0.55s ease both;
 }
 
 .sr-card {
   width: min(100%, 980px);
-  background: rgba(255, 255, 255, 0.92);
-  border: 1px solid rgba(148, 163, 184, 0.25);
+  background: #ffffff;
+  border: 1px solid #c3c6d5;
   border-radius: 12px;
   padding: 28px 30px 28px;
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
@@ -59,18 +60,20 @@
 
 .sr-title {
   text-align: center;
-  color: #0b4fbc;
-  font-size: clamp(2rem, 3vw, 2.8rem);
-  font-weight: 800;
+  color: #00317e;
+  font-size: clamp(1.75rem, 3vw, 2rem);
+  line-height: 1.25;
+  font-weight: 600;
   margin: 0 0 8px;
 }
 
 .sr-subtitle {
   text-align: center;
-  color: #374151;
+  color: #434653;
   margin: 0 auto 28px;
   max-width: 760px;
-  font-size: 1.05rem;
+  font-size: 1rem;
+  line-height: 1.5;
 }
 
 .sr-form {
@@ -97,9 +100,9 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  color: #1f2937;
-  font-size: 0.92rem;
-  font-weight: 700;
+  color: #434653;
+  font-size: 0.875rem;
+  font-weight: 500;
 }
 
 .sr-label span[aria-hidden='true'] {
@@ -113,8 +116,8 @@
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: #e5edf8;
-  color: #2762c3;
+  background: #dae2ff;
+  color: #00317e;
   font-size: 0.72rem;
   font-weight: 800;
   cursor: help;
@@ -125,10 +128,10 @@ select,
 textarea {
   width: 100%;
   min-height: 44px;
-  border: 1px solid #c9d1da;
+  border: 1px solid #c3c6d5;
   border-radius: 8px;
   background: #fff;
-  color: #1f2937;
+  color: #191c1e;
   padding: 0.72rem 0.9rem;
   font-size: 1rem;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
@@ -143,8 +146,8 @@ input:focus,
 select:focus,
 textarea:focus {
   outline: none;
-  border-color: #2b6eea;
-  box-shadow: 0 0 0 3px rgba(43, 110, 234, 0.12);
+  border-color: #2559bf;
+  box-shadow: 0 0 0 3px rgba(37, 89, 191, 0.12);
 }
 
 .is-error {
@@ -168,7 +171,7 @@ textarea:focus {
   align-items: center;
   gap: 12px;
   min-height: 44px;
-  border: 1px solid #c9d1da;
+  border: 1px solid #c3c6d5;
   border-radius: 8px;
   background: #fff;
   padding: 6px 10px;
@@ -184,17 +187,17 @@ textarea:focus {
   justify-content: center;
   min-height: 36px;
   padding: 0.55rem 0.9rem;
-  border: 1px solid #c9d1da;
+  border: 1px solid #c3c6d5;
   border-radius: 8px;
-  background: #f9fafb;
-  color: #2d3748;
-  font-weight: 600;
+  background: #f2f4f6;
+  color: #434653;
+  font-weight: 500;
   cursor: pointer;
 }
 
 .sr-file-name {
   flex: 1;
-  color: #64748b;
+  color: #737784;
   font-size: 0.9rem;
   white-space: nowrap;
   overflow: hidden;
@@ -209,7 +212,7 @@ textarea:focus {
 }
 
 .sr-counter {
-  color: #64748b;
+  color: #737784;
   font-size: 0.75rem;
 }
 
@@ -218,7 +221,7 @@ textarea:focus {
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  color: #1f2937;
+  color: #434653;
   font-size: 0.95rem;
   line-height: 1.4;
 }
@@ -227,12 +230,12 @@ textarea:focus {
   width: 17px;
   height: 17px;
   min-height: 17px;
-  accent-color: #0b4fbc;
+  accent-color: #00317e;
   margin-top: 3px;
 }
 
 .sr-checkbox-wrap a {
-  color: #0b4fbc;
+  color: #00317e;
   text-decoration: underline;
 }
 
@@ -242,10 +245,10 @@ textarea:focus {
   min-height: 50px;
   border: none;
   border-radius: 8px;
-  background: linear-gradient(135deg, #0a4fb8 0%, #0b4fbc 100%);
+  background: #00317e;
   color: #fff;
-  font-size: 1.05rem;
-  font-weight: 800;
+  font-size: 0.875rem;
+  font-weight: 600;
   cursor: pointer;
   transition: transform 0.2s ease, filter 0.2s ease, opacity 0.2s ease;
 }

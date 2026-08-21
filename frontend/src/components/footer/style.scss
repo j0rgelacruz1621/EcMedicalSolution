@@ -1,7 +1,8 @@
 .site-footer {
   width: 100%;
-  background: #f6f7f9;
-  border-top: 1px solid #e6eef7;
+  background: #eceef0;
+  border-top: 1px solid #c3c6d5;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
 }
 
 .site-footer__inner {
@@ -11,13 +12,13 @@
   justify-content: space-between;
   align-items: center;
   padding: 18px 28px;
-  color: #475569;
+  color: #434653;
 }
 
-.site-footer__left { color: #0b3b7a; font-weight: 800 }
-.site-footer__center { color: #8b90a0; font-size: 0.95rem }
-.site-footer__right a { margin-left: 14px; color: #475569; text-decoration: none; font-size: 14px }
-.site-footer__right a:hover { color: #0b3b7a }
+.site-footer__left { color: #00317e; font-weight: 700 }
+.site-footer__center { color: #737784; font-size: 0.75rem }
+.site-footer__right a { margin-left: 14px; color: #434653; text-decoration: none; font-size: 12px; font-weight: 500 }
+.site-footer__right a:hover { color: #00317e }
 
 .animate__animated { animation-duration: .35s; animation-fill-mode: both }
 .animate__fadeInUp { animation-name: fadeInUp }

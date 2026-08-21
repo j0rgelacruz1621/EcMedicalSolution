@@ -16,6 +16,7 @@
   padding: 18px 18px 20px;
   box-shadow: 0 20px 40px rgba(2,6,23,0.35);
   text-align: center;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
 }
 
 .cdp-icon { margin-bottom: 6px }
@@ -24,12 +25,12 @@
 
 .cdp-actions { display:flex; flex-direction:column; gap:10px }
 .cdp-btn { padding: 10px 12px; border-radius:8px; font-weight:700; cursor:pointer; transition: all .2s ease; }
-.cdp-btn--primary { background: #7b0d14; color:#fff; border: none; }
-.cdp-btn--primary:hover { background: #8c1a20; filter: brightness(1.08); box-shadow: 0 6px 18px rgba(123, 13, 20, 0.18); }
-.cdp-btn--outline { background: transparent; color:#7b0d14; border: 1px solid #f4dde0; }
-.cdp-btn--outline:hover { background: #fff5f5; border-color: #e7b8be; filter: brightness(1.04); }
+.cdp-btn--primary { background: #00317e; color:#fff; border: none; }
+.cdp-btn--primary:hover { background: #0046ad; filter: brightness(1.08); box-shadow: 0 6px 18px rgba(0, 49, 126, 0.18); }
+.cdp-btn--outline { background: transparent; color:#00317e; border: 1px solid #c3c6d5; }
+.cdp-btn--outline:hover { background: #f2f4f6; border-color: #89ceff; filter: brightness(1.04); }
 .cdp-link { background: transparent; color: #6b7280; border: none; padding: 8px 6px }
-.cdp-link:hover { color: #7b0d14; }
+.cdp-link:hover { color: #00317e; }
 
 .cdp-spinner { width:18px; height:18px; border-radius:50%; border:3px solid rgba(255,255,255,0.25); border-top-color: rgba(255,255,255,0.9); display:inline-block; animation: spin 1s linear infinite }
 

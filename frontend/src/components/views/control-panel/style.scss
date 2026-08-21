@@ -2,6 +2,7 @@
   display: flex;
   min-height: 100vh;
   background: rgba(255, 255, 255, 0.12);
+  font-family: 'Inter', 'Segoe UI', sans-serif;
 }
 
 .cp-main {
@@ -17,9 +18,10 @@
 }
 
 .cp-header h1 {
-  color: var(--primary-dark);
-  font-size: clamp(2rem, 2vw, 2.8rem);
-  font-weight: 800;
+  color: var(--primary);
+  font-size: clamp(1.5rem, 2vw, 2rem);
+  line-height: 1.25;
+  font-weight: 600;
 }
 
 .cp-header-right {
@@ -49,8 +51,8 @@
   border: 1px solid rgba(146, 157, 168, 0.2);
   background: rgba(255, 255, 255, 0.45);
   border-radius: 999px;
-  font-weight: 700;
-  color: #292f36;
+  font-weight: 500;
+  color: #434653;
 }
 
 .cp-kpis {
@@ -79,7 +81,7 @@
   width: 42px;
   height: 42px;
   border-radius: 12px;
-  background: linear-gradient(135deg, rgba(166, 29, 47, 0.14), rgba(166, 29, 47, 0.05));
+  background: linear-gradient(135deg, rgba(0, 49, 126, 0.14), rgba(0, 49, 126, 0.05));
 }
 
 .kpi:nth-child(2)::before {
@@ -95,9 +97,10 @@
 }
 
 .kpi-label {
-  color: #636b73;
-  font-size: 0.76rem;
-  letter-spacing: 0.03em;
+  color: #737784;
+  font-size: 0.75rem;
+  letter-spacing: 0;
+  font-weight: 500;
   margin-top: 2px;
 }
 
@@ -158,17 +161,18 @@
   gap: 12px;
   margin-bottom: 10px;
   padding: 4px 2px;
-  font-size: 1.1rem;
-  font-weight: 800;
-  color: #252d37;
+  font-size: 1.25rem;
+  line-height: 1.4;
+  font-weight: 600;
+  color: #191c1e;
 }
 
 .see {
   border: none;
   background: transparent;
   font-size: 0.72rem;
-  color: #3a5d8f;
-  font-weight: 700;
+  color: #00317e;
+  font-weight: 500;
   cursor: pointer;
 }
 
@@ -197,7 +201,7 @@
   border-radius: 50%;
   display: grid;
   place-items: center;
-  background: linear-gradient(135deg, #f8d8d7 0%, #f0c5c5 100%);
+  background: linear-gradient(135deg, #dae2ff 0%, #b2c5ff 100%);
 }
 
 .placeholder-avatar {
@@ -262,7 +266,7 @@
 }
 
 .chart-bar:nth-child(2n) span {
-  background: linear-gradient(180deg, #d8a4aa 0%, #ad2d3e 100%);
+  background: linear-gradient(180deg, #89ceff 0%, #005277 100%);
 }
 
 .tasks {
@@ -274,8 +278,8 @@
   border-radius: 8px;
   width: 28px;
   height: 28px;
-  background: rgba(166, 29, 47, 0.12);
-  color: var(--primary-dark);
+  background: rgba(0, 49, 126, 0.12);
+  color: var(--primary);
   font-size: 1.2rem;
   cursor: pointer;
 }
@@ -332,8 +336,8 @@
   border-radius: 10px;
   border: 1px solid rgba(148, 163, 184, 0.3);
   background: transparent;
-  color: #495664;
-  font-weight: 700;
+  color: #434653;
+  font-weight: 500;
 }
 
 .mini-cal {
@@ -390,7 +394,7 @@
 }
 
 .mini-cal-grid .date-cell.active {
-  background: linear-gradient(135deg, #a61d2f 0%, #7d1623 100%);
+  background: #00317e;
   color: white;
   font-weight: 700;
 }
