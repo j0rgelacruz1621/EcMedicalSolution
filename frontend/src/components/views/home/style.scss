@@ -1,0 +1,164 @@
+.home-view__options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 15px;
+  margin-bottom: 25px;
+  font-size: 0.9rem;
+
+  .form-check {
+    display: flex;
+    align-items: center;
+    gap: 8px; 
+    margin: 0; 
+    padding: 0; 
+    min-height: auto;
+  }
+
+  .form-check-input {
+    // Estas 3 líneas garantizan que sea un cuadrado pequeño
+    width: 16px !important;
+    height: 16px !important;
+    flex-shrink: 0; // Evita que se deforme
+    
+    margin: 0; 
+    cursor: pointer;
+    border: 1.5px solid #c3c6d5;
+    border-radius: 4px; // Esquinas apenas redondeadas para que se vea moderno
+    background-color: #fff;
+    appearance: none; // Quitamos el estilo por defecto del sistema
+    -webkit-appearance: none;
+
+    &:checked {
+      background-color: #00317e;
+      border-color: #00317e;
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='m6 10 3 3 6-6'/%3e%3c/svg%3e");
+      background-size: 100% 100%;
+    }
+
+    &:focus {
+      box-shadow: none;
+      border-color: #00317e;
+    }
+  }
+
+  .form-check-label {
+    color: #737784;
+    margin: 0;
+    padding: 0;
+    line-height: 1; 
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .home-view__link {
+    color: #00317e;
+    text-decoration: none;
+    font-weight: 600;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.home-view__login-card {
+  width: 480px; // Más ancho como pediste
+  max-width: calc(100% - 32px);
+  background: #ffffff;
+  border: 1px solid #c3c6d5;
+  border-radius: 12px;
+  padding: 40px; // Más espacio interno para que no sea tan alto
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+  text-align: left; // Alineación base a la izquierda
+}
+
+.home-view__login-icon {
+  width: 60px;
+  height: 60px;
+  background: #dae2ff;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+}
+
+.home-view__login-card h3 {
+  font-size: 1.25rem;
+  color: #00317e;
+  font-size: 1.25rem;
+  line-height: 1.4;
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+// Alineación de Usuario y Contraseña
+.form-label {
+  display: block;
+  text-align: left !important; // Obligamos a la izquierda
+  font-weight: 500;
+  color: #434653;
+  margin-bottom: 8px;
+}
+
+.input-group-text {
+  background-color: transparent !important;
+  border-right: none !important;
+  color: #94a3b8;
+}
+
+.form-control {
+  border-left: none !important;
+  &:focus {
+    box-shadow: none;
+    border-color: #cbd5e1;
+  }
+}
+
+// Corrección de Recordarme y Olvido Contraseña
+.home-view__options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 15px;
+  margin-bottom: 25px;
+  font-size: 0.9rem;
+
+  .form-check-label {
+    color: #737784;
+  }
+
+  .home-view__link {
+    color: #00317e;
+    text-decoration: none;
+    font-weight: 600;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+// Botón Azul con Hover Claro
+.home-view__submit {
+  background-color: #00317e !important; // Azul primario de la referencia
+  border: none !important;
+  padding: 12px !important;
+  transition: background-color 0.3s ease !important;
+  font-weight: 700;
+
+  &:hover {
+    background-color: #0046ad !important;
+  }
+}
+
+.home-view__info {
+  margin-top: 25px;
+  padding: 15px;
+  background: #f2f4f6;
+  border: 1px solid #c3c6d5;
+  border-radius: 8px;
+  display: flex;
+  gap: 12px;
+  font-size: 0.85rem;
+  color: #737784;
+}
