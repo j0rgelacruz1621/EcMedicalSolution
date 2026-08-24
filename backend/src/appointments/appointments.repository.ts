@@ -3,10 +3,19 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { gender_enum, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateAppointmentDto } from './dto/create-appointment.dto';
+import {
+  CreateAppointmentDto,
+  PatientGender,
+} from './dto/create-appointment.dto';
 import { UpdateAppointmentScheduleDto } from './dto/create-appointment.dto';
+
+const GENDER_MAP: Record<PatientGender, gender_enum> = {
+  [PatientGender.MASCULINO]: 'Male',
+  [PatientGender.FEMENINO]: 'Female',
+  [PatientGender.OTRO]: 'Other',
+};
 
 @Injectable()
 export class AppointmentsRepository {
@@ -67,7 +76,7 @@ export class AppointmentsRepository {
           FROM appointments
           WHERE doctor_id = ${doctor.id}
             AND appointment_date = CAST(${appointmentDateValue} AS date)
-            AND status IN ('RESERVED', 'CONFIRMED')
+            AND status IN ('SCHEDULED', 'CONFIRMED')
             AND start_time < CAST(${endTimeValue} AS time)
             AND end_time > CAST(${startTimeValue} AS time)
           LIMIT 1
@@ -88,7 +97,7 @@ export class AppointmentsRepository {
             email: payload.patient.email,
             phone: payload.patient.phone,
             dateOfBirth: new Date(payload.patient.dateOfBirth),
-            gender: payload.patient.gender,
+            gender: GENDER_MAP[payload.patient.gender],
             medicalHistoryNotes: payload.patient.medicalHistoryNotes,
           },
           update: {
@@ -110,7 +119,7 @@ export class AppointmentsRepository {
             medicalCenterId: payload.medicalCenterId,
             officeId: payload.officeId,
             reasonForVisit: payload.reasonForVisit,
-            status: 'RESERVED',
+            status: 'SCHEDULED',
           },
           include: { patient: true, doctor: true },
         });
@@ -188,7 +197,7 @@ export class AppointmentsRepository {
         WHERE doctor_id = ${currentAppointment.doctorId}
           AND id <> ${currentAppointment.id}
           AND appointment_date = CAST(${appointmentDateValue} AS date)
-          AND status IN ('RESERVED', 'CONFIRMED')
+          AND status IN ('SCHEDULED', 'CONFIRMED')
           AND start_time < CAST(${endTimeValue} AS time)
           AND end_time > CAST(${startTimeValue} AS time)
         LIMIT 1

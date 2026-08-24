@@ -12,6 +12,9 @@ import { DoctorsModule } from './doctors/doctors.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { AppointmentsModule } from './appointments/appointments.module';
 import { MedicalCentersModule } from './medical-centers/medical-centers.module';
+import { TasksModule } from './tasks/tasks.module';
+import { ReportsModule } from './reports/reports.module';
+import { PatientsModule } from './patients/patients.module';
 
 @Module({
   imports: [
@@ -26,6 +29,9 @@ import { MedicalCentersModule } from './medical-centers/medical-centers.module';
     DoctorsModule,
     AppointmentsModule,
     MedicalCentersModule,
+    TasksModule,
+    ReportsModule,
+    PatientsModule,
   ],
   controllers: [AppController],
   providers: [

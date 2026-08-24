@@ -3,6 +3,7 @@ import { AppointmentsRepository } from './appointments.repository';
 import { AppointmentsService } from './appointments.service';
 import {
   CreateAppointmentDto,
+  PatientGender,
   UpdateAppointmentScheduleDto,
 } from './dto/create-appointment.dto';
 
@@ -26,7 +27,7 @@ describe('AppointmentsService', () => {
       email: 'maria@example.com',
       phone: '0999999999',
       dateOfBirth: '1990-05-20',
-      gender: 'FEMENINO',
+      gender: PatientGender.FEMENINO,
     },
   };
 
