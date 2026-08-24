@@ -52,6 +52,7 @@ export class AuthService {
         await this.buildTokenPayload(data),
       ),
       user: true,
+      rol: data.rol,
     };
   }
 
