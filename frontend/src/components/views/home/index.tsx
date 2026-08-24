@@ -37,7 +37,7 @@ function HomeView() {
       })
 
       // 3. LA VALIDACIÓN DEL IF QUE SOLICITASTE
-      if (data.access_token && data.user === true) {
+      if (data.access_token && data.user === true && data.rol === 'SA') {
         
         // Guardamos el token para futuras peticiones (opcional pero recomendado)
         localStorage.setItem('token', data.access_token)
