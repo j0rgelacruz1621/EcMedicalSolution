@@ -2,7 +2,9 @@ import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 
 export interface RequestUser {
   sub: number;
+  user_name: string;
   rol?: string;
+  application?: string;
   doctorId?: number;
 }
 
