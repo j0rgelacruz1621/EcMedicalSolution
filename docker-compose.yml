@@ -23,7 +23,6 @@ services:
     environment:
       PORT: ${PORT:-3000}
       NODE_ENV: development
-      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/ecmedical?schema=public
     working_dir: /app
     command: npm run start:dev
     ports:
