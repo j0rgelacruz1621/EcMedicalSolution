@@ -1,4 +1,5 @@
 .lsb {
+
   width: 260px;
   min-height: 100vh;
   background: #ffffff;
@@ -7,21 +8,6 @@
   flex-direction: column;
   justify-content: space-between;
   padding: 24px 18px 20px;
-  font-family: 'Inter', 'Segoe UI', sans-serif;
-  backdrop-filter: blur(4px);
-}
-
-.lsb-top {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
-
-.lsb-user {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 4px 4px 10px;
 }
 
 .lsb-avatar {
@@ -32,92 +18,41 @@
   place-items: center;
   font-size: 0.8rem;
   font-weight: 800;
-  color: #00317e;
-  background: linear-gradient(135deg, #dae2ff 0%, #b2c5ff 100%);
-  box-shadow: inset 0 0 0 1px rgba(0, 49, 126, 0.08);
+  color: var(--primary-color);
+  /* CAMBIO: Gradiente dinámico que no sea siempre azul */
+  background: linear-gradient(135deg, var(--primary-light) 0%, #ffffff 100%);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.05);
 }
 
 .lsb-name {
   font-size: 1.05rem;
   line-height: 1.15;
   font-weight: 800;
-  color: #00317e;
-}
-
-.lsb-sub {
-  margin-top: 3px;
-  font-size: 0.75rem;
-  color: var(--muted);
-}
-
-.lsb-nav {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.lsb-nav a {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 11px 12px;
-  border-radius: 10px;
-  font-weight: 500;
-  color: #434653;
-  transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease;
-}
-
-.nav-icon {
-  width: 18px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1rem;
-  line-height: 1;
+  color: var(--primary-color);
 }
 
 .lsb-nav a.active {
-  background: #dae2ff;
-  color: #00317e;
-  box-shadow: inset 0 0 0 1px rgba(0, 49, 126, 0.08);
+  background: var(--primary-light);
+  color: var(--primary-color);
 }
 
-.lsb-nav a:hover {
-  background: rgba(148, 160, 175, 0.05);
-  transform: translateX(2px);
-}
-
-.lsb-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding-top: 18px;
-}
-
-.lsb-new,
-.lsb-logout {
+.lsb-new {
+  /* Usamos la misma variable global */
+  background: var(--primary-color);
+  box-shadow: 0 8px 18px var(--primary-shadow);
+  color: #fff;
   border: 0;
   border-radius: 12px;
   padding: 12px 14px;
   font-weight: 700;
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.lsb-new {
-  background: #00317e;
-  color: #fff;
-  box-shadow: 0 8px 18px rgba(0, 49, 126, 0.18);
-}
-
-.lsb-new:hover,
-.lsb-logout:hover {
-  transform: translateY(-1px);
-}
-
-.lsb-logout {
-  background: transparent;
-  color: #45515f;
-  border: 1px solid rgba(148, 163, 184, 0.2);
-}
-
+/* El resto de estilos (lsb-top, lsb-nav a, etc.) se mantienen igual */
+.lsb-top { display: flex; flex-direction: column; gap: 18px; }
+.lsb-user { display: flex; align-items: center; gap: 12px; padding: 4px 4px 10px; }
+.lsb-sub { margin-top: 3px; font-size: 0.75rem; color: #737784; }
+.lsb-nav { display: flex; flex-direction: column; gap: 6px; }
+.lsb-nav a { display: flex; align-items: center; gap: 10px; padding: 11px 12px; border-radius: 10px; font-weight: 500; color: #434653; text-decoration: none; }
+.lsb-actions { display: flex; flex-direction: column; gap: 10px; padding-top: 18px; }
+.lsb-logout { background: transparent; color: #45515f; border: 1px solid rgba(148, 163, 184, 0.2); border-radius: 12px; padding: 12px 14px; font-weight: 700; cursor: pointer; }

@@ -18,16 +18,17 @@
 }
 
 .cp-header h1 {
-  color: var(--primary);
-  font-size: clamp(1.5rem, 2vw, 2rem);
-  line-height: 1.25;
-  font-weight: 600;
+  color: var(--primary-color) !important;
 }
 
 .cp-header-right {
   display: flex;
   align-items: center;
   gap: 12px;
+}
+
+.kpi:nth-child(1)::before {
+  background: linear-gradient(135deg, rgba(128, 0, 32, 0.14), rgba(128, 0, 32, 0.05)) !important;
 }
 
 .icon {
@@ -74,14 +75,7 @@
 }
 
 .kpi::before {
-  content: '';
-  position: absolute;
-  top: 15px;
-  right: 16px;
-  width: 42px;
-  height: 42px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, rgba(0, 49, 126, 0.14), rgba(0, 49, 126, 0.05));
+  background: linear-gradient(135deg, rgba(128, 0, 32, 0.14), rgba(128, 0, 32, 0.05)) !important;
 }
 
 .kpi:nth-child(2)::before {
@@ -171,7 +165,7 @@
   border: none;
   background: transparent;
   font-size: 0.72rem;
-  color: #00317e;
+  color: var(--primary); // Vinotinto
   font-weight: 500;
   cursor: pointer;
 }
@@ -201,7 +195,7 @@
   border-radius: 50%;
   display: grid;
   place-items: center;
-  background: linear-gradient(135deg, #dae2ff 0%, #b2c5ff 100%);
+  background: linear-gradient(135deg, #f8d7da 0%, #e9ecef 100%);
 }
 
 .placeholder-avatar {
@@ -266,22 +260,17 @@
 }
 
 .chart-bar:nth-child(2n) span {
-  background: linear-gradient(180deg, #89ceff 0%, #005277 100%);
+  background: var(--primary-color) !important;
 }
+
 
 .tasks {
   padding-bottom: 12px;
 }
 
 .add {
-  border: none;
-  border-radius: 8px;
-  width: 28px;
-  height: 28px;
-  background: rgba(0, 49, 126, 0.12);
-  color: var(--primary);
-  font-size: 1.2rem;
-  cursor: pointer;
+  background: var(--primary-light) !important;
+  color: var(--primary-color) !important;
 }
 
 .tasks-list {
@@ -317,6 +306,12 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+}
+
+.outline:hover {
+    background-color: var(--primary-light);
+    color: var(--primary);
+    border-color: var(--primary);
 }
 
 .task-title {
@@ -394,9 +389,8 @@
 }
 
 .mini-cal-grid .date-cell.active {
-  background: #00317e;
-  color: white;
-  font-weight: 700;
+  background: var(--primary-color) !important;
+  color: white !important;
 }
 
 .mini-cal-grid .date-cell.muted {
@@ -404,6 +398,9 @@
   background: transparent;
 }
 
+.tasks-list input:checked {
+  accent-color: var(--primary-color);
+}
 @media (max-width: 1100px) {
   .cp-content {
     flex-direction: column;
@@ -416,7 +413,19 @@
 
 @media (max-width: 880px) {
   .cp-root {
-    flex-direction: column;
+    /* DEFINICIÓN DEL TEMA VINOTINTO SOLO PARA ESTA VISTA */
+    --primary-color: #800020; 
+    --primary-light: rgba(128, 0, 32, 0.1); // Vinotinto muy suave
+
+    display: flex;
+    min-height: 100vh;
+    background: rgba(255, 255, 255, 0.12);
+    
+    /* Forzamos que la sidebar herede estas variables */
+    .lsb {
+      --primary-color: #800020;
+      --primary-light: #f8d7da;
+    }
   }
 
   .lsb {
