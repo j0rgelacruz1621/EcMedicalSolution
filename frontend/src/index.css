@@ -1,105 +1,19 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
 :root {
-  font-family: 'Inter', 'Segoe UI', sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-  color: #191c1e;
-  background: #f7f9fb;
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-
-  --bg-page: #f7f9fb;
-  --panel: #ffffff;
-  --panel-alt: #f2f4f6;
+  /* TEMA POR DEFECTO: VINOTINTO (Control Panel, Agenda, etc.) */
+  --primary-color: #800020;         /* Vinotinto */
+  --primary-hover: #5a0017;         
+  --primary-light: #f8d7da;         /* Vinotinto clarito para fondos */
+  --primary-shadow: rgba(128, 0, 32, 0.15);
+  
   --line: #c3c6d5;
-  --text: #191c1e;
-  --muted: #434653;
-  --primary: #00317e;
-  --primary-dark: #0046ad;
-  --primary-soft: #dae2ff;
-  --accent-green: #89ceff;
-  --accent-green-soft: #c9e6ff;
-  --shadow: 0 8px 24px rgba(25, 28, 30, 0.08);
+  --bg-page: #f7f9fb;
+  --text-main: #191c1e;
 }
 
-* {
-  box-sizing: border-box;
-}
-
-html,
-body,
-#root {
-  margin: 0;
-  min-width: 320px;
-  min-height: 100%;
-  width: 100%;
-}
-
-body {
-  min-height: 100vh;
-  background: #f7f9fb;
-  color: var(--text);
-}
-
-/* --- BLOQUE DE ICONOS LUCIDE (GLOBAL) --- */
-.lucide {
-  display: inline-block;
-  vertical-align: middle;
-  flex-shrink: 0; /* Evita que el icono se aplaste */
-}
-
-/* --- AJUSTE GLOBAL DE BOTONES --- */
-button {
-  font: inherit;
-  display: inline-flex; /* Para que el botón se ajuste al contenido */
-  align-items: center;
-  justify-content: center;
-  gap: 10px; /* Espacio estándar entre icono y texto */
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-input,
-textarea,
-select {
-  font: inherit;
-}
-
-/* --- AJUSTE DE LINKS (ESPECIALMENTE PARA EL SIDEBAR) --- */
-a {
-  color: inherit;
-  text-decoration: none;
-  display: inline-flex; /* Permite alinear iconos dentro de links */
-  align-items: center;
-}
-
-/* Específico para tu navegación lateral */
-.lsb-nav a {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-img {
-  max-width: 100%;
-  display: block;
-}
-
-h1,
-h2,
-h3,
-p {
-  margin: 0;
-}
-
-/* Clase de utilidad rápida por si necesitas alinear algo manual */
-.d-flex-align {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+/* CLASE PARA AZUL (Solo para Home y Registro) */
+.theme-blue {
+  --primary-color: #00317e;         /* Azul */
+  --primary-hover: #0046ad;
+  --primary-light: #dae2ff;         /* Azul clarito */
+  --primary-shadow: rgba(0, 49, 126, 0.18);
 }

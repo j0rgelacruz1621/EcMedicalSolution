@@ -1,29 +1,140 @@
-.cd-final-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.35);display:grid;place-items:center;z-index:2100}
-.cd-final-card{width:420px;max-width:calc(100% - 32px);background:#fff;border-radius:12px;padding:22px;box-shadow:0 20px 40px rgba(2,6,23,0.25);text-align:center;font-family:'Inter','Segoe UI',sans-serif}
-.cd-final-icon{margin-bottom:8px}
-.cd-final-icon__bg{width:56px;height:56px;border-radius:999px;background:#fde8e9;display:inline-grid;place-items:center;margin:0 auto}
-.cd-final-title{color:#0f172a;font-weight:800;font-size:20px;margin:10px 0}
-.cd-final-sub{color:#6b7280;font-size:13px;margin-bottom:14px}
-.cd-final-summary{border:1px solid #f0dfe0;padding:14px;border-radius:8px;text-align:left}
-.cd-final-summary__title{color:#00317e;font-variant:small-caps;font-weight:600;padding-bottom:8px;border-bottom:1px solid #c3c6d5;margin-bottom:10px}
-.cd-final-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px dashed rgba(0,0,0,0.04)}
-.cd-final-row:last-of-type{border-bottom:none}
-.cd-final-row .label{color:#6b7280;font-size:12px}
-.cd-final-row .value{color:#0f172a;font-weight:700}
-.cd-final-actions{display:flex;flex-direction:column;gap:10px;margin-top:14px}
-.btn-primary{background:#00317e;color:#fff;padding:12px;border-radius:8px;border:none;font-weight:600;width:100%;transition:all .2s ease}
-.btn-primary:hover{background:#0046ad;filter:brightness(1.08);box-shadow:0 6px 18px rgba(0,49,126,0.18)}
-.btn-outline{background:transparent;color:#00317e;padding:10px;border-radius:8px;border:1px solid #00317e;font-weight:600;transition:all .2s ease}
-.btn-outline:hover{background:#f2f4f6;border-color:#89ceff;filter:brightness(1.04)}
-.cd-final-note{font-size:12px;color:#9ca3af;margin-top:12px}
+.cd-final-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  display: grid;
+  place-items: center;
+  z-index: 2100;
+  backdrop-filter: blur(2px);
+}
 
+.cd-final-card {
+  width: 420px;
+  max-width: calc(100% - 32px);
+  background: #fff;
+  border-radius: 12px;
+  padding: 22px;
+  box-shadow: 0 20px 40px rgba(2, 6, 23, 0.25);
+  text-align: center;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+}
+
+.cd-final-icon {
+  margin-bottom: 8px;
+}
+
+.cd-final-icon__bg {
+  width: 56px;
+  height: 56px;
+  border-radius: 999px;
+  background: var(--primary-light); /* Cambio a variable */
+  display: inline-grid;
+  place-items: center;
+  margin: 0 auto;
+  
+  svg path {
+    stroke: var(--primary-color); /* Para que el check del icono cambie de color */
+  }
+}
+
+.cd-final-title {
+  color: #0f172a;
+  font-weight: 800;
+  font-size: 20px;
+  margin: 10px 0;
+}
+
+.cd-final-sub {
+  color: #6b7280;
+  font-size: 13px;
+  margin-bottom: 14px;
+}
+
+.cd-final-summary {
+  border: 1px solid var(--primary-light); /* Cambio a variable */
+  padding: 14px;
+  border-radius: 8px;
+  text-align: left;
+}
+
+.cd-final-summary__title {
+  color: var(--primary-color); /* Cambio a variable */
+  font-variant: small-caps;
+  font-weight: 600;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 10px;
+}
+
+.cd-final-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px dashed rgba(0, 0, 0, 0.04);
+}
+
+.cd-final-row:last-of-type {
+  border-bottom: none;
+}
+
+.cd-final-row .label {
+  color: #6b7280;
+  font-size: 12px;
+}
+
+.cd-final-row .value {
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.cd-final-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.btn-primary {
+  background: var(--primary-color); /* Cambio a variable */
+  color: #fff;
+  padding: 12px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 600;
+  width: 100%;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: var(--primary-hover); /* Cambio a variable */
+    filter: brightness(1.08);
+    box-shadow: 0 6px 18px var(--primary-shadow);
+  }
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--primary-color); /* Cambio a variable */
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid var(--primary-color); /* Cambio a variable */
+  font-weight: 600;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: var(--primary-light);
+    filter: brightness(1.04);
+  }
+}
+
+.cd-final-note {
+  font-size: 12px;
+  color: #9ca3af;
+  margin-top: 12px;
+}
+
+/* Animaciones */
 .animate__animated { animation-duration: .35s; animation-fill-mode: both }
 .animate__fadeIn { animation-name: fadeIn }
-.animate__fadeInDown { animation-name: fadeInDown }
-.animate__fadeInUp { animation-name: fadeInUp }
 .animate__zoomIn { animation-name: zoomIn }
-
 @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
-@keyframes fadeInDown { from { opacity: 0; transform: translateY(-10px) } to { opacity: 1; transform: translateY(0) } }
-@keyframes fadeInUp { from { opacity: 0; transform: translateY(10px) } to { opacity: 1; transform: translateY(0) } }
 @keyframes zoomIn { from { opacity: 0; transform: scale(0.96) } to { opacity: 1; transform: scale(1) } }

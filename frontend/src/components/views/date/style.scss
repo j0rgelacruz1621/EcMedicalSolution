@@ -1,5 +1,5 @@
 // Variables de diseño
-$color-primary: #00317e;
+$color-primary: var(--primary-color);
 $color-bg-page: #f7f9fb;
 $color-border: #c3c6d5;
 $color-text-main: #191c1e;
@@ -26,11 +26,6 @@ $color-text-muted: #737784;
 // Título principal con el color del tema
   &__main-title {
     color: $color-primary !important;
-    font-size: 2rem;
-    line-height: 1.25;
-    font-weight: 600;
-    text-align: center;
-    margin-bottom: 10px;
   }
 
   // Subtítulo con letra más grande
@@ -108,7 +103,7 @@ $color-text-muted: #737784;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 20px;
-      color: $color-primary;
+      $color-primary: $color-primary;
       font-weight: 800;
       font-size: 1rem;
     }
@@ -225,21 +220,18 @@ $color-text-muted: #737784;
     .btn-cancel {
       background: transparent;
       border: 2px solid $color-primary;
-      color: $color-primary;
+      $color-primary: $color-primary;
 
       &:hover {
         background: #dae2ff;
       }
     }
 
-    .btn-submit {
+  .btn-submit {
       background: $color-primary;
-      border: 2px solid $color-primary;
-      color: #ffffff;
-
+      border-color: $color-primary;
       &:hover {
-        background: #5e0a0f;
-        border-color: #5e0a0f;
+        background: $color-primary;
       }
     }
   }

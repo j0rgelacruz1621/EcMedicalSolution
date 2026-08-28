@@ -1,16 +1,3 @@
-:root {
-  --text: #3d3a3c;
-  --text-dark: #1c151b;
-  --bg: #fcf7f8;
-  --border: rgba(104, 23, 44, 0.16);
-  --brand: #800020;
-  --brand-dark: #5a0017;
-  --accent: #8b2b3b;
-  --accent-bg: rgba(128, 0, 32, 0.09);
-  --shadow: rgba(0, 0, 0, 0.12) 0 18px 40px -24px;
-  --sans: 'Inter', 'Segoe UI', sans-serif;
-}
-
 .landing-shell {
   width: 100%;
   min-height: 100svh;

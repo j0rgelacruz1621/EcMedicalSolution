@@ -1,26 +1,24 @@
-// 1. VARIABLES CORPORATIVAS (SEGÚN REQUERIMIENTO)
-$primary-blue: #0052cc;   // Azul Rey solicitado
-$primary-hover: #0047ab;  // Estado Hover
-$error-red: #d32f2f;     // Rojo para asteriscos y errores
-$bg-neutral: #f4f6f8;    // Fondo neutro
-$border-color: #c3c6d5;
-$text-main: #191c1e;
-$text-muted: #434653;
+// 1. VARIABLE DE COLOR EXACTA (Mismo azul de Home)
+$primary-blue: var(--primary-color);
+$primary-hover: var(--primary-color);  // Un tono más oscuro para el hover
+$error-red: #d32f2f;     
+$bg-neutral: #f8fafc;    
+$border-color: #e2e8f0;
+$text-main: #1a1a1a;
+$text-muted: #64748b;
 
-// 2. ESTRUCTURA DE PÁGINA Y HEADER
+// 2. HEADER (Sin botón de login)
 .sr-header {
   width: 100%;
   background: #ffffff;
   border-bottom: 1px solid $border-color;
-  font-family: 'Inter', sans-serif;
 
   &__inner {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 16px 28px;
+    padding: 16px 24px;
     display: flex;
     align-items: center;
-    justify-content: space-between;
   }
 }
 
@@ -28,237 +26,217 @@ $text-muted: #434653;
   display: flex;
   align-items: center;
   gap: 12px;
-  &__logo { width: 40px; height: 40px; object-fit: contain; }
-  &__text { color: $primary-blue; font-size: 1.25rem; font-weight: 700; }
+  &__logo { width: 38px; height: 38px; object-fit: contain; }
+  &__text { 
+    color: $primary-blue; // Azul exacto
+    font-size: 1.15rem; 
+    font-weight: 700; 
+  }
 }
 
-.sr-login-link {
-  color: $primary-blue;
-  font-weight: 600;
+// 3. ESTRUCTURA DE PÁGINA
+.sr-page {
+  min-height: calc(100vh - 80px);
+  padding: 60px 20px;
+  background: $bg-neutral;
+  display: flex;
+  justify-content: center;
+}
+
+.sr-card {
+  width: 100%;
+  max-width: 1000px; 
+  background: #ffffff;
+  border-radius: 20px; // Bordes más redondeados según diseño
+  padding: 48px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+}
+
+.sr-title {
+  color: var(--primary-color); // Azul exacto
+  font-size: 2.2rem;
+  font-weight: 800;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.sr-subtitle {
+  color: $text-muted;
+  text-align: center;
+  margin-bottom: 45px;
+  font-size: 1.05rem;
+}
+
+// 4. GRID Y CAMPOS (Espaciados corregidos)
+.sr-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px 35px; // Espaciado horizontal y vertical
+}
+
+.sr-field {
+  margin-bottom: 22px; 
+
+  .sr-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.88rem;
+    font-weight: 700; // Más negrita según diseño
+    color: $text-main;
+    margin-bottom: 8px; // ESPACIO TÍTULO-INPUT
+
+    span { color: $error-red; }
+  }
+
+  input, select, textarea {
+    width: 100%;
+    min-height: 48px;
+    padding: 12px 16px;
+    border: 1px solid $border-color;
+    border-radius: 10px;
+    font-size: 15px;
+    background-color: #ffffff;
+    transition: all 0.2s ease;
+
+    &:focus {
+      outline: none;
+      border-color: $primary-blue; // Borde azul al enfocar
+      box-shadow: 0 0 0 3px rgba(0, 51, 128, 0.08);
+    }
+
+    &::placeholder { color: #cbd5e1; }
+  }
+
+  textarea {
+    min-height: 110px;
+    resize: none;
+  }
+}
+
+// 5. TÉRMINOS Y CHECKBOX (Eliminación del recuadro de enfoque)
+.sr-terms {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 35px 0 25px;
+  padding: 0 5px;
+
+  input[type="checkbox"] {
+    width: 19px;
+    height: 19px;
+    cursor: pointer;
+    accent-color: $primary-blue; // Azul exacto para el check
+    
+    // ELIMINA EL EFECTO DE RECUADRO AZUL EXTERNO
+    outline: none !important;
+    box-shadow: none !important;
+    
+    &:focus {
+      outline: none !important;
+      box-shadow: none !important;
+    }
+  }
+
+  label {
+    font-size: 0.92rem;
+    color: $text-muted;
+    cursor: pointer;
+    user-select: none;
+  }
+}
+
+// Link único solicitado
+.sr-link-unified {
+  color: $primary-blue; // Azul exacto
+  font-weight: 700;
   text-decoration: none;
   &:hover { text-decoration: underline; }
 }
 
-// 3. CONTENEDOR PRINCIPAL Y TARJETA (CARD)
-.sr-page {
-  min-height: calc(100vh - 150px);
-  display: grid;
-  place-items: center;
-  padding: 40px 20px;
-  background: $bg-neutral;
-  animation: sr-page-enter 0.55s ease both;
-}
-
-.sr-card {
-  width: min(100%, 980px); // Ancho máximo según requerimiento
-  background: #ffffff;
-  border: 1px solid $border-color;
+// 6. BOTÓN DE ENVÍO
+.sr-submit-btn {
+  width: 100%;
+  background-color: $primary-blue; // Azul exacto
+  color: #ffffff;
+  padding: 16px;
   border-radius: 12px;
-  padding: 35px 40px;
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
-  animation: sr-card-enter 0.55s 0.1s ease both;
-}
-
-.sr-title {
-  text-align: center;
-  color: $primary-blue;
-  font-size: 2rem;
+  font-size: 1.1rem;
   font-weight: 700;
-  margin-bottom: 8px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.1s ease;
+
+  &:hover:not(:disabled) {
+    background-color: $primary-hover;
+  }
+
+  &:active:not(:disabled) {
+    transform: scale(0.99);
+  }
+
+  &:disabled {
+    background-color: #e2e8f0;
+    color: #94a3b8;
+    cursor: not-allowed;
+  }
 }
 
-.sr-subtitle {
-  text-align: center;
-  color: $text-muted;
-  margin-bottom: 35px;
-  font-size: 1rem;
-}
-
-// 4. GRID DE FORMULARIO (2 COLUMNAS)
-.sr-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr; // Aquí se cumple la distribución en 2 columnas
-  gap: 20px 30px;
-  margin-bottom: 25px;
-}
-
-.sr-field {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.sr-label {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: $text-muted;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-
-  span { color: $error-red; } // Asterisco rojo (*)
-}
-
+// Tooltips
 .sr-info-wrapper {
-  display: inline-flex;
-  align-items: center;
-  cursor: help;
-  margin-left: 6px;
-}
-
-// Icono informativo (Tooltip)
-.sr-info-icon {
   color: #94a3b8;
-  transition: color 0.2s;
+  display: inline-flex;
+  cursor: help;
   &:hover { color: $primary-blue; }
 }
 
-// 5. INPUTS, SELECTS Y TEXTAREAS
-input, select, textarea {
-  width: 100%;
-  min-height: 48px; // Todos los campos miden 48px de alto
-  border: 1px solid $border-color;
-  border-radius: 8px;
-  padding: 10px 15px;
-  font-size: 1rem;
-  background: #fff;
-  transition: all 0.2s;
-
-  &:focus {
-    outline: none;
-    border-color: $primary-blue;
-    box-shadow: 0 0 0 3px rgba(0, 82, 204, 0.1);
-  }
-
-  &::placeholder { color: #cbd5e1; }
-}
-
-textarea { min-height: 100px; resize: vertical; }
-
-// Estado de Error
-.is-error {
-  border-color: $error-red !important;
-  background-color: #fffafb;
-}
-
-.sr-error {
-  color: $error-red;
-  font-size: 0.75rem;
-  margin-top: 4px;
-}
-
-// 6. SELECTOR DE ARCHIVOS PERSONALIZADO
 .sr-file-custom {
   display: flex;
   align-items: center;
   gap: 12px;
   border: 1px solid $border-color;
-  border-radius: 8px;
-  padding: 5px 10px;
-  background: #fff;
-
-  input[type="file"] { display: none; }
+  border-radius: 10px;
+  padding: 4px 8px;
+  background: #ffffff;
+  min-height: 48px; // Para que tenga la misma altura que los otros inputs
 
   .sr-file-btn {
-    background: #f1f5f9;
-    border: 1px solid $border-color;
-    padding: 6px 12px;
-    border-radius: 6px;
+    background-color: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    padding: 8px 14px;
+    border-radius: 8px;
     font-size: 0.85rem;
     font-weight: 600;
+    color: $text-main;
     cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 6px;
-    &:hover { background: #e2e8f0; }
+    gap: 8px;
+    white-space: nowrap;
+    transition: background 0.2s;
+
+    &:hover {
+      background-color: #e2e8f0;
+    }
+
+    &.disabled {
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
   }
 
   .sr-file-status {
     font-size: 0.85rem;
-    color: #64748b;
-    white-space: nowrap;
+    color: $text-muted;
     overflow: hidden;
     text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }
 
-// 7. PIE DEL FORMULARIO Y BOTÓN
-.sr-terms {
-  display: flex;
-  align-items: center; // Centra verticalmente el checkbox con el texto
-  gap: 12px;
-  margin: 30px 0 15px; // Más espacio arriba para separarlo de la Bio
-  padding-left: 2px;
-
-  input[type="checkbox"] {
-    width: 20px;       // Un poquito más grande para que sea fácil de clickear
-    height: 20px;
-    accent-color: $primary-blue;
-    cursor: pointer;
-    flex-shrink: 0;    // Evita que el checkbox se aplaste si el texto es largo
-    margin: 0;         // Quitamos margenes por defecto del navegador
-  }
-
-  label {
-    font-size: 0.95rem;
-    color: $text-muted;
-    line-height: 1.2;
-    cursor: pointer;
-    user-select: none;
-
-    a {
-      color: $primary-blue;
-      font-weight: 700;
-      text-decoration: none;
-      &:hover { text-decoration: underline; }
-    }
-  }
-}
-
-.sr-submit-btn {
-  width: 100%; // Ancho completo (Full-width)
-  background-color: $primary-blue;
-  color: #ffffff;
-  padding: 15px;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 700;
-  border: none;
-  cursor: pointer;
-  margin-top: 20px;
-  transition: all 0.3s ease;
-
-  &:hover {
-    background-color: $primary-hover;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 82, 204, 0.2);
-  }
-
-  &:active { transform: translateY(0); }
-  
-  &:disabled {
-    background-color: #cbd5e1;
-    cursor: not-allowed;
-  }
-}
-
-// 8. RESPONSIVIDAD (MOBILE)
-@media (max-width: 768px) {
-  .sr-grid {
-    grid-template-columns: 1fr; // Cambio a 1 sola columna en móvil
-    gap: 15px;
-  }
-
-  .sr-card {
-    padding: 25px 20px;
-  }
-
-  .sr-title { font-size: 1.75rem; }
-}
-
-// ANIMACIONES
-@keyframes sr-page-enter { from { opacity: 0; } to { opacity: 1; } }
-@keyframes sr-card-enter { 
-  from { opacity: 0; transform: translateY(20px); } 
-  to { opacity: 1; transform: translateY(0); } 
+// Responsivo
+@media (max-width: 850px) {
+  .sr-grid { grid-template-columns: 1fr; }
+  .sr-card { padding: 35px 25px; }
+  .sr-title { font-size: 1.9rem; }
 }
