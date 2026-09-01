@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { task_status_enum } from '@prisma/client';
 import { RequestUser } from '../auth/current-user.decorator';
+import { PaginatedResponseDto } from '../common/dto/paginated-response.dto';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { QueryTasksDto } from './dto/query-tasks.dto';
 import { UpdateTaskStatusDto } from './dto/update-task-status.dto';
@@ -101,13 +102,12 @@ export class TasksService {
       this.tasksRepository.countByDoctor(BigInt(doctorId), query.status),
     ]);
 
-    return {
-      data: toJsonSafe(tasks),
+    return new PaginatedResponseDto(
+      toJsonSafe(tasks) as Record<string, unknown>[],
+      total,
       page,
       limit,
-      total,
-      totalPages: Math.max(1, Math.ceil(total / limit)),
-    };
+    );
   }
 
   async getSummary(doctorId: number, user: RequestUser) {

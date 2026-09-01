@@ -11,12 +11,14 @@ import {
 } from '@nestjs/common';
 import {
   ApiBody,
+  ApiOkResponse,
   ApiOperation,
   ApiParam,
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
 import { Public } from '../auth/public.decorator.js';
+import { PaginatedResponseDto } from '../common/dto/paginated-response.dto';
 import { CreateDoctorDto } from './dto/create-doctor.dto.js';
 import { CreateDoctorSchedulesDto } from './dto/create-doctor-schedules.dto.js';
 import { DoctorsService } from './doctors.service.js';
@@ -53,6 +55,7 @@ export class DoctorsController {
   @Public()
   @Get()
   @ApiOperation({ summary: 'Get all doctors (paginated)' })
+  @ApiOkResponse({ type: PaginatedResponseDto })
   @ApiQuery({ name: 'page', type: Number, required: false, example: 1 })
   @ApiQuery({ name: 'limit', type: Number, required: false, example: 10 })
   findAll(

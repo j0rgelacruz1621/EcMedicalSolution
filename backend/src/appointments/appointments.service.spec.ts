@@ -1,17 +1,18 @@
-import { ConflictException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  NotFoundException,
+} from '@nestjs/common';
 import { AppointmentsRepository } from './appointments.repository';
 import { AppointmentsService } from './appointments.service';
-import {
-  CreateAppointmentDto,
-  PatientGender,
-  UpdateAppointmentScheduleDto,
-} from './dto/create-appointment.dto';
+import { CreateAppointmentDto, PatientGender } from './dto/create-appointment.dto';
+import { UpdateAppointmentDto } from './dto/update-appointment.dto';
 
 describe('AppointmentsService', () => {
   let service: AppointmentsService;
   let repository: {
     reserveAppointment: jest.Mock;
-    updateSchedule: jest.Mock;
+    updateAppointment: jest.Mock;
   };
 
   const payload: CreateAppointmentDto = {
@@ -34,7 +35,7 @@ describe('AppointmentsService', () => {
   beforeEach(() => {
     repository = {
       reserveAppointment: jest.fn(),
-      updateSchedule: jest.fn(),
+      updateAppointment: jest.fn(),
     };
     service = new AppointmentsService(
       repository as unknown as AppointmentsRepository,
@@ -78,34 +79,51 @@ describe('AppointmentsService', () => {
     expect(repository.reserveAppointment).not.toHaveBeenCalled();
   });
 
-  it('updates an appointment schedule', async () => {
-    const schedule: UpdateAppointmentScheduleDto = {
-      startAt: '2026-08-11T11:00:00.000Z',
-      endAt: '2026-08-11T11:30:00.000Z',
+  it('updates an appointment', async () => {
+    const payload: UpdateAppointmentDto = {
+      start_time: '11:00:00',
+      end_time: '11:30:00',
     };
-    repository.updateSchedule.mockResolvedValue({
+    repository.updateAppointment.mockResolvedValue({
       id: 1n,
       appointmentDate: new Date('2026-08-11T00:00:00.000Z'),
     });
 
-    const result = await service.updateSchedule(1, schedule);
+    const result = await service.update(1, payload);
 
-    expect(repository.updateSchedule).toHaveBeenCalledWith(1, schedule);
+    expect(repository.updateAppointment).toHaveBeenCalledWith(1, payload);
     expect(result).toEqual(expect.objectContaining({ id: 1 }));
   });
 
-  it('propagates ConflictException when the new schedule is unavailable', async () => {
-    repository.updateSchedule.mockRejectedValue(
+  it('propagates NotFoundException when the appointment does not exist', async () => {
+    repository.updateAppointment.mockRejectedValue(
+      new NotFoundException('Appointment not found.'),
+    );
+
+    await expect(
+      service.update(999, { status: 'CONFIRMED' }),
+    ).rejects.toThrow(NotFoundException);
+  });
+
+  it('propagates BadRequestException when end_time is not after start_time', async () => {
+    repository.updateAppointment.mockRejectedValue(
+      new BadRequestException('end_time must be greater than start_time.'),
+    );
+
+    await expect(
+      service.update(1, { start_time: '11:00:00', end_time: '10:00:00' }),
+    ).rejects.toThrow(BadRequestException);
+  });
+
+  it('propagates ConflictException when the new schedule overlaps another appointment', async () => {
+    repository.updateAppointment.mockRejectedValue(
       new ConflictException(
-        'The selected appointment time is no longer available.',
+        'The doctor already has another appointment overlapping this schedule.',
       ),
     );
 
     await expect(
-      service.updateSchedule(1, {
-        startAt: '2026-08-11T11:00:00.000Z',
-        endAt: '2026-08-11T11:30:00.000Z',
-      }),
+      service.update(1, { start_time: '11:00:00', end_time: '11:30:00' }),
     ).rejects.toThrow(ConflictException);
   });
 });

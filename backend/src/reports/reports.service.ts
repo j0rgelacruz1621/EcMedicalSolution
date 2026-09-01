@@ -3,6 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { PaginatedResponseDto } from '../common/dto/paginated-response.dto';
 import { AttachReportFileDto } from './dto/attach-report-file.dto';
 import { CreateReportDto } from './dto/create-report.dto';
 import { QueryReportsDto } from './dto/query-reports.dto';
@@ -81,13 +82,12 @@ export class ReportsService {
       this.reportsRepository.count(filters),
     ]);
 
-    return {
-      data: toJsonSafe(reports),
+    return new PaginatedResponseDto(
+      toJsonSafe(reports) as Record<string, unknown>[],
+      total,
       page,
       limit,
-      total,
-      totalPages: Math.max(1, Math.ceil(total / limit)),
-    };
+    );
   }
 
   async findOne(id: number) {

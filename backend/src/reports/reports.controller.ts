@@ -12,6 +12,7 @@ import {
 } from '@nestjs/common';
 import {
   ApiBody,
+  ApiOkResponse,
   ApiOperation,
   ApiParam,
   ApiQuery,
@@ -19,6 +20,7 @@ import {
 } from '@nestjs/swagger';
 import { report_status_enum } from '@prisma/client';
 import { Public } from '../auth/public.decorator';
+import { PaginatedResponseDto } from '../common/dto/paginated-response.dto';
 import { AttachReportFileDto } from './dto/attach-report-file.dto';
 import { CreateReportDto } from './dto/create-report.dto';
 import { QueryReportsDto } from './dto/query-reports.dto';
@@ -63,6 +65,7 @@ export class ReportsController {
     }),
   )
   @ApiOperation({ summary: 'Get reports (filterable, paginated)' })
+  @ApiOkResponse({ type: PaginatedResponseDto })
   @ApiQuery({ name: 'patient_id', type: Number, required: false })
   @ApiQuery({ name: 'doctor_id', type: Number, required: false })
   @ApiQuery({
