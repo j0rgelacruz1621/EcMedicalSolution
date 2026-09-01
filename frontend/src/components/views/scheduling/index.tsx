@@ -1,14 +1,13 @@
 import { useState } from 'react'
 import LeftSideBar from '../../left-sideBar'
 import './style.scss'
-import { 
-  Bell, 
-  CircleHelp, 
-  Search, 
-  ChevronLeft, 
-  ChevronRight, 
+import {
+  Bell,
+  CircleHelp,
+  Search,
+  ChevronLeft,
+  ChevronRight,
   Plus,
-  Calendar as CalendarIcon
 } from 'lucide-react'
 
 // Datos de ejemplo para las citas

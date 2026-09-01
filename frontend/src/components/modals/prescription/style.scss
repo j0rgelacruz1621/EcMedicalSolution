@@ -1,0 +1,261 @@
+.prescription-form-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.38);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1200;
+  padding: 1.25rem;
+}
+
+.prescription-form-modal {
+  width: min(100%, 980px);
+  max-height: 90vh;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid rgba(128, 0, 32, 0.14);
+  border-radius: 1.4rem;
+  box-shadow: 0 28px 70px rgba(17, 24, 39, 0.18);
+  display: flex;
+  flex-direction: column;
+}
+
+.prescription-form-header {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem 1rem;
+  background: #fff;
+  border-bottom: 1px solid #f1e7ea;
+}
+
+.header-text-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.prescription-form-header h2 {
+  margin: 0;
+  color: #800020;
+  font-size: clamp(1.5rem, 2vw, 2rem);
+}
+
+.context-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.context-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0.7rem;
+  border-radius: 999px;
+  background: #f3f4f6;
+  color: #3f4349;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.close-button {
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 0;
+  background: #f9eef1;
+  color: #800020;
+  border-radius: 0.8rem;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.prescription-form-body {
+  overflow-y: auto;
+  padding: 1.25rem 1.5rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.prescription-drugs-section,
+.prescription-notes-section {
+  border: 1px solid #f0e4e7;
+  border-radius: 1rem;
+  background: #fff;
+  padding: 1rem;
+}
+
+.drug-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.drug-row {
+  display: grid;
+  grid-template-columns: minmax(180px, 1.7fr) minmax(120px, 0.8fr) minmax(110px, 0.8fr) minmax(150px, 1.2fr) minmax(100px, 0.8fr);
+  gap: 0.8rem;
+  padding: 0.8rem;
+  border: 1px solid #f1e7ea;
+  border-radius: 0.9rem;
+  background: #fff9fa;
+}
+
+.input-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.input-field label,
+.notes-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #800020;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.input-field input,
+.prescription-notes-section textarea {
+  width: 100%;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.8rem;
+  background: #fff;
+  color: #111827;
+  padding: 0.75rem 0.85rem;
+  font: inherit;
+}
+
+.input-field input:focus,
+.prescription-notes-section textarea:focus {
+  outline: 2px solid rgba(128, 0, 32, 0.14);
+  border-color: rgba(128, 0, 32, 0.28);
+}
+
+.add-drug-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.9rem;
+  border: none;
+  background: transparent;
+  color: #800020;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+}
+
+.prescription-notes-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.prescription-notes-section textarea {
+  resize: vertical;
+  min-height: 140px;
+}
+
+.notes-footer {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.fast-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.quick-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  border: 1px solid #eceef3;
+  background: #f3f4f6;
+  color: #3a3d42;
+  border-radius: 999px;
+  padding: 0.5rem 0.8rem;
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.char-counter {
+  color: #6b7280;
+  font-size: 0.76rem;
+}
+
+.prescription-form-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem 1.5rem;
+  border-top: 1px solid #f1e7ea;
+  background: #fff;
+}
+
+.secondary-button,
+.primary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  border-radius: 0.85rem;
+  padding: 0.8rem 1.25rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.secondary-button {
+  background: #fff;
+  border: 1px solid #e8dfe3;
+  color: #3a3d42;
+}
+
+.primary-button {
+  background: #800020;
+  color: #fff;
+  border: 0;
+}
+
+@media (max-width: 860px) {
+  .drug-row {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .prescription-form-header,
+  .prescription-form-body,
+  .prescription-form-footer {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .context-badges,
+  .notes-footer,
+  .prescription-form-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .drug-row {
+    grid-template-columns: 1fr;
+  }
+
+  .prescription-form-modal {
+    max-height: 94vh;
+  }
+}
