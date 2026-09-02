@@ -12,6 +12,7 @@ import {
 import {
   ApiBearerAuth,
   ApiBody,
+  ApiOkResponse,
   ApiOperation,
   ApiParam,
   ApiQuery,
@@ -20,6 +21,7 @@ import {
 import { task_priority_enum, task_status_enum } from '@prisma/client';
 import { CurrentUser } from '../auth/current-user.decorator';
 import type { RequestUser } from '../auth/current-user.decorator';
+import { PaginatedResponseDto } from '../common/dto/paginated-response.dto';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { QueryTasksDto } from './dto/query-tasks.dto';
 import { TasksService } from './tasks.service';
@@ -65,6 +67,7 @@ export class DoctorTasksController {
     }),
   )
   @ApiOperation({ summary: 'Get tasks for a doctor (filterable, paginated)' })
+  @ApiOkResponse({ type: PaginatedResponseDto })
   @ApiParam({ name: 'doctorId', type: Number, example: 1 })
   @ApiQuery({ name: 'status', enum: task_status_enum, required: false })
   @ApiQuery({

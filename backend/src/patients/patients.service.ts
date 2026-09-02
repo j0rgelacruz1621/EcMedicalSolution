@@ -5,6 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import { PaginatedResponseDto } from '../common/dto/paginated-response.dto';
 import { CreatePatientVitalsDto } from './dto/create-patient-vitals.dto';
 import { CreatePatientDto } from './dto/create-patient.dto';
 import { QueryPatientsDto } from './dto/query-patients.dto';
@@ -153,13 +154,12 @@ export class PatientsService {
       latestVitals: latestVitalsByPatientId.get(patient.id.toString()) ?? null,
     }));
 
-    return {
-      data: toJsonSafe(data),
+    return new PaginatedResponseDto(
+      toJsonSafe(data) as Record<string, unknown>[],
+      total,
       page,
       limit,
-      total,
-      totalPages: Math.max(1, Math.ceil(total / limit)),
-    };
+    );
   }
 
   async findVitalsHistory(id: number, query: QueryVitalsDto) {
@@ -181,13 +181,12 @@ export class PatientsService {
       this.patientsRepository.countVitals(BigInt(id)),
     ]);
 
-    return {
-      data: toJsonSafe(vitals),
+    return new PaginatedResponseDto(
+      toJsonSafe(vitals) as Record<string, unknown>[],
+      total,
       page,
       limit,
-      total,
-      totalPages: Math.max(1, Math.ceil(total / limit)),
-    };
+    );
   }
 
   async update(id: number, payload: UpdatePatientDto) {

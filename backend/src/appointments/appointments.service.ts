@@ -1,8 +1,13 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { randomBytes } from 'node:crypto';
+import { PaginatedResponseDto } from '../common/dto/paginated-response.dto';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
-import { UpdateAppointmentScheduleDto } from './dto/create-appointment.dto';
-import { AppointmentsRepository } from './appointments.repository';
+import { QueryAppointmentsDto } from './dto/query-appointments.dto';
+import { UpdateAppointmentDto } from './dto/update-appointment.dto';
+import {
+  AppointmentFilters,
+  AppointmentsRepository,
+} from './appointments.repository';
 
 function toJsonSafe(value: unknown): unknown {
   if (typeof value === 'bigint') {
@@ -55,18 +60,11 @@ export class AppointmentsService {
     return toJsonSafe(appointment) as Record<string, unknown>;
   }
 
-  async updateSchedule(
+  async update(
     id: number,
-    payload: UpdateAppointmentScheduleDto,
+    payload: UpdateAppointmentDto,
   ): Promise<Record<string, unknown>> {
-    const startAt = new Date(payload.startAt);
-    const endAt = new Date(payload.endAt);
-
-    if (startAt >= endAt) {
-      throw new BadRequestException('startAt must be less than endAt.');
-    }
-
-    const appointment = await this.appointmentsRepository.updateSchedule(
+    const appointment = await this.appointmentsRepository.updateAppointment(
       id,
       payload,
     );
@@ -81,5 +79,45 @@ export class AppointmentsService {
       await this.appointmentsRepository.findByPatientNationalId(nationalId);
 
     return toJsonSafe(appointments) as Record<string, unknown>[];
+  }
+
+  async findAll(query: QueryAppointmentsDto) {
+    if (
+      query.start_date &&
+      query.end_date &&
+      new Date(query.start_date) > new Date(query.end_date)
+    ) {
+      throw new BadRequestException('start_date must not be after end_date.');
+    }
+
+    const page = query.page ?? 1;
+    const limit = query.limit ?? 10;
+    const filters: AppointmentFilters = {
+      doctorId: query.doctor_id ? BigInt(query.doctor_id) : undefined,
+      medicalCenterId: query.medical_center_id
+        ? BigInt(query.medical_center_id)
+        : undefined,
+      patientId: query.patient_id ? BigInt(query.patient_id) : undefined,
+      status: query.status,
+      appointmentDate: query.appointment_date,
+      startDate: query.start_date,
+      endDate: query.end_date,
+    };
+
+    const [appointments, total] = await Promise.all([
+      this.appointmentsRepository.findMany(
+        filters,
+        (page - 1) * limit,
+        limit,
+      ),
+      this.appointmentsRepository.count(filters),
+    ]);
+
+    return new PaginatedResponseDto(
+      toJsonSafe(appointments) as Record<string, unknown>[],
+      total,
+      page,
+      limit,
+    );
   }
 }

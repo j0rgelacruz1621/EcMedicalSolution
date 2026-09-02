@@ -4,6 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { PaginatedResponseDto } from '../common/dto/paginated-response.dto';
 import { CreateDoctorDto } from './dto/create-doctor.dto.js';
 import { CreateDoctorSchedulesDto } from './dto/create-doctor-schedules.dto.js';
 import { DoctorsRepository } from './doctors.repository';
@@ -88,15 +89,12 @@ export class DoctorsService {
       this.doctorsRepository.countDoctors(),
     ]);
 
-    const totalPages = Math.max(1, Math.ceil(total / safeLimit));
-
-    return {
-      data: this.toJsonSafe(doctors),
-      page: safePage,
-      limit: safeLimit,
+    return new PaginatedResponseDto(
+      this.toJsonSafe(doctors),
       total,
-      totalPages,
-    };
+      safePage,
+      safeLimit,
+    );
   }
 
   async findOne(id: number) {

@@ -77,11 +77,3 @@ export class CreateAppointmentDto {
   @Type(() => PatientDataDto)
   patient: PatientDataDto;
 }
-
-export class UpdateAppointmentScheduleDto {
-  @IsDateString()
-  startAt: string;
-
-  @IsDateString()
-  endAt: string;
-}
