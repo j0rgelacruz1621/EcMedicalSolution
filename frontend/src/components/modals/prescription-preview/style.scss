@@ -1,0 +1,383 @@
+.prescription-preview-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.42);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1300;
+  padding: 1.25rem;
+}
+
+.prescription-preview-modal {
+  width: min(100%, 980px);
+  max-height: 92vh;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid rgba(128, 0, 32, 0.12);
+  border-radius: 1.4rem;
+  box-shadow: 0 30px 80px rgba(17, 24, 39, 0.18);
+  display: flex;
+  flex-direction: column;
+}
+
+.prescription-preview-header {
+  position: sticky;
+  top: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem 1rem;
+  background: #fff;
+  border-bottom: 1px solid #f1e7ea;
+}
+
+.preview-eyebrow {
+  margin: 0;
+  color: #800020;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.prescription-preview-header h2 {
+  margin: 0.25rem 0 0;
+  font-size: clamp(1.5rem, 2vw, 2rem);
+  color: #800020;
+}
+
+.preview-subtitle {
+  display: inline-block;
+  margin-top: 0.35rem;
+  color: #6b7280;
+  font-size: 0.92rem;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.print-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  border: none;
+  border-radius: 0.8rem;
+  background: #800020;
+  color: #fff;
+  padding: 0.75rem 1rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.close-button {
+  width: 2.5rem;
+  height: 2.5rem;
+  border: none;
+  background: #f9eef1;
+  color: #800020;
+  border-radius: 0.8rem;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.prescription-document {
+  overflow-y: auto;
+  padding: 1.2rem 1.5rem 1.5rem;
+  background: linear-gradient(180deg, #fff 0%, #fffafc 100%);
+}
+
+.doctor-membrete {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border: 1px solid rgba(128, 0, 32, 0.12);
+  border-radius: 1rem;
+  background: linear-gradient(90deg, #fff8fa 0%, #fff 100%);
+  margin-bottom: 1.25rem;
+}
+
+.brand-mark {
+  width: 3.2rem;
+  height: 3.2rem;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #800020;
+  color: #fff;
+  font-weight: 800;
+}
+
+.brand-copy {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.brand-copy strong {
+  color: #800020;
+  font-size: 1.1rem;
+}
+
+.brand-copy span,
+.brand-copy small {
+  color: #4b5563;
+}
+
+.brand-copy small {
+  margin-top: 0.15rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+}
+
+.patient-data-panel {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.8rem 1.2rem;
+  padding: 0.25rem 0 1rem;
+}
+
+.info-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.info-field span {
+  color: #800020;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.info-field strong {
+  color: #1f2937;
+  font-size: 1rem;
+}
+
+.prescription-body {
+  border-top: 1px solid #f1e7ea;
+  border-bottom: 1px solid #f1e7ea;
+  padding: 1rem 0;
+}
+
+.rp-title {
+  color: #800020;
+  font-size: 2.3rem;
+  font-style: italic;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+}
+
+.medicine-table {
+  border: 1px solid #f0e4e7;
+  border-radius: 0.9rem;
+  background: #fff;
+  overflow: hidden;
+}
+
+.table-header,
+.table-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+}
+
+.table-header {
+  background: #faf3f5;
+  border-bottom: 1px solid #f1e7ea;
+}
+
+.table-header span {
+  padding: 0.75rem 1rem;
+  color: #800020;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.table-row {
+  border-bottom: 1px solid #f2ebee;
+}
+
+.table-row:last-child {
+  border-bottom: 0;
+}
+
+.medicine-description,
+.medicine-posology {
+  padding: 0.9rem 1rem;
+}
+
+.medicine-description {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.medicine-description strong {
+  color: #1f2937;
+  font-size: 1rem;
+}
+
+.medicine-description small {
+  color: #6b7280;
+  font-size: 0.76rem;
+}
+
+.medicine-posology {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-end;
+  text-align: right;
+  gap: 0.2rem;
+  color: #3f4349;
+}
+
+.medicine-posology span {
+  font-weight: 700;
+}
+
+.medicine-posology em {
+  font-style: italic;
+  color: #800020;
+  font-size: 0.8rem;
+}
+
+.notes-panel {
+  margin-top: 1.2rem;
+  border: 1px solid #f1e7ea;
+  border-radius: 1rem;
+  background: #fff7f8;
+  overflow: hidden;
+}
+
+.notes-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.8rem 1rem;
+  background: #fff;
+  border-bottom: 1px solid #f1e7ea;
+  color: #800020;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.notes-panel ul {
+  margin: 0;
+  padding: 1rem 1rem 1rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  color: #3f4349;
+  line-height: 1.6;
+}
+
+.document-footer {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.signature-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  min-width: 200px;
+}
+
+.signature-line {
+  display: block;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, #800020 0%, #800020 70%, #e7d5d9 70%, #e7d5d9 100%);
+  border-radius: 999px;
+}
+
+.signature-block small {
+  margin-top: 0.5rem;
+  color: #800020;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.specialist-contact {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 0.8rem 1rem;
+  border: 1px solid rgba(128, 0, 32, 0.12);
+  border-radius: 0.9rem;
+  background: #fff;
+}
+
+.contact-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: #3f4349;
+  font-size: 0.74rem;
+}
+
+@media (max-width: 720px) {
+  .prescription-preview-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .header-actions {
+    justify-content: space-between;
+  }
+
+  .patient-data-panel,
+  .table-header,
+  .table-row,
+  .document-footer {
+    grid-template-columns: 1fr;
+    display: grid;
+  }
+
+  .table-header {
+    display: none;
+  }
+
+  .medicine-posology {
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .document-footer {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .signature-block {
+    align-items: flex-start;
+  }
+
+  .specialist-contact {
+    justify-content: flex-start;
+  }
+}

@@ -1,0 +1,400 @@
+.new-clinical-history-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.38);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1100;
+  padding: 1.25rem;
+}
+
+.new-clinical-history-modal {
+  width: min(100%, 1100px);
+  max-height: 90vh;
+  overflow: hidden;
+  background: #fff;
+  border-radius: 1.4rem;
+  box-shadow: 0 28px 70px rgba(17, 24, 39, 0.2);
+  border: 1px solid rgba(128, 0, 32, 0.12);
+  display: flex;
+  flex-direction: column;
+}
+
+.new-clinical-history-header {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.3rem 1.5rem 1rem;
+  background: #fff;
+  border-bottom: 1px solid #f1e7ea;
+}
+
+.new-clinical-history-header h2 {
+  margin: 0;
+  color: #800020;
+  font-size: clamp(1.5rem, 2vw, 2rem);
+}
+
+.new-clinical-history-header p {
+  margin: 0.35rem 0 0;
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.close-button {
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 0;
+  background: #f9eef1;
+  color: #800020;
+  border-radius: 0.8rem;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.new-clinical-history-body {
+  overflow-y: auto;
+  padding: 1.25rem 1.5rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.2rem;
+}
+
+.form-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.field-group label,
+.highlight-label {
+  font-size: 0.76rem;
+  color: #800020;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.field-group textarea,
+.field-group input,
+.vital-box input,
+.formula-box input {
+  width: 100%;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.8rem;
+  background: #fff;
+  color: #111827;
+  padding: 0.8rem 0.9rem;
+  font: inherit;
+  resize: vertical;
+}
+
+.field-group textarea:focus,
+.field-group input:focus,
+.vital-box input:focus,
+.formula-box input:focus {
+  outline: 2px solid rgba(128, 0, 32, 0.18);
+  border-color: rgba(128, 0, 32, 0.35);
+}
+
+.radio-matrix {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  background: #fff;
+  border: 1px solid #f0e4e7;
+  border-radius: 0.9rem;
+  padding: 0.7rem;
+}
+
+.matrix-row {
+  display: grid;
+  grid-template-columns: minmax(140px, 1fr) auto;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.matrix-row span {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #3a3d42;
+}
+
+.options-box {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+}
+
+.options-box label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.72rem;
+  color: #3a3d42;
+  text-transform: uppercase;
+}
+
+.options-box input {
+  width: auto;
+  accent-color: #800020;
+}
+
+.habits-panel,
+.vitals-panel,
+.ekg-panel,
+.final-block {
+  border: 1px solid #f0e4e7;
+  background: #fffafc;
+  border-radius: 1rem;
+  padding: 1rem;
+}
+
+.habits-panel h3,
+.vitals-panel h3,
+.ekg-panel h3 {
+  margin: 0 0 0.9rem;
+  color: #800020;
+  font-size: 1rem;
+}
+
+.habit-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.7rem;
+}
+
+.habit-item {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.7rem 0.8rem;
+  background: #f8f9fb;
+  border: 1px solid #eceef3;
+  border-radius: 0.8rem;
+  font-size: 0.78rem;
+  color: #3d3f45;
+  font-weight: 700;
+}
+
+.habit-item input {
+  width: auto;
+  accent-color: #800020;
+}
+
+.compact-field {
+  margin-top: 0.8rem;
+}
+
+.vitals-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.8rem;
+}
+
+.vital-box {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  background: #fff;
+  border: 1px solid #f1e7ea;
+  border-radius: 0.9rem;
+  padding: 0.75rem 0.7rem;
+}
+
+.vital-box label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #4b5563;
+}
+
+.full-width {
+  margin-top: 0.2rem;
+}
+
+.upload-box {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: 1rem;
+  border: 1px dashed rgba(128, 0, 32, 0.5);
+  background: #fff8f8;
+  margin-bottom: 1rem;
+}
+
+.upload-box svg {
+  color: #800020;
+  flex-shrink: 0;
+}
+
+.upload-box strong {
+  display: block;
+  color: #800020;
+}
+
+.upload-box p {
+  margin: 0.2rem 0 0;
+  color: #6b7280;
+  font-size: 0.8rem;
+}
+
+.upload-button {
+  margin-left: auto;
+  border: 1px solid #800020;
+  color: #800020;
+  background: #fff;
+  border-radius: 0.75rem;
+  padding: 0.7rem 1rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.ekg-readout {
+  margin-top: 1rem;
+  background: #f5f6f8;
+  border: 1px solid #eceef2;
+  border-radius: 1rem;
+  padding: 1rem;
+}
+
+.ekg-readout h4 {
+  margin: 0 0 0.8rem;
+  color: #800020;
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+}
+
+.readout-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.8rem;
+}
+
+.readout-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.readout-item span {
+  font-size: 0.72rem;
+  color: #4b5563;
+  font-weight: 700;
+}
+
+.formula-box {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  padding: 0.55rem 0.7rem;
+  min-height: 2.6rem;
+}
+
+.formula-box input {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  text-align: center;
+  width: 3rem;
+}
+
+.formula-box.narrow input {
+  width: 100%;
+  text-align: left;
+}
+
+.final-block {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.new-clinical-history-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem 1.5rem;
+  border-top: 1px solid #f1e7ea;
+  background: #fff;
+}
+
+.secondary-button,
+.primary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  border-radius: 0.85rem;
+  padding: 0.8rem 1.2rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.secondary-button {
+  background: #fff;
+  border: 1px solid #e8dfe3;
+  color: #3a3d42;
+}
+
+.primary-button {
+  background: #800020;
+  color: #fff;
+  border: 0;
+}
+
+@media (max-width: 900px) {
+  .form-grid,
+  .readout-grid,
+  .vitals-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .upload-box {
+    flex-wrap: wrap;
+  }
+
+  .upload-button {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .new-clinical-history-header,
+  .new-clinical-history-body,
+  .new-clinical-history-footer {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .matrix-row {
+    grid-template-columns: 1fr;
+  }
+
+  .new-clinical-history-modal {
+    max-height: 94vh;
+  }
+}

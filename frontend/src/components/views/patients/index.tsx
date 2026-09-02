@@ -1,13 +1,19 @@
-import LeftSideBar from '../../left-sideBar'
 import './style.scss'
-import { 
-  Search, Plus, Bell, CircleHelp, ChevronLeft, 
-  ChevronRight, MoreVertical, Edit, Eye, User,
-  Calendar as CalIcon, MapPin, Activity
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import LeftSideBar from '../../left-sideBar'
+import NewPatientModal from '../../modals/new-patient';
+import ConfirmNewPatientModal from '../../modals/confirm-new-patient';
+
+import {
+  Plus, Bell, CircleHelp, User,
+  ChevronLeft,
+  ChevronRight, Edit, Eye,
+  Calendar as CalIcon, MapPin
 } from 'lucide-react'
 
 const PATIENTS_MOCK = [
-  { id: 1, name: 'Ricardo Mendoza', email: 'r.mendoza@email.com', ci: '3996369', age: 54, lastVisit: '12 Oct 2023', origin: 'Mérida', color: 'JV' },
+  { id: 1, name: 'Ricardo Mendoza', email: 'r.mendoza@email.com', ci: '45.234.112-K', age: 54, lastVisit: '12 Oct 2023', origin: 'Mérida', color: 'RM' },
   { id: 2, name: 'Elena Gómez', email: 'elena.g@email.com', ci: '32.889.001', age: 62, lastVisit: '05 Sep 2023', origin: 'Tovar', color: 'EG' },
   { id: 3, name: 'Javier Valdés', email: 'jvaldes@email.com', ci: '18.445.677', age: 41, lastVisit: '29 Oct 2023', origin: 'Mérida', color: 'JV' },
   { id: 4, name: 'Ana Alvarado', email: 'ana.alv@email.com', ci: '51.332.990', age: 29, lastVisit: '15 Oct 2023', origin: 'Mérida', color: 'AA' },
@@ -15,12 +21,29 @@ const PATIENTS_MOCK = [
 ];
 
 export default function PatientsView() {
+  const navigate = useNavigate();
+  const [showModal, setShowModal] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [lastAddedName, setLastAddedName] = useState('');
+  const [lastAddedId, setLastAddedId] = useState<number | null>(null);
+
+  const handlePatientCreated = (data: { name: string; ci: string; age: string; origin: string; email: string }) => {
+    setLastAddedName(data.name);
+    setLastAddedId(1);
+    setShowModal(false);
+    setShowConfirmModal(true);
+  };
+
+  const handleViewPatientFile = () => {
+    setShowConfirmModal(false);
+    navigate(lastAddedId ? `/patients/${lastAddedId}` : '/patients/1');
+  };
+
   return (
     <div className="patients-root">
       <LeftSideBar />
-      
+
       <main className="patients-main">
-        {/* Header Superior idéntico al diseño */}
         <header className="patients-top-header">
           <h2 className="page-title">Pacientes</h2>
           <div className="header-right">
@@ -37,12 +60,17 @@ export default function PatientsView() {
           <div className="content-header">
             <div>
               <h1>Listado de Pacientes</h1>
-              <p>Gestione y supervise la salud cardiovascular de sus pacientes.</p>
+              <p>Gestione y supervise la salud cardiovascular...</p>
             </div>
-            <button className="btn-new-patient"><Plus size={18} /> Nuevo Paciente</button>
+
+            <button
+                className="btn-new-patient"
+                onClick={() => setShowModal(true)}
+            >
+                <Plus size={18} /> Nuevo Paciente
+            </button>
           </div>
 
-          {/* Filtros */}
           <div className="filters-bar">
             <div className="filter-group">
               <label>Filtrar por:</label>
@@ -54,7 +82,6 @@ export default function PatientsView() {
             </div>
           </div>
 
-          {/* Tabla de Pacientes */}
           <div className="table-container shadow-sm">
             <table className="patients-table">
               <thead>
@@ -85,7 +112,7 @@ export default function PatientsView() {
                     <td><span className={p.origin === 'Mérida' ? 'origin-highlight' : ''}>{p.origin}</span></td>
                     <td>
                       <div className="action-btns">
-                        <button title="Ver historia"><Eye size={16} /></button>
+                        <button title="Ver historia" onClick={() => navigate(`/patients/${p.id}`)}><Eye size={16} /></button>
                         <button title="Editar"><Edit size={16} /></button>
                       </div>
                     </td>
@@ -93,7 +120,7 @@ export default function PatientsView() {
                 ))}
               </tbody>
             </table>
-            
+
             <div className="table-footer">
               <span>Mostrando 5 de 1,240 pacientes</span>
               <div className="pagination">
@@ -108,7 +135,6 @@ export default function PatientsView() {
             </div>
           </div>
 
-          {/* KPIs Inferiores */}
           <div className="kpi-grid">
             <div className="kpi-card dark">
               <div className="kpi-icon-box"><Plus size={20} /></div>
@@ -117,7 +143,7 @@ export default function PatientsView() {
                 <span className="kpi-label">Nuevos este mes</span>
               </div>
             </div>
-            
+
             <div className="kpi-card outline">
               <div className="kpi-icon-box green"><MapPin size={20} /></div>
               <div className="kpi-data">
@@ -144,6 +170,19 @@ export default function PatientsView() {
           </div>
         </section>
       </main>
+
+      <NewPatientModal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        onSuccess={handlePatientCreated}
+      />
+
+      <ConfirmNewPatientModal
+        isOpen={showConfirmModal}
+        onClose={() => setShowConfirmModal(false)}
+        onViewFile={handleViewPatientFile}
+        patientName={lastAddedName || 'Paciente'}
+      />
     </div>
   )
 }

@@ -16,7 +16,7 @@ const MOCK_DATA = {
 }
 
 function SpecialistPresentation() {
-  const { slug } = useParams();
+  useParams();
 
   return (
     <div className="sp-view d-flex flex-column min-vh-100">

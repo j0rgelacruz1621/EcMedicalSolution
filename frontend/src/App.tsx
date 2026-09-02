@@ -5,7 +5,8 @@ import ControlPanel from './components/views/control-panel'
 import SpecialistRegister from './components/views/specialist-register'
 import SpecialistPresentation from './components/views/specialist-presentation'
 import AgendaView from './components/views/scheduling'
-import PatientsView from './components/views/patients' // Nueva importación
+import PatientsView from './components/views/patients'
+import PatientFileView from './components/views/patient-file'
 
 function App() {
   return (
@@ -16,7 +17,8 @@ function App() {
       <Route path="/specialist-register" element={<SpecialistRegister />} />
       <Route path="/specialist/:slug" element={<SpecialistPresentation />} />
       <Route path="/agenda" element={<AgendaView />} />
-      <Route path="/patients" element={<PatientsView />} /> {/* Ruta de pacientes */}
+      <Route path="/patients" element={<PatientsView />} />
+      <Route path="/patients/:id" element={<PatientFileView />} />
     </Routes>
   )
 }

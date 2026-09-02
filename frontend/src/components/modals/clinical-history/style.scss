@@ -1,0 +1,258 @@
+.clinical-history-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(17, 24, 39, 0.35);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 1.25rem;
+}
+
+.clinical-history-modal {
+  width: min(100%, 980px);
+  max-height: 90vh;
+  overflow: hidden;
+  background: #fff;
+  border-radius: 1.5rem;
+  border: 1px solid rgba(128, 0, 32, 0.12);
+  box-shadow: 0 22px 56px rgba(17, 24, 39, 0.18);
+  display: flex;
+  flex-direction: column;
+}
+
+.clinical-history-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.5rem 1.5rem 1.1rem;
+  border-bottom: 1px solid #f1e7ea;
+}
+
+.clinical-history-header h2 {
+  margin: 0;
+  color: #800020;
+  font-size: clamp(1.6rem, 2vw, 2.1rem);
+  line-height: 1.2;
+}
+
+.clinical-history-header p {
+  margin: 0.3rem 0 0;
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.close-button {
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 0;
+  background: #f8f2f3;
+  color: #800020;
+  border-radius: 0.8rem;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.clinical-history-body {
+  padding: 1.4rem 1.5rem 0;
+  overflow-y: auto;
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.2rem;
+}
+
+.metric-card {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  background: linear-gradient(180deg, #fff9fa 0%, #fff 100%);
+  border: 1px solid #efdfe3;
+  border-radius: 1rem;
+  padding: 1rem;
+}
+
+.metric-icon-wrap {
+  width: 2.8rem;
+  height: 2.8rem;
+  border-radius: 0.8rem;
+  background: #fbe8ec;
+  color: #800020;
+  display: grid;
+  place-items: center;
+}
+
+.metric-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+}
+
+.metric-label {
+  color: #6b7280;
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.metric-copy strong {
+  font-size: 1.1rem;
+  color: #191c1e;
+}
+
+.metric-copy small {
+  color: #16a34a;
+  font-weight: 700;
+}
+
+.timeline-section {
+  border: 1px solid #f0e4e7;
+  border-radius: 1.3rem;
+  background: #fff;
+  padding: 1.2rem;
+}
+
+.timeline-header {
+  margin-bottom: 1rem;
+}
+
+.timeline-title-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: #800020;
+}
+
+.timeline-title-wrap h3 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.timeline-list {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding-left: 0.4rem;
+}
+
+.timeline-list::before {
+  content: '';
+  position: absolute;
+  left: 0.66rem;
+  top: 0.25rem;
+  bottom: 0.25rem;
+  width: 2px;
+  background: #f1d9df;
+}
+
+.timeline-item {
+  position: relative;
+  padding-left: 2rem;
+}
+
+.timeline-marker {
+  position: absolute;
+  left: 0;
+  top: 0.4rem;
+  width: 0.9rem;
+  height: 0.9rem;
+  border-radius: 50%;
+  background: #800020;
+  border: 3px solid #fff;
+  box-shadow: 0 0 0 2px #f8d7da;
+}
+
+.timeline-content {
+  background: #fffafa;
+  border: 1px solid #f1e7ea;
+  border-radius: 1rem;
+  padding: 1rem 1rem 0.95rem;
+}
+
+.timeline-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.55rem;
+}
+
+.event-category {
+  color: #800020;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+.event-date {
+  font-size: 0.8rem;
+  color: #6b7280;
+  white-space: nowrap;
+}
+
+.timeline-content h4 {
+  margin: 0 0 0.45rem;
+  font-size: 1.1rem;
+  color: #191c1e;
+}
+
+.timeline-content p {
+  margin: 0;
+  line-height: 1.6;
+  color: #4b5563;
+}
+
+.clinical-history-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 1rem 1.5rem 1.5rem;
+  border-top: 1px solid #f1e7ea;
+  background: #fff;
+}
+
+.primary-history-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  background: #800020;
+  color: #fff;
+  border: 0;
+  border-radius: 0.9rem;
+  padding: 0.8rem 1.2rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+@media (max-width: 720px) {
+  .clinical-history-modal {
+    max-height: 92vh;
+  }
+
+  .clinical-history-header,
+  .clinical-history-body,
+  .clinical-history-footer {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .metrics-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .timeline-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .event-date {
+    white-space: normal;
+  }
+}
