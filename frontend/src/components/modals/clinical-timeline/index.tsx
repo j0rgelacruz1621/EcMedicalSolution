@@ -14,6 +14,7 @@ interface ClinicalTimelineModalProps {
   isOpen: boolean;
   patientName: string;
   onClose: () => void;
+  onAddStudy: () => void;
 }
 
 const recentStudy = {
@@ -53,7 +54,7 @@ const historyItems = [
   },
 ];
 
-export default function ClinicalTimelineModal({ isOpen, patientName, onClose }: ClinicalTimelineModalProps) {
+export default function ClinicalTimelineModal({ isOpen, patientName, onClose, onAddStudy }: ClinicalTimelineModalProps) {
   if (!isOpen) return null;
 
   return (
@@ -146,7 +147,7 @@ export default function ClinicalTimelineModal({ isOpen, patientName, onClose }: 
         </div>
 
         <footer className="clinical-timeline-footer">
-          <button type="button" className="primary-add-button">
+          <button type="button" className="primary-add-button" onClick={onAddStudy}>
             <Plus size={18} />
             Agregar estudios
           </button>
