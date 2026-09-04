@@ -87,7 +87,10 @@
 }
 
 .patient-overview {
-  padding: 1.4rem 1.5rem;
+  height: 100%;
+  padding: 1.7rem 1.5rem;
+  display: flex;
+  flex-direction: column;
 }
 
 .patient-header-row {
@@ -95,7 +98,8 @@
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  margin-bottom: 1.25rem;
+  min-height: 4.8rem;
+  margin-bottom: 1.45rem;
 }
 
 .patient-identity {
@@ -105,8 +109,8 @@
 }
 
 .patient-avatar {
-  width: 4rem;
-  height: 4rem;
+  width: 4.4rem;
+  height: 4.4rem;
   border-radius: 1.2rem;
   background: linear-gradient(135deg, #800020, #a32b43);
   color: #fff;
@@ -165,56 +169,92 @@
   display: grid;
   grid-template-columns: repeat(3, minmax(120px, 1fr));
   gap: 1rem;
+  row-gap: 4px;
   margin-bottom: 1.4rem;
+  flex: 1;
 }
 
 .meta-item {
   background: #f8f7f8;
   border: 1px solid #f1e9eb;
   border-radius: 1rem;
-  padding: 0.9rem 1rem;
+  min-height: 76px;
+  padding: 1.1rem 1.15rem;
   display: flex;
   flex-direction: column;
   gap: 0.3rem;
+  justify-content: center;
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
 }
 
 .meta-label {
-  font-size: 0.74rem;
+  font-size: 0.82rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: #6b7280;
 }
 
 .meta-item strong {
-  font-size: 1.05rem;
+  color: #242126;
+  font-size: 1.38rem;
+  font-weight: 750;
+  line-height: 1.2;
+}
+
+.meta-item:hover {
+  transform: translateY(-3px);
+  border-color: #e7cbd1;
+  box-shadow: 0 8px 18px rgba(128, 0, 32, 0.09);
 }
 
 .vital-signs-row {
   display: grid;
   grid-template-columns: repeat(3, minmax(120px, 1fr));
   gap: 0.9rem;
+  row-gap: 4px;
+  flex: 1;
 }
 
 .vital-card {
   background: linear-gradient(180deg, #fff9fa 0%, #fff 100%);
   border: 1px solid #f1e5e7;
   border-radius: 1rem;
-  padding: 1rem 1rem 0.85rem;
+  min-height: 76px;
+  padding: 1.1rem 1.15rem;
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
+  justify-content: center;
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
 }
 
 .vital-label {
   color: #6b7280;
-  font-size: 0.74rem;
+  font-size: 0.82rem;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
 .vital-card strong {
-  font-size: 1.05rem;
+  color: #242126;
+  font-size: 1.38rem;
+  font-weight: 750;
+  line-height: 1.2;
+}
+
+.vital-card:hover {
+  transform: translateY(-3px);
+  border-color: #e7cbd1;
+  box-shadow: 0 8px 18px rgba(128, 0, 32, 0.09);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .meta-item,
+  .vital-card { transition: none; }
+
+  .meta-item:hover,
+  .vital-card:hover { transform: none; }
 }
 
 .next-appointment-card {
@@ -546,6 +586,15 @@
 
   .patient-header-row {
     display: grid;
+  }
+
+  .patient-overview {
+    height: auto;
+  }
+
+  .patient-meta-grid,
+  .vital-signs-row {
+    flex: initial;
   }
 
   .header-actions-row {

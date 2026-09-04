@@ -68,12 +68,13 @@ export default function PrescriptionPreviewModal({
 
         <div className="prescription-document">
           <div className="doctor-membrete">
-            <div className="brand-mark">MC</div>
-            <div className="brand-copy">
-              <strong>Dra. Josiana Piña Martínez</strong>
-              <span>CARDIÓLOGO CLÍNICO</span>
-              <small>MPPS: 12.345 • CM: 98-235 • RIF: J-01234567-0</small>
+              <span className="brand-ornament" aria-hidden="true">&lt;&lt;&lt;</span>
+              <div className="brand-copy">
+                <strong>Dra. Josiana Piña Martínez</strong>
+                <span>CARDIÓLOGO CLÍNICO</span>
+                <small>MPPS 107.17 • CM 7.778 • RIF V-19643464-6</small>
             </div>
+              <span className="brand-ornament" aria-hidden="true">&gt;&gt;&gt;</span>
           </div>
 
           <section className="patient-data-panel">
@@ -128,11 +129,7 @@ export default function PrescriptionPreviewModal({
               <ClipboardList size={16} />
               <span>INDICACIONES ADICIONALES</span>
             </div>
-            <ul>
-              {additionalNotes.map((note) => (
-                <li key={note}>{note}</li>
-              ))}
-            </ul>
+            <p>{additionalNotes.join(' ')}</p>
           </section>
 
           <div className="document-footer">
