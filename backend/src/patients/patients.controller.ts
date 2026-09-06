@@ -92,13 +92,14 @@ export class PatientsController {
     }),
   )
   @ApiOperation({
-    summary: 'Registrar un nuevo paciente con sus signos vitales de triaje',
+    summary: 'Registrar un nuevo paciente',
     description:
-      'Procesa el formulario "Agregar Paciente": guarda en una única transacción de PostgreSQL (BEGIN/COMMIT) la ' +
-      'información del paciente en "patients" y su primer registro de signos vitales en "patient_vitals". Si falla ' +
-      'la inserción de cualquiera de las dos tablas, se ejecuta ROLLBACK y no queda ningún registro parcial. ' +
+      'Guarda la información demográfica y médica inicial del paciente en "patients" y le asigna un id único. ' +
+      'Si se incluye "vitals", se registra además, en la misma transacción de PostgreSQL (BEGIN/COMMIT), su primer ' +
+      'signo vital de triaje en "patient_vitals"; si falla cualquiera de las dos inserciones se ejecuta ROLLBACK. ' +
       'El campo "bloodPressure" (ej. "120/80") se desglosa en blood_pressure_systolic = 120 y blood_pressure_diastolic = 80. ' +
-      'Se valida la unicidad de national_id antes de intentar la inserción.',
+      'Se valida la unicidad de national_id y de email antes de intentar la inserción, y que dateOfBirth sea una fecha ' +
+      'pasada válida (YYYY-MM-DD). is_active toma true por defecto y created_at/updated_at se asignan automáticamente.',
   })
   @ApiBody({
     schema: {
@@ -111,7 +112,6 @@ export class PatientsController {
         'phone',
         'dateOfBirth',
         'gender',
-        'vitals',
       ],
       properties: {
         nationalId: { type: 'string', example: '0102030405' },
@@ -122,24 +122,26 @@ export class PatientsController {
         dateOfBirth: { type: 'string', format: 'date', example: '1990-05-12' },
         gender: { type: 'string', enum: Object.values(PatientGender) },
         medicalHistoryNotes: { type: 'string', nullable: true },
-        vitals: VITALS_SCHEMA,
+        vitals: { ...VITALS_SCHEMA, nullable: true },
       },
     },
   })
   @ApiResponse({
     status: 201,
     description:
-      'Paciente creado junto con el registro inicial de sus signos vitales.',
+      'Paciente creado. Si se envió "vitals", incluye también el registro inicial de signos vitales.',
     schema: { example: PATIENT_RESPONSE_EXAMPLE },
   })
   @ApiResponse({
     status: 400,
     description:
-      'Datos inválidos, por ejemplo bloodPressure con un formato distinto de "sistólica/diastólica".',
+      'Faltan campos obligatorios o algún formato es inválido: email, dateOfBirth (debe ser YYYY-MM-DD y una fecha ' +
+      'pasada), gender, o bloodPressure con un formato distinto de "sistólica/diastólica".',
   })
   @ApiResponse({
     status: 409,
-    description: 'Ya existe un paciente registrado con el national_id enviado.',
+    description:
+      'Ya existe un paciente registrado con el national_id o el email enviados.',
   })
   create(@Body() payload: CreatePatientDto) {
     return this.patientsService.create(payload);

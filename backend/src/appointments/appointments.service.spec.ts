@@ -3,6 +3,7 @@ import {
   ConflictException,
   NotFoundException,
 } from '@nestjs/common';
+import { UnprocessableEntityException } from '@nestjs/common';
 import { AppointmentsRepository } from './appointments.repository';
 import { AppointmentsService } from './appointments.service';
 import { CreateAppointmentDto, PatientGender } from './dto/create-appointment.dto';
@@ -13,6 +14,7 @@ describe('AppointmentsService', () => {
   let repository: {
     reserveAppointment: jest.Mock;
     updateAppointment: jest.Mock;
+    cancelAppointment: jest.Mock;
   };
 
   const payload: CreateAppointmentDto = {
@@ -36,6 +38,7 @@ describe('AppointmentsService', () => {
     repository = {
       reserveAppointment: jest.fn(),
       updateAppointment: jest.fn(),
+      cancelAppointment: jest.fn(),
     };
     service = new AppointmentsService(
       repository as unknown as AppointmentsRepository,
@@ -125,5 +128,53 @@ describe('AppointmentsService', () => {
     await expect(
       service.update(1, { start_time: '11:00:00', end_time: '11:30:00' }),
     ).rejects.toThrow(ConflictException);
+  });
+
+  it('cancels an appointment by id', async () => {
+    repository.cancelAppointment.mockResolvedValue({
+      id: 1n,
+      status: 'CANCELLED',
+    });
+
+    const result = await service.cancel('1');
+
+    expect(repository.cancelAppointment).toHaveBeenCalledWith('1');
+    expect(result).toEqual(
+      expect.objectContaining({ id: 1, status: 'CANCELLED' }),
+    );
+  });
+
+  it('cancels an appointment by appointment_code', async () => {
+    repository.cancelAppointment.mockResolvedValue({
+      id: 1n,
+      appointmentCode: 'APT-20260810-A1B2',
+      status: 'CANCELLED',
+    });
+
+    await service.cancel('APT-20260810-A1B2');
+
+    expect(repository.cancelAppointment).toHaveBeenCalledWith(
+      'APT-20260810-A1B2',
+    );
+  });
+
+  it('propagates NotFoundException when cancelling a nonexistent appointment', async () => {
+    repository.cancelAppointment.mockRejectedValue(
+      new NotFoundException('Appointment not found.'),
+    );
+
+    await expect(service.cancel('999')).rejects.toThrow(NotFoundException);
+  });
+
+  it('propagates UnprocessableEntityException when the appointment is already completed', async () => {
+    repository.cancelAppointment.mockRejectedValue(
+      new UnprocessableEntityException(
+        'Appointment cannot be cancelled because it is already COMPLETED.',
+      ),
+    );
+
+    await expect(service.cancel('1')).rejects.toThrow(
+      UnprocessableEntityException,
+    );
   });
 });

@@ -95,20 +95,38 @@ export class PatientsService {
       );
     }
 
-    const vitals = this.parseVitals(payload.vitals);
+    const existingPatientByEmail = await this.patientsRepository.findByEmail(
+      payload.email,
+    );
+
+    if (existingPatientByEmail) {
+      throw new ConflictException(
+        `A patient with email "${payload.email}" already exists.`,
+      );
+    }
+
+    const patientData: PatientData = {
+      nationalId: payload.nationalId,
+      firstName: payload.firstName,
+      lastName: payload.lastName,
+      email: payload.email,
+      phone: payload.phone,
+      dateOfBirth: new Date(payload.dateOfBirth),
+      gender: GENDER_MAP[payload.gender],
+      medicalHistoryNotes: payload.medicalHistoryNotes,
+    };
 
     try {
+      if (!payload.vitals) {
+        const patient =
+          await this.patientsRepository.createPatientOnly(patientData);
+
+        return toJsonSafe({ patient, vitals: null });
+      }
+
+      const vitals = this.parseVitals(payload.vitals);
       const result = await this.patientsRepository.createPatientWithVitals(
-        {
-          nationalId: payload.nationalId,
-          firstName: payload.firstName,
-          lastName: payload.lastName,
-          email: payload.email,
-          phone: payload.phone,
-          dateOfBirth: new Date(payload.dateOfBirth),
-          gender: GENDER_MAP[payload.gender],
-          medicalHistoryNotes: payload.medicalHistoryNotes,
-        },
+        patientData,
         vitals,
       );
 

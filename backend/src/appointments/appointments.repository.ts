@@ -3,6 +3,7 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 import { appointment_status_enum, gender_enum, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
@@ -17,6 +18,12 @@ const GENDER_MAP: Record<PatientGender, gender_enum> = {
   [PatientGender.FEMENINO]: 'Female',
   [PatientGender.OTRO]: 'Other',
 };
+
+const NON_CANCELABLE_STATUSES: appointment_status_enum[] = [
+  'COMPLETED',
+  'CANCELLED',
+  'NO_SHOW',
+];
 
 export interface AppointmentFilters {
   doctorId?: bigint;
@@ -232,6 +239,39 @@ export class AppointmentsRepository {
           officeId,
           status,
         },
+        include: {
+          patient: true,
+          doctor: true,
+          medicalCenter: true,
+          office: true,
+        },
+      });
+    });
+  }
+
+  async cancelAppointment(idOrCode: string) {
+    const isNumericId = /^\d+$/.test(idOrCode);
+
+    return this.prisma.$transaction(async (transaction) => {
+      const current = await transaction.appointment.findUnique({
+        where: isNumericId
+          ? { id: BigInt(idOrCode) }
+          : { appointmentCode: idOrCode },
+      });
+
+      if (!current) {
+        throw new NotFoundException('Appointment not found.');
+      }
+
+      if (current.status && NON_CANCELABLE_STATUSES.includes(current.status)) {
+        throw new UnprocessableEntityException(
+          `Appointment cannot be cancelled because it is already ${current.status}.`,
+        );
+      }
+
+      return transaction.appointment.update({
+        where: { id: current.id },
+        data: { status: 'CANCELLED' },
         include: {
           patient: true,
           doctor: true,
