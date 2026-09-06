@@ -1,5 +1,5 @@
 import './style.scss'
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import LeftSideBar from '../../left-sideBar'
 import NewPatientModal from '../../modals/new-patient';
@@ -11,14 +11,27 @@ import {
   ChevronRight, Edit, Eye,
   Calendar as CalIcon, MapPin
 } from 'lucide-react'
+import { getPatients, type Patient } from '../../../services/patients/patient-services';
 
-const PATIENTS_MOCK = [
-  { id: 1, name: 'Ricardo Mendoza', email: 'r.mendoza@email.com', ci: '45.234.112-K', age: 54, lastVisit: '12 Oct 2023', origin: 'Mérida', color: 'RM' },
-  { id: 2, name: 'Elena Gómez', email: 'elena.g@email.com', ci: '32.889.001', age: 62, lastVisit: '05 Sep 2023', origin: 'Tovar', color: 'EG' },
-  { id: 3, name: 'Javier Valdés', email: 'jvaldes@email.com', ci: '18.445.677', age: 41, lastVisit: '29 Oct 2023', origin: 'Mérida', color: 'JV' },
-  { id: 4, name: 'Ana Alvarado', email: 'ana.alv@email.com', ci: '51.332.990', age: 29, lastVisit: '15 Oct 2023', origin: 'Mérida', color: 'AA' },
-  { id: 5, name: 'Manuel Soto', email: 'm.soto@email.com', ci: '27.112.334', age: 75, lastVisit: '01 Oct 2023', origin: 'Tovar', color: 'MS' },
-];
+function getAge(dateOfBirth: string) {
+  const birthDate = new Date(dateOfBirth);
+  const today = new Date();
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const birthdayHasPassed = today.getMonth() > birthDate.getMonth() ||
+    (today.getMonth() === birthDate.getMonth() && today.getDate() >= birthDate.getDate());
+
+  if (!birthdayHasPassed) age -= 1;
+  return age;
+}
+
+function formatDate(value?: string) {
+  if (!value) return 'Sin registro';
+  return new Intl.DateTimeFormat('es-ES', { dateStyle: 'medium' }).format(new Date(value));
+}
+
+function getInitials(patient: Patient) {
+  return `${patient.firstName[0] ?? ''}${patient.lastName[0] ?? ''}`.toUpperCase();
+}
 
 export default function PatientsView() {
   const navigate = useNavigate();
@@ -26,10 +39,49 @@ export default function PatientsView() {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [lastAddedName, setLastAddedName] = useState('');
   const [lastAddedId, setLastAddedId] = useState<number | null>(null);
+  const [patients, setPatients] = useState<Patient[]>([]);
+  const [totalPatients, setTotalPatients] = useState(0);
+  const [page, setPage] = useState(1);
+  const [nameFilter, setNameFilter] = useState('');
+  const [nationalIdFilter, setNationalIdFilter] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  const handlePatientCreated = (data: { name: string; ci: string; age: string; origin: string; email: string }) => {
-    setLastAddedName(data.name);
-    setLastAddedId(1);
+  useEffect(() => {
+    let active = true;
+
+    async function loadPatients() {
+      setLoading(true);
+      setError('');
+
+      try {
+        const result = await getPatients({
+          page,
+          limit: 10,
+          firstName: nameFilter || undefined,
+          nationalId: nationalIdFilter || undefined,
+        });
+
+        if (active) {
+          setPatients(result.data);
+          setTotalPatients(result.total);
+        }
+      } catch {
+        if (active) setError('No se pudo cargar el listado de pacientes.');
+      } finally {
+        if (active) setLoading(false);
+      }
+    }
+
+    void loadPatients();
+    return () => { active = false; };
+  }, [nameFilter, nationalIdFilter, page]);
+
+  const handlePatientCreated = (patient: Patient) => {
+    setLastAddedName(`${patient.firstName} ${patient.lastName}`);
+    setLastAddedId(patient.id);
+    setPatients((current) => [patient, ...current]);
+    setTotalPatients((current) => current + 1);
     setShowModal(false);
     setShowConfirmModal(true);
   };
@@ -77,8 +129,8 @@ export default function PatientsView() {
               <select className="form-select-custom">
                 <option>Procedencia</option>
               </select>
-              <input type="text" placeholder="Nombre del paciente" className="input-custom" />
-              <input type="text" placeholder="Cédula" className="input-custom" />
+              <input type="text" placeholder="Nombre del paciente" className="input-custom" value={nameFilter} onChange={(event) => { setPage(1); setNameFilter(event.target.value); }} />
+              <input type="text" placeholder="Cédula" className="input-custom" value={nationalIdFilter} onChange={(event) => { setPage(1); setNationalIdFilter(event.target.value); }} />
             </div>
           </div>
 
@@ -95,21 +147,24 @@ export default function PatientsView() {
                 </tr>
               </thead>
               <tbody>
-                {PATIENTS_MOCK.map((p) => (
+                {loading && <tr><td colSpan={6}>Cargando pacientes...</td></tr>}
+                {!loading && error && <tr><td colSpan={6}>{error}</td></tr>}
+                {!loading && !error && patients.length === 0 && <tr><td colSpan={6}>No hay pacientes registrados.</td></tr>}
+                {!loading && !error && patients.map((p) => (
                   <tr key={p.id}>
                     <td>
                       <div className="patient-info">
-                        <div className={`avatar-circle bg-light-${p.id}`}>{p.color}</div>
+                        <div className={`avatar-circle bg-light-${(p.id % 5) + 1}`}>{getInitials(p)}</div>
                         <div>
-                          <div className="p-name">{p.name}</div>
+                          <div className="p-name">{p.firstName} {p.lastName}</div>
                           <div className="p-email">{p.email}</div>
                         </div>
                       </div>
                     </td>
-                    <td>{p.ci}</td>
-                    <td>{p.age}</td>
-                    <td>{p.lastVisit}</td>
-                    <td><span className={p.origin === 'Mérida' ? 'origin-highlight' : ''}>{p.origin}</span></td>
+                    <td>{p.nationalId}</td>
+                    <td>{getAge(p.dateOfBirth)}</td>
+                    <td>{formatDate(p.latestVitals?.measured_at)}</td>
+                    <td>-</td>
                     <td>
                       <div className="action-btns">
                         <button title="Ver historia" onClick={() => navigate(`/patients/${p.id}`)}><Eye size={16} /></button>
@@ -122,15 +177,11 @@ export default function PatientsView() {
             </table>
 
             <div className="table-footer">
-              <span>Mostrando 5 de 1,240 pacientes</span>
+              <span>Mostrando {patients.length} de {totalPatients} pacientes</span>
               <div className="pagination">
-                <button className="page-nav"><ChevronLeft size={18}/></button>
-                <button className="page-num active">1</button>
-                <button className="page-num">2</button>
-                <button className="page-num">3</button>
-                <span>...</span>
-                <button className="page-num">248</button>
-                <button className="page-nav"><ChevronRight size={18}/></button>
+                <button className="page-nav" disabled={page === 1} onClick={() => setPage((current) => current - 1)}><ChevronLeft size={18}/></button>
+                <span className="page-num active">{page}</span>
+                <button className="page-nav" disabled={patients.length === 0 || patients.length + (page - 1) * 10 >= totalPatients} onClick={() => setPage((current) => current + 1)}><ChevronRight size={18}/></button>
               </div>
             </div>
           </div>
@@ -139,8 +190,8 @@ export default function PatientsView() {
             <div className="kpi-card dark">
               <div className="kpi-icon-box"><Plus size={20} /></div>
               <div className="kpi-data">
-                <span className="kpi-value">12</span>
-                <span className="kpi-label">Nuevos este mes</span>
+                <span className="kpi-value">{totalPatients}</span>
+                <span className="kpi-label">Pacientes registrados</span>
               </div>
             </div>
 

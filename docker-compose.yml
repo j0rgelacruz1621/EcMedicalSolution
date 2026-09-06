@@ -24,7 +24,7 @@ services:
       PORT: ${PORT:-3000}
       NODE_ENV: development
     working_dir: /app
-    command: npm run start:dev
+    command: sh -c "npm ci && npm run start:dev"
     ports:
       - '3000:3000'
     volumes:

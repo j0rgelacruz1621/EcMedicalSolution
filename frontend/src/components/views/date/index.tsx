@@ -4,6 +4,9 @@ import Footer from '../../footer'
 import './style.scss'
 import ConfirmDatePreview from '../../modals/confirm-date-preview'
 import ConfirmDate from '../../modals/confirm-date'
+import { createAppointment } from '../../../services/appointments/appointment-services'
+import { getDoctors, type Doctor } from '../../../services/doctors/doctor-services'
+import { getOffices, type Office } from '../../../services/medical-center/medical-center-services'
 
 // Importamos los iconos profesionales
 import { 
@@ -44,16 +47,6 @@ const getCalendarDays = (year: number, month: number) => {
   })
 }
 
-// Datos de ejemplo
-const consultories = [
-  { id: 'c1', name: 'Cardiología - Consultorio A', orderOfArrival: false, schedule: ['08:00 AM', '09:00 AM', '10:00 AM', '11:00 AM'] },
-  { id: 'c2', name: 'Triaje - Orden de llegada', orderOfArrival: true, schedule: [] },
-]
-
-const exampleBooked: Record<string, string[]> = {
-  'c1_2026-10-16': ['10:00 AM'],
-}
-
 export default function DateView() {
   const today = useMemo(() => {
     const current = new Date()
@@ -77,13 +70,21 @@ export default function DateView() {
   const [cedula, setCedula] = useState('')
   const [age, setAge] = useState('')
   const [phone, setPhone] = useState('')
+  const [email, setEmail] = useState('')
+  const [dateOfBirth, setDateOfBirth] = useState('')
+  const [gender, setGender] = useState<'MASCULINO' | 'FEMENINO' | 'OTRO'>('OTRO')
 
   const sanitizeName = (value: string) => value.replace(/[^A-Za-zÀ-ÿ\s]/g, '')
   const sanitizeCedula = (value: string) => value.replace(/[^0-9-]/g, '')
   const sanitizeAge = (value: string) => value.replace(/\D/g, '')
   const sanitizePhone = (value: string) => value.replace(/[^0-9+()\s-]/g, '')
   
-  const [selectedConsultory, setSelectedConsultory] = useState<string | null>(consultories[0].id)
+  const [doctors, setDoctors] = useState<Doctor[]>([])
+  const [offices, setOffices] = useState<Office[]>([])
+  const [selectedDoctorId, setSelectedDoctorId] = useState('')
+  const [selectedOfficeId, setSelectedOfficeId] = useState('')
+  const [catalogError, setCatalogError] = useState('')
+  const [submitError, setSubmitError] = useState('')
   
   // Partes del selector de hora
   const [timeHour, setTimeHour] = useState<string>('10')
@@ -98,50 +99,66 @@ export default function DateView() {
 
   const calendarRef = useRef<HTMLDivElement | null>(null)
 
+  useEffect(() => {
+    Promise.all([getDoctors(), getOffices()])
+      .then(([loadedDoctors, loadedOffices]) => {
+        setDoctors(loadedDoctors)
+        setOffices(loadedOffices)
+        setSelectedDoctorId(String(loadedDoctors[0]?.id ?? ''))
+        setSelectedOfficeId(String(loadedOffices[0]?.id ?? ''))
+      })
+      .catch(() => setCatalogError('No se pudieron cargar médicos y consultorios.'))
+  }, [])
+
   const calendarDays = useMemo(() => getCalendarDays(visibleYear, visibleMonth), [visibleMonth, visibleYear])
   const monthLabel = new Intl.DateTimeFormat('es-ES', {
     month: 'long',
     year: 'numeric'
   }).format(visibleDate).replace(/^./, char => char.toUpperCase())
 
-  // Lógica para filtrar horarios disponibles según el consultorio
-  useEffect(() => {
-    if (!selectedConsultory || !selectedDate) return
-
-    const consultory = consultories.find(c => c.id === selectedConsultory)
-    if (!consultory || consultory.orderOfArrival) {
-      return
-    }
-
-    const y = selectedDate.getFullYear()
-    const m = String(selectedDate.getMonth() + 1).padStart(2, '0')
-    const d = String(selectedDate.getDate()).padStart(2, '0')
-    const dateKey = `${consultory.id}_${y}-${m}-${d}`
-    const booked = exampleBooked[dateKey] || []
-
-    void booked
-  }, [selectedConsultory, selectedDate])
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!firstName || !lastName || !selectedDate) return alert('Complete los campos obligatorios')
+    if (!firstName || !lastName || !cedula || !email || !dateOfBirth || !phone || !selectedDate || !selectedDoctorId || !selectedOfficeId) return alert('Complete los campos obligatorios')
+    setSubmitError('')
     setIsConfirmOpen(true)
   }
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     setIsSubmitting(true)
-    setTimeout(() => {
+    try {
+      const office = offices.find(item => item.id === Number(selectedOfficeId))
+      if (!office?.medicalCenterId) throw new Error('El consultorio no tiene centro médico asociado.')
+
+      let hour = Number(timeHour) % 12
+      if (timeMeridiem === 'PM') hour += 12
+      const startAt = new Date(selectedDate!.getFullYear(), selectedDate!.getMonth(), selectedDate!.getDate(), hour, Number(timeMinute))
+      const endAt = new Date(startAt.getTime() + 30 * 60 * 1000)
+
+      const appointment = await createAppointment({
+        doctorId: Number(selectedDoctorId),
+        startAt: startAt.toISOString(),
+        endAt: endAt.toISOString(),
+        medicalCenterId: office.medicalCenterId,
+        officeId: office.id,
+        patient: { nationalId: cedula, firstName, lastName, email, phone, dateOfBirth, gender },
+      })
+
       setIsSubmitting(false)
       setIsConfirmOpen(false)
-      const consultory = consultories.find(c => c.id === selectedConsultory)
       setFinalBooking({
         dateLabel: formatLongDate(selectedDate),
         timeLabel: `${timeHour}:${timeMinute} ${timeMeridiem}`,
-        specialty: 'Cardiología Intervencionista',
-        location: consultory ? consultory.name : 'Consultorio Médico'
+        specialty: doctors.find(item => item.id === Number(selectedDoctorId))?.specialty ?? 'Consulta médica',
+        location: office.officeNumber,
+        appointmentCode: appointment.appointmentCode,
       })
       setIsFinalOpen(true)
-    }, 1000)
+    } catch {
+      setSubmitError('No se pudo agendar la cita. Revisa la disponibilidad y los datos ingresados.')
+      setIsConfirmOpen(false)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -225,6 +242,23 @@ export default function DateView() {
                   </div>
                 </div>
 
+                <div className="col-md-6">
+                  <label className="form-label">Fecha de nacimiento</label>
+                  <input className="form-control" type="date" value={dateOfBirth} onChange={e => setDateOfBirth(e.target.value)} />
+                </div>
+                <div className="col-md-6">
+                  <label className="form-label">Correo electrónico</label>
+                  <input className="form-control" type="email" value={email} onChange={e => setEmail(e.target.value)} />
+                </div>
+                <div className="col-md-6">
+                  <label className="form-label">Género</label>
+                  <select className="form-select" value={gender} onChange={e => setGender(e.target.value as typeof gender)}>
+                    <option value="MASCULINO">Masculino</option>
+                    <option value="FEMENINO">Femenino</option>
+                    <option value="OTRO">Otro</option>
+                  </select>
+                </div>
+
                 {/* FILA 3: TELÉFONO Y CONSULTORIO */}
                 <div className="col-md-6">
                   <label className="form-label">Número de teléfono</label>
@@ -247,12 +281,20 @@ export default function DateView() {
                     <span className="input-group-text">
                       <Hospital size={18} strokeWidth={2.5} />
                     </span>
-                    <select className="form-select" value={selectedConsultory ?? ''} onChange={e => setSelectedConsultory(e.target.value)}>
+                    <select className="form-select" value={selectedOfficeId} onChange={e => setSelectedOfficeId(e.target.value)}>
                       <option value="">Seleccione ubicación</option>
-                      {consultories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                      {offices.map(office => <option key={office.id} value={office.id}>{office.officeNumber} {office.locationDetails ? `- ${office.locationDetails}` : ''}</option>)}
                     </select>
                   </div>
                 </div>
+                <div className="col-md-6">
+                  <label className="form-label">Médico</label>
+                  <select className="form-select" value={selectedDoctorId} onChange={e => setSelectedDoctorId(e.target.value)}>
+                    <option value="">Seleccione médico</option>
+                    {doctors.map(doctor => <option key={doctor.id} value={doctor.id}>Dr. {doctor.firstName} {doctor.lastName}</option>)}
+                  </select>
+                </div>
+                {catalogError && <div className="col-12"><div className="alert alert-danger">{catalogError}</div></div>}
               </div>
 
               {/* SECCIÓN CALENDARIO Y DETALLES */}
@@ -313,8 +355,7 @@ export default function DateView() {
                     <input className="form-control" type="text" readOnly value={formatLongDate(selectedDate)} />
                   </div>
 
-                  {!consultories.find(c => c.id === selectedConsultory)?.orderOfArrival && (
-                    <>
+                  <>
                       <label className="form-label">Seleccionar hora</label>
                       <div className="time-picker-row">
                         <Clock size={18} className="clock-icon" />
@@ -336,8 +377,7 @@ export default function DateView() {
                         </select>
                         <Clock size={18} className="ms-auto clock-icon" />
                       </div>
-                    </>
-                  )}
+                  </>
 
                   <div className="alert alert-light border mt-4 d-flex align-items-start gap-3">
                     <Info size={20} className="text-primary mt-1" />
@@ -345,6 +385,7 @@ export default function DateView() {
                       Las citas están sujetas a disponibilidad. Recibirá una confirmación vía SMS en los próximos 15 minutos.
                     </p>
                   </div>
+                  {submitError && <div className="alert alert-danger mt-3">{submitError}</div>}
                 </div>
               </div>
 

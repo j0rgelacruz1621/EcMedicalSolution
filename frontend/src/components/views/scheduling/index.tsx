@@ -1,6 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import LeftSideBar from '../../left-sideBar'
 import './style.scss'
+import { getAppointments, type Appointment } from '../../../services/appointments/appointment-services'
 import {
   Bell,
   CircleHelp,
@@ -9,16 +11,6 @@ import {
   ChevronRight,
   Plus,
 } from 'lucide-react'
-
-// Datos de ejemplo para las citas
-const MOCK_APPOINTMENTS = [
-  { id: 1, time: '09:00 AM', patient: 'Ricardo Valenzuela', type: 'Control', day: 12, color: 'var(--primary-color)' },
-  { id: 2, time: '11:30 AM', patient: 'Marta Díaz', type: 'De primera', day: 12, color: '#21b490' },
-  { id: 3, time: '10:00 AM', patient: 'Julio Rivas', type: 'Control', day: 13, color: 'var(--primary-color)' },
-  { id: 4, time: '08:30 AM', patient: 'Elena Torres', type: 'Control', day: 14, color: 'var(--primary-color)' },
-  { id: 5, time: '04:00 PM', patient: 'Oscar Lozano', type: 'De primera', day: 15, color: '#21b490' },
-  { id: 6, time: '12:00 PM', patient: 'Sofia Paredes', type: 'Control', day: 16, color: 'var(--primary-color)' },
-];
 
 const weekDays = [
   { label: 'LUN', date: 12 },
@@ -31,7 +23,18 @@ const weekDays = [
 ];
 
 export default function AgendaView() {
+  const navigate = useNavigate();
   const [viewMode, setViewMode] = useState('Semana');
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    getAppointments({ limit: 100 })
+      .then((result) => setAppointments(result.data))
+      .catch(() => setError('No se pudieron cargar las citas.'))
+      .finally(() => setLoading(false));
+  }, []);
 
   return (
     <div className="agenda-root">
@@ -49,7 +52,7 @@ export default function AgendaView() {
             <button className="icon-btn"><Bell size={20} /></button>
             <button className="icon-btn"><CircleHelp size={20} /></button>
             <div className="user-profile">
-              <img src="https://via.placeholder.com/32" alt="Perfil" className="avatar" />
+              <div className="avatar" aria-label="Perfil">JD</div>
               <span>Dra. Josiana Piña</span>
             </div>
           </div>
@@ -84,12 +87,14 @@ export default function AgendaView() {
                 <button><ChevronRight size={20} /></button>
               </div>
 
-              <button className="btn-add-appointment">
+              <button className="btn-add-appointment" type="button" onClick={() => navigate('/date')}>
                 <Plus size={18} /> Agendar cita
               </button>
             </div>
           </section>
 
+          {error && <div className="alert alert-danger">{error}</div>}
+          {loading && <div className="alert alert-info">Cargando citas...</div>}
           <div className="agenda-grid-container">
             {/* PANEL LATERAL IZQUIERDO (Mini cal y filtros) */}
             <aside className="agenda-sidebar-left">
@@ -141,13 +146,13 @@ export default function AgendaView() {
               <div className="grid-body">
                 {weekDays.map(day => (
                   <div key={day.label} className="grid-column">
-                    {MOCK_APPOINTMENTS
-                      .filter(app => app.day === day.date)
+                    {appointments
+                      .filter(app => new Date(app.appointmentDate ?? '').getDate() === day.date)
                       .map(app => (
-                        <div key={app.id} className="appointment-card" style={{ borderLeftColor: app.color }}>
-                          <span className="app-time" style={{ color: app.color }}>{app.time}</span>
-                          <span className="app-patient">{app.patient}</span>
-                          <span className="app-type">{app.type}</span>
+                        <div key={app.id} className="appointment-card" style={{ borderLeftColor: 'var(--primary-color)' }}>
+                          <span className="app-time" style={{ color: 'var(--primary-color)' }}>{app.startTime ?? '--:--'}</span>
+                          <span className="app-patient">{app.patient?.firstName} {app.patient?.lastName}</span>
+                          <span className="app-type">{app.status ?? 'SCHEDULED'}</span>
                         </div>
                       ))}
                   </div>
