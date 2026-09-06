@@ -1,5 +1,5 @@
 import './style.scss';
-import { Save, Upload, X } from 'lucide-react';
+import { Activity, Brain, ClipboardPenLine, FileText, HeartPulse, Save, Upload, UserRound, Wind, X, type LucideIcon } from 'lucide-react';
 
 interface NewClinicalHistoryModalProps {
   isOpen: boolean;
@@ -7,13 +7,17 @@ interface NewClinicalHistoryModalProps {
   onClose: () => void;
 }
 
-const personalHistoryOptions = [
-  'HTA',
-  'DM2',
-  'ALERGIAS A FÁRMACOS',
-  'ENF. NEUROLÓGICA',
-  'ENF. CARDIACA',
-  'ENF. PULMONAR',
+const personalHistoryOptions: { label: string; icon: LucideIcon }[] = [
+  { label: 'HTA', icon: HeartPulse },
+  { label: 'DM2', icon: Activity },
+  { label: 'ALERGIAS A FÁRMACOS', icon: ClipboardPenLine },
+  { label: 'ENF. NEUROLÓGICA', icon: Brain },
+  { label: 'ENF. CARDIACA', icon: HeartPulse },
+  { label: 'ENF. PULMONAR', icon: Wind },
+  { label: 'ENF. TIROIDEA', icon: Activity },
+  { label: 'ENF. GASTROINTESTINAL', icon: Activity },
+  { label: 'ENF. RENAL', icon: Activity },
+  { label: 'ENF. GINECOLÓGICA', icon: UserRound },
 ];
 
 const habits = ['TABÁQUICOS', 'CHIMOICOS', 'ENÓLICOS', 'COCINA CON LEÑA', 'CONTACTO CON VECTOR DEL CHAGAS'];
@@ -42,24 +46,36 @@ export default function NewClinicalHistoryModal({ isOpen, patientName, onClose }
                 <textarea placeholder="Escriba los síntomas principales o razón de la visita..." rows={4} />
               </div>
 
-              <div className="field-group">
-                <label>Antecedentes personales</label>
-                <div className="radio-matrix">
-                  {personalHistoryOptions.map((item) => (
-                    <div key={item} className="matrix-row">
-                      <span>{item}</span>
+              <div className="field-group personal-history-group">
+                <label><ClipboardPenLine size={16} /> Antecedentes personales</label>
+                <div className="personal-history-scroll">
+                  <div className="radio-matrix">
+                  {personalHistoryOptions.map(({ label, icon: Icon }) => (
+                    <div key={label} className="matrix-row">
+                      <span><Icon size={15} />{label}</span>
                       <div className="options-box">
                         <label>
-                          <input type="radio" name={item} value="niega" />
+                          <input type="radio" name={label} value="niega" />
                           <span>NIEGA</span>
                         </label>
                         <label>
-                          <input type="radio" name={item} value="afirma" />
+                          <input type="radio" name={label} value="afirma" />
                           <span>AFIRMA</span>
                         </label>
                       </div>
                     </div>
                   ))}
+                  </div>
+                  <div className="history-text-fields">
+                    <div className="field-group">
+                      <label><ClipboardPenLine size={15} /> INTERVENCIONES PREVIAS</label>
+                      <textarea placeholder="Especifique cirugías o procedimientos previos..." rows={3} />
+                    </div>
+                    <div className="field-group">
+                      <label><FileText size={15} /> OTROS</label>
+                      <textarea placeholder="Especifique otros antecedentes relevantes..." rows={3} />
+                    </div>
+                  </div>
                 </div>
               </div>
             </section>

@@ -8,6 +8,9 @@ import PrescriptionHistoryModal from '../../modals/Prescription-history';
 import PrescriptionFormModal from '../../modals/prescription';
 import PrescriptionPreviewModal from '../../modals/prescription-preview';
 import ClinicalTimelineModal from '../../modals/clinical-timeline';
+import ClinicalStudiesModal from '../../modals/Clinica-trials';
+import SupplementaryTestsModal from '../../modals/Supplementary-tests';
+import NewSupplementaryTests from '../new-Supplementary-tests';
 import {
   CalendarDays,
   ChevronLeft,
@@ -87,6 +90,9 @@ export default function PatientFileView() {
   const [isPrescriptionFormOpen, setIsPrescriptionFormOpen] = useState(false);
   const [isPrescriptionPreviewOpen, setIsPrescriptionPreviewOpen] = useState(false);
   const [isClinicalTimelineOpen, setIsClinicalTimelineOpen] = useState(false);
+  const [isClinicalStudiesOpen, setIsClinicalStudiesOpen] = useState(false);
+  const [isSupplementaryTestsOpen, setIsSupplementaryTestsOpen] = useState(false);
+  const [isNewSupplementaryTestsOpen, setIsNewSupplementaryTestsOpen] = useState(false);
 
   const monthLabel = useMemo(() => 'Octubre 2026', []);
 
@@ -227,6 +233,10 @@ export default function PatientFileView() {
                   if (tab === 'Estudios') {
                     setIsClinicalTimelineOpen(true);
                   }
+
+                  if (tab === 'Paraclínicos') {
+                    setIsSupplementaryTestsOpen(true);
+                  }
                 }}
               >
                 {tab}
@@ -345,7 +355,29 @@ export default function PatientFileView() {
         isOpen={isClinicalTimelineOpen}
         patientName={patient.name}
         onClose={() => setIsClinicalTimelineOpen(false)}
+        onAddStudy={() => {
+          setIsClinicalTimelineOpen(false);
+          setIsClinicalStudiesOpen(true);
+        }}
       />
+
+      <ClinicalStudiesModal
+        isOpen={isClinicalStudiesOpen}
+        patientName={patient.name}
+        onClose={() => setIsClinicalStudiesOpen(false)}
+      />
+
+      <SupplementaryTestsModal
+        isOpen={isSupplementaryTestsOpen}
+        patientName={patient.name}
+        onClose={() => setIsSupplementaryTestsOpen(false)}
+        onAddTest={() => {
+          setIsSupplementaryTestsOpen(false);
+          setIsNewSupplementaryTestsOpen(true);
+        }}
+      />
+
+      {isNewSupplementaryTestsOpen && <NewSupplementaryTests patientName={patient.name} onClose={() => setIsNewSupplementaryTestsOpen(false)} />}
     </div>
   );
 }

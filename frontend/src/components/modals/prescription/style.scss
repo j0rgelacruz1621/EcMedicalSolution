@@ -75,6 +75,13 @@
   display: grid;
   place-items: center;
   cursor: pointer;
+  transition: transform 160ms ease, background-color 160ms ease;
+}
+
+.close-button:hover,
+.close-button:focus-visible {
+  transform: translateY(-2px);
+  background: #f5e1e6;
 }
 
 .prescription-form-body {
@@ -100,6 +107,7 @@
 }
 
 .drug-row {
+  position: relative;
   display: grid;
   grid-template-columns: minmax(180px, 1.7fr) minmax(120px, 0.8fr) minmax(110px, 0.8fr) minmax(150px, 1.2fr) minmax(100px, 0.8fr);
   gap: 0.8rem;
@@ -107,6 +115,40 @@
   border: 1px solid #f1e7ea;
   border-radius: 0.9rem;
   background: #fff9fa;
+}
+
+.remove-drug-button {
+  position: absolute;
+  top: -0.7rem;
+  right: 0.7rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid #f0d5dc;
+  border-radius: 50%;
+  background: #fff;
+  color: #800020;
+  cursor: pointer;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(0.25rem) scale(0.9);
+  transition: opacity 160ms ease, visibility 160ms ease, transform 160ms ease, background-color 160ms ease;
+}
+
+.drug-row:hover .remove-drug-button,
+.drug-row:focus-within .remove-drug-button,
+.remove-drug-button:focus-visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+}
+
+.remove-drug-button:hover,
+.remove-drug-button:focus-visible {
+  background: #fbe8ec;
+  transform: translateY(0) scale(1.08);
 }
 
 .input-field {
@@ -152,6 +194,13 @@
   font-weight: 700;
   cursor: pointer;
   padding: 0;
+  transition: transform 160ms ease, color 160ms ease;
+}
+
+.add-drug-button:hover,
+.add-drug-button:focus-visible {
+  color: #a0002c;
+  transform: translateX(2px);
 }
 
 .prescription-notes-section {
@@ -190,6 +239,15 @@
   font-size: 0.76rem;
   font-weight: 600;
   cursor: pointer;
+  transition: transform 160ms ease, border-color 160ms ease, background-color 160ms ease, box-shadow 160ms ease;
+}
+
+.quick-chip:hover,
+.quick-chip:focus-visible {
+  transform: translateY(-2px);
+  border-color: #e2c3cb;
+  background: #fff;
+  box-shadow: 0 4px 10px rgba(128, 0, 32, 0.1);
 }
 
 .char-counter {
@@ -216,6 +274,15 @@
   padding: 0.8rem 1.25rem;
   font-weight: 700;
   cursor: pointer;
+  transition: transform 160ms ease, box-shadow 160ms ease, background-color 160ms ease, border-color 160ms ease;
+}
+
+.secondary-button:hover,
+.secondary-button:focus-visible,
+.primary-button:hover,
+.primary-button:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 12px rgba(128, 0, 32, 0.14);
 }
 
 .secondary-button {
@@ -224,10 +291,21 @@
   color: #3a3d42;
 }
 
+.secondary-button:hover,
+.secondary-button:focus-visible {
+  border-color: #d8bbc4;
+  background: #fff9fa;
+}
+
 .primary-button {
   background: #800020;
   color: #fff;
   border: 0;
+}
+
+.primary-button:hover,
+.primary-button:focus-visible {
+  background: #970029;
 }
 
 @media (max-width: 860px) {

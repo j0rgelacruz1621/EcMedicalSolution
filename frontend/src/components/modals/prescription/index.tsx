@@ -48,6 +48,10 @@ export default function PrescriptionFormModal({ isOpen, patientName, onClose, on
     setRows((current) => [...current, { name: '', presentation: '', dose: '', frequency: '', duration: '' }]);
   };
 
+  const removeRow = (index: number) => {
+    setRows((current) => (current.length === 1 ? current : current.filter((_, rowIndex) => rowIndex !== index)));
+  };
+
   const updateRow = (index: number, field: keyof PrescriptionRow, value: string) => {
     setRows((current) => current.map((row, rowIndex) => (rowIndex === index ? { ...row, [field]: value } : row)));
   };
@@ -88,6 +92,16 @@ export default function PrescriptionFormModal({ isOpen, patientName, onClose, on
             <div className="drug-list">
               {rows.map((row, index) => (
                 <div key={`drug-row-${index}`} className="drug-row">
+                  {rows.length > 1 && (
+                    <button
+                      type="button"
+                      className="remove-drug-button"
+                      aria-label={`Eliminar medicamento ${index + 1}`}
+                      onClick={() => removeRow(index)}
+                    >
+                      <X size={14} />
+                    </button>
+                  )}
                   <div className="input-field">
                     <label htmlFor={`med-name-${index}`}>Nombre del fármaco</label>
                     <input

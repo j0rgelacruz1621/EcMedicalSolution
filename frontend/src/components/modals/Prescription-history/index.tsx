@@ -38,15 +38,18 @@ const currentMedications = [
 const previousPrescriptions = [
   {
     date: '15 SEP 2023',
-    summary: 'Enalapril 20mg + Atenolol 50mg • Ajuste de dosis por control de PA.',
+    medications: 'Enalapril 20mg + Atenolol 50mg',
+    description: 'Ajuste de dosis por control de PA.',
   },
   {
     date: '22 JUN 2023',
-    summary: 'Aspirina 100mg + Simvastatina 20mg • Tratamiento para prevención secundaria.',
+    medications: 'Aspirina 100mg + Simvastatina 20mg',
+    description: 'Tratamiento para prevención secundaria.',
   },
   {
     date: '10 MAR 2023',
-    summary: 'Losartán 50mg • Revisión por hipertensión y control de edema.',
+    medications: 'Losartán 50mg',
+    description: 'Revisión por hipertensión y control de edema.',
   },
 ];
 
@@ -112,7 +115,8 @@ export default function PrescriptionHistoryModal({ isOpen, patientName, onClose,
                   </div>
 
                   <div className="prescription-detail">
-                    <p>{item.summary}</p>
+                    <h4>{item.medications}</h4>
+                    <p>{item.description}</p>
                   </div>
 
                   <button type="button" className="detail-button">

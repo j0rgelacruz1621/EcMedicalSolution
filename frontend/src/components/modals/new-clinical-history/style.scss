@@ -87,6 +87,9 @@
 
 .field-group label,
 .highlight-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
   font-size: 0.76rem;
   color: #800020;
   font-weight: 800;
@@ -126,6 +129,17 @@
   padding: 0.7rem;
 }
 
+.personal-history-group {
+  min-height: 0;
+}
+
+.personal-history-scroll {
+  max-height: 390px;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+  scrollbar-color: #c99aa5 transparent;
+}
+
 .matrix-row {
   display: grid;
   grid-template-columns: minmax(140px, 1fr) auto;
@@ -134,9 +148,18 @@
 }
 
 .matrix-row span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
   font-size: 0.78rem;
   font-weight: 700;
   color: #3a3d42;
+}
+
+.matrix-row span svg,
+.field-group > label svg {
+  flex-shrink: 0;
+  color: #800020;
 }
 
 .options-box {
@@ -158,6 +181,17 @@
 .options-box input {
   width: auto;
   accent-color: #800020;
+}
+
+.history-text-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.history-text-fields textarea {
+  min-height: 82px;
 }
 
 .habits-panel,
