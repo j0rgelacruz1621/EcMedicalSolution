@@ -1,7 +1,10 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import LeftSideBar from '../../left-sideBar'
 import './style.scss'
 import { Bell, CircleHelp, ChevronLeft, ChevronRight, Plus } from 'lucide-react'
+import { getDoctor, type Doctor } from '../../../services/doctors/doctor-services'
+import { getAppointments, type Appointment } from '../../../services/appointments/appointment-services'
 
 const weekDays = ['L', 'M', 'M', 'J', 'V', 'S', 'D']
 
@@ -20,6 +23,31 @@ const getCalendarDays = (year: number, month: number) => {
 }
 
 export default function ControlPanel() {
+  const [searchParams] = useSearchParams()
+  const role = localStorage.getItem('user_rol')
+  const selectedDoctorFromUrl = searchParams.get('doctorId')
+  if (role === 'SA' && selectedDoctorFromUrl) {
+    sessionStorage.setItem('active_doctor_id', selectedDoctorFromUrl)
+  }
+  const doctorId = Number(
+    role === 'DOCTOR'
+      ? localStorage.getItem('doctor_id')
+      : selectedDoctorFromUrl || sessionStorage.getItem('active_doctor_id') || 0,
+  )
+  const [doctor, setDoctor] = useState<Doctor | null>(null)
+  const [appointments, setAppointments] = useState<Appointment[]>([])
+  const patients = Array.from(
+    new Map(
+      appointments
+        .filter(appointment => appointment.patient)
+        .map(appointment => [
+          appointment.patient?.id || appointment.patient?.nationalId || `${appointment.patient?.firstName}-${appointment.patient?.lastName}`,
+          appointment.patient,
+        ]),
+    ).values(),
+  )
+    const today = new Date().toISOString().slice(0, 10)
+    const todayAppointments = appointments.filter(appointment => appointment.appointmentDate?.slice(0, 10) === today)
   const [selectedDate, setSelectedDate] = useState<Date>(() => {
     const date = new Date()
     date.setHours(0, 0, 0, 0)
@@ -41,6 +69,16 @@ export default function ControlPanel() {
     [visibleMonth, visibleYear]
   )
 
+  useEffect(() => {
+    if (!doctorId) return
+
+    Promise.all([getDoctor(doctorId), getAppointments({ doctorId, limit: 100 })])
+      .then(([doctorResult, appointmentResult]) => {
+        setDoctor(doctorResult)
+        setAppointments(appointmentResult.data)
+      })
+  }, [doctorId])
+
   const monthLabel = new Intl.DateTimeFormat('es-ES', {
     month: 'long',
     year: 'numeric'
@@ -51,12 +89,12 @@ export default function ControlPanel() {
       <LeftSideBar />
       <div className="cp-main">
         <header className="cp-header">
-          <h1>Panel de Control</h1>
+          <h1>{doctor ? `Panel de ${doctor.firstName} ${doctor.lastName}` : 'Panel de Control'}</h1>
             <div className="cp-header-right">
               <button className="icon" aria-label="Notificaciones"><Bell size={18} /></button>
               <button className="icon" aria-label="Ayuda"><CircleHelp size={18} /></button>
               <div className="cp-user">
-                <span>Dra. Josiana Piña</span>
+                <span>{doctor ? `${doctor.specialty || 'Especialista'} · ${doctor.email || ''}` : 'Dra. Josiana Piña'}</span>
               </div>
             </div>
         </header>
@@ -64,17 +102,17 @@ export default function ControlPanel() {
         <section className="cp-kpis">
           <div className="kpi">
             <div className="kpi-label">Total de pacientes</div>
-            <div className="kpi-value empty-value" aria-label="Sin valor" />
+            {doctor ? <div className="kpi-value">{patients.length}</div> : <div className="kpi-value empty-value" aria-label="Sin valor" />}
           </div>
-          <div className="kpi">
+            <div className="kpi">
             <div className="kpi-label">Citas hoy</div>
-            <div className="kpi-value empty-value" aria-label="Sin valor" />
+              {doctor ? <div className="kpi-value">{todayAppointments.length}</div> : <div className="kpi-value empty-value" aria-label="Sin valor" />}
           </div>
           <div className="kpi">
             <div className="kpi-label">Tareas pendientes</div>
             <div className="kpi-value empty-value" aria-label="Sin valor" />
           </div>
-          <div className="kpi">
+            <div className="kpi">
             <div className="kpi-label">Informes por revisar</div>
             <div className="kpi-value empty-value" aria-label="Sin valor" />
           </div>
@@ -84,11 +122,11 @@ export default function ControlPanel() {
           <div className="cp-left">
             <div className="panel upcoming">
               <div className="panel-title">
-                <span>Tareas pendientes</span>
+                <span>{doctor ? 'Agenda del especialista' : 'Tareas pendientes'}</span>
                 <button className="add" type="button" aria-label="Agregar tarea"><Plus size={18} /></button>
               </div>
 
-              <ul className="up-list">
+              {doctor ? <ul className="up-list">{appointments.slice(0, 4).map(appointment => <li className="list-row" key={appointment.id}><span className="avatar placeholder-avatar" /><span className="appointment-name">{appointment.patient?.firstName || 'Paciente'} {appointment.patient?.lastName || ''}</span><span className="appointment-time">{appointment.startTime || '--:--'}</span><span className="placeholder-pill">{appointment.status || 'CITA'}</span></li>)}</ul> : <ul className="up-list">
                 <li className="list-row empty-row">
                   <span className="avatar placeholder-avatar" />
                   <span className="placeholder-line placeholder-name" />
@@ -113,7 +151,7 @@ export default function ControlPanel() {
                   <span className="placeholder-line placeholder-time" />
                   <span className="placeholder-pill" />
                 </li>
-              </ul>
+              </ul>}
             </div>
 
             <div className="panel chart">

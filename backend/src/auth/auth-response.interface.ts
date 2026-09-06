@@ -2,6 +2,7 @@ export interface AuthResponse {
   access_token: string;
   user: true;
   rol: string | null;
+  doctorId?: number;
 }
 
 export interface SessionResponse {

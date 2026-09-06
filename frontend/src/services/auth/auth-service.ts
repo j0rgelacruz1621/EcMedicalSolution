@@ -9,6 +9,7 @@ export interface LoginResponse {
   access_token: string;
   user: boolean;
   rol: string;
+  doctorId?: number;
 }
 
 export const loginUser = async (credentials: LoginRequest): Promise<LoginResponse> => {

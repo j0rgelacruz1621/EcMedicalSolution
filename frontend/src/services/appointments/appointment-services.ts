@@ -26,7 +26,7 @@ export interface Appointment {
   startTime?: string;
   endTime?: string;
   status?: string;
-  patient?: { firstName?: string; lastName?: string };
+  patient?: { id?: number; nationalId?: string; firstName?: string; lastName?: string };
 }
 
 export interface AppointmentListResponse {
@@ -43,6 +43,17 @@ export async function createAppointment(payload: CreateAppointmentRequest) {
 }
 
 export async function getAppointments(params: Record<string, string | number | undefined> = {}) {
-  const response = await apiClient.get<AppointmentListResponse>('/appointments', { params });
+  const { doctorId, medicalCenterId, patientId, appointmentDate, startDate, endDate, ...pagination } = params;
+  const response = await apiClient.get<AppointmentListResponse>('/appointments', {
+    params: {
+      ...pagination,
+      ...(doctorId !== undefined ? { doctor_id: doctorId } : {}),
+      ...(medicalCenterId !== undefined ? { medical_center_id: medicalCenterId } : {}),
+      ...(patientId !== undefined ? { patient_id: patientId } : {}),
+      ...(appointmentDate !== undefined ? { appointment_date: appointmentDate } : {}),
+      ...(startDate !== undefined ? { start_date: startDate } : {}),
+      ...(endDate !== undefined ? { end_date: endDate } : {}),
+    },
+  });
   return response.data;
 }

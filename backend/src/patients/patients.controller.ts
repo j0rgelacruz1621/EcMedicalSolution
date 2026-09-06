@@ -181,6 +181,7 @@ export class PatientsController {
   })
   @ApiQuery({ name: 'page', type: Number, required: false, example: 1 })
   @ApiQuery({ name: 'limit', type: Number, required: false, example: 10 })
+  @ApiQuery({ name: 'doctorId', type: Number, required: false, example: 1 })
   @ApiResponse({
     status: 200,
     description:

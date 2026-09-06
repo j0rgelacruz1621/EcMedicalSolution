@@ -54,6 +54,7 @@ export async function getPatients(params: {
   limit?: number;
   firstName?: string;
   nationalId?: string;
+  doctorId?: number;
 } = {}): Promise<PatientListResponse> {
   const response = await apiClient.get<PatientListResponse>('/api/v1/patients', {
     params,

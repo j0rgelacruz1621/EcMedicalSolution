@@ -1,6 +1,6 @@
 import './style.scss'
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import LeftSideBar from '../../left-sideBar'
 import NewPatientModal from '../../modals/new-patient';
 import ConfirmNewPatientModal from '../../modals/confirm-new-patient';
@@ -35,6 +35,10 @@ function getInitials(patient: Patient) {
 
 export default function PatientsView() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const role = localStorage.getItem('user_rol');
+  const doctorId = role === 'DOCTOR' ? Number(localStorage.getItem('doctor_id')) : Number(searchParams.get('doctorId') || sessionStorage.getItem('active_doctor_id')) || undefined;
+  const controlPanelPath = doctorId ? `/control-panel?doctorId=${doctorId}` : '/control-panel';
   const [showModal, setShowModal] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [lastAddedName, setLastAddedName] = useState('');
@@ -60,6 +64,7 @@ export default function PatientsView() {
           limit: 10,
           firstName: nameFilter || undefined,
           nationalId: nationalIdFilter || undefined,
+          doctorId,
         });
 
         if (active) {
@@ -83,7 +88,8 @@ export default function PatientsView() {
     setPatients((current) => [patient, ...current]);
     setTotalPatients((current) => current + 1);
     setShowModal(false);
-    setShowConfirmModal(true);
+    setShowConfirmModal(false);
+    navigate(controlPanelPath);
   };
 
   const handleViewPatientFile = () => {
@@ -102,7 +108,7 @@ export default function PatientsView() {
             <button className="icon-btn"><Bell size={20} /></button>
             <button className="icon-btn"><CircleHelp size={20} /></button>
             <div className="user-info">
-              <span>Dra. Josiana Piña</span>
+              <span>{doctorId ? 'Panel del especialista' : 'Administración'}</span>
               <div className="mini-avatar"><User size={16}/></div>
             </div>
           </div>

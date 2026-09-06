@@ -28,10 +28,16 @@ function HomeView() {
 
     try {
       const data = await loginUser({ user_name: username, password: password })
-      if (data.access_token && data.user === true && data.rol === 'SA') {
+      if (data.access_token && data.user === true && (data.rol === 'SA' || data.rol === 'DOCTOR')) {
         localStorage.setItem('token', data.access_token)
         localStorage.setItem('user_rol', data.rol)
-        navigate('/control-panel')
+        if (data.doctorId !== undefined) {
+          localStorage.setItem('doctor_id', String(data.doctorId))
+        } else {
+          localStorage.removeItem('doctor_id')
+          sessionStorage.removeItem('active_doctor_id')
+        }
+        navigate(data.rol === 'SA' ? '/admin' : '/control-panel')
       } else {
         setError('El usuario no tiene permisos de acceso.')
       }

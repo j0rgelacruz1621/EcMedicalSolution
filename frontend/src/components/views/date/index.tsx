@@ -1,4 +1,5 @@
 import { useMemo, useState, useEffect, useRef } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import Header from '../../header'
 import Footer from '../../footer'
 import './style.scss'
@@ -48,6 +49,16 @@ const getCalendarDays = (year: number, month: number) => {
 }
 
 export default function DateView() {
+  const navigate = useNavigate()
+  const activeRole = localStorage.getItem('user_rol')
+  const loggedDoctorId = localStorage.getItem('doctor_id')
+  const [searchParams] = useSearchParams()
+  const selectedContextDoctorId = activeRole === 'DOCTOR'
+    ? loggedDoctorId
+    : searchParams.get('doctorId') || sessionStorage.getItem('active_doctor_id')
+  const controlPanelPath = selectedContextDoctorId
+    ? `/control-panel?doctorId=${selectedContextDoctorId}`
+    : '/control-panel'
   const today = useMemo(() => {
     const current = new Date()
     current.setHours(0, 0, 0, 0)
@@ -55,9 +66,10 @@ export default function DateView() {
   }, [])
 
   // ESTADOS PRINCIPALES
-  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date(2026, 9, 16))
+  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date())
   const [visibleDate, setVisibleDate] = useState<Date>(() => {
-    const date = new Date(2026, 9, 1)
+    const date = new Date()
+    date.setDate(1)
     date.setHours(0, 0, 0, 0)
     return date
   })
@@ -102,13 +114,17 @@ export default function DateView() {
   useEffect(() => {
     Promise.all([getDoctors(), getOffices()])
       .then(([loadedDoctors, loadedOffices]) => {
-        setDoctors(loadedDoctors)
+        const availableDoctors = selectedContextDoctorId
+          ? loadedDoctors.filter(doctor => String(doctor.id) === selectedContextDoctorId)
+          : loadedDoctors
+        setDoctors(availableDoctors)
         setOffices(loadedOffices)
-        setSelectedDoctorId(String(loadedDoctors[0]?.id ?? ''))
+        const defaultDoctorId = selectedContextDoctorId || String(availableDoctors[0]?.id ?? '')
+        setSelectedDoctorId(defaultDoctorId)
         setSelectedOfficeId(String(loadedOffices[0]?.id ?? ''))
       })
       .catch(() => setCatalogError('No se pudieron cargar médicos y consultorios.'))
-  }, [])
+  }, [activeRole, loggedDoctorId, selectedContextDoctorId])
 
   const calendarDays = useMemo(() => getCalendarDays(visibleYear, visibleMonth), [visibleMonth, visibleYear])
   const monthLabel = new Intl.DateTimeFormat('es-ES', {
@@ -289,7 +305,7 @@ export default function DateView() {
                 </div>
                 <div className="col-md-6">
                   <label className="form-label">Médico</label>
-                  <select className="form-select" value={selectedDoctorId} onChange={e => setSelectedDoctorId(e.target.value)}>
+                  <select className="form-select" disabled={Boolean(selectedContextDoctorId)} value={selectedDoctorId} onChange={e => setSelectedDoctorId(e.target.value)}>
                     <option value="">Seleccione médico</option>
                     {doctors.map(doctor => <option key={doctor.id} value={doctor.id}>Dr. {doctor.firstName} {doctor.lastName}</option>)}
                   </select>
@@ -391,7 +407,7 @@ export default function DateView() {
 
               {/* BOTONES 50/50 */}
               <div className="date-view__footer-actions">
-                <button type="button" className="btn-cancel" onClick={() => window.location.href = '/'}>Cancelar</button>
+                <button type="button" className="btn-cancel" onClick={() => navigate(controlPanelPath)}>Cancelar</button>
                 <button type="submit" className="btn-submit">Agendar cita</button>
               </div>
             </form>
@@ -414,7 +430,7 @@ export default function DateView() {
         isOpen={isFinalOpen}
         booking={finalBooking}
         onClose={() => setIsFinalOpen(false)}
-        onFinish={() => { setIsFinalOpen(false); window.location.href = '/'; }}
+        onFinish={() => { setIsFinalOpen(false); navigate(controlPanelPath); }}
       />
       <Footer />
     </>

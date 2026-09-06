@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { day_of_week_enum } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateDoctorDto } from './dto/create-doctor.dto';
+import { UpdateDoctorDto } from './dto/update-doctor.dto';
 
 const DAY_OF_WEEK_MAP: Record<string, day_of_week_enum> = {
   MONDAY: 'Monday',
@@ -71,6 +72,21 @@ export class DoctorsRepository {
         phone: payload.phone,
         specialty: payload.specialty,
         officeId: payload.officeId !== undefined ? BigInt(payload.officeId) : undefined,
+      },
+    });
+  }
+
+  updateDoctor(id: bigint, payload: UpdateDoctorDto) {
+    return this.prisma.doctor.update({
+      where: { id },
+      data: {
+        ...payload,
+        officeId:
+          payload.officeId === undefined
+            ? undefined
+            : payload.officeId === null
+              ? null
+              : BigInt(payload.officeId),
       },
     });
   }

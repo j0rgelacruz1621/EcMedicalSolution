@@ -17,8 +17,8 @@ import {
 } from '@nestjs/swagger';
 import { Roles } from '../auth/roles.decorator';
 import { SafeUserRow } from '../supabase/database.types';
-import type { CreateUserDto } from './create-user.dto';
-import type { UpdateUserDto } from './update-user.dto';
+import { CreateUserDto } from './create-user.dto';
+import { UpdateUserDto } from './update-user.dto';
 import { UsersService } from './users.service';
 
 @ApiTags('users')
@@ -57,6 +57,7 @@ export class UsersController {
         user_name: { type: 'string', example: 'Jorge1621' },
         password: { type: 'string', example: '802170300' },
         rol: { type: 'string', nullable: true, example: 'SA' },
+        doctor_id: { type: 'number', nullable: true, example: 1 },
         application: {
           type: 'string',
           nullable: true,

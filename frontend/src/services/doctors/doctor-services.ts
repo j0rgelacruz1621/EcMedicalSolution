@@ -9,14 +9,19 @@ export interface DoctorRequestBody {
   email: string;
   phone: string;
   specialty: string;
-  officeId: number;
+  officeId?: number;
 }
 
 export interface Doctor {
   id: number;
+  licenseNumber?: string;
+  nationalId?: string;
   firstName: string;
   lastName: string;
+  email?: string;
+  phone?: string | null;
   specialty?: string | null;
+  officeId?: number | null;
 }
 
 export async function getDoctors(): Promise<Doctor[]> {
@@ -24,6 +29,11 @@ export async function getDoctors(): Promise<Doctor[]> {
     params: { page: 1, limit: 100 },
   });
   return response.data.data;
+}
+
+export async function getDoctor(id: number): Promise<Doctor> {
+  const response = await apiClient.get<Doctor>(`/doctors/${id}`);
+  return response.data;
 }
 
 export const registerDoctor = async (doctorData: DoctorRequestBody) => {
@@ -36,3 +46,8 @@ export const registerDoctor = async (doctorData: DoctorRequestBody) => {
     throw new Error(message);
   }
 };
+
+export async function updateDoctor(id: number, doctorData: Partial<DoctorRequestBody>) {
+  const response = await apiClient.patch<Doctor>(`/doctors/${id}`, doctorData);
+  return response.data;
+}

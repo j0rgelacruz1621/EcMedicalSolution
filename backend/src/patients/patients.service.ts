@@ -152,6 +152,7 @@ export class PatientsService {
       nationalId: query.nationalId,
       firstName: query.firstName,
       lastName: query.lastName,
+      doctorId: query.doctorId ? BigInt(query.doctorId) : undefined,
     };
 
     const [patients, total] = await Promise.all([

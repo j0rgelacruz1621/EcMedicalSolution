@@ -7,6 +7,7 @@ import {
 import { PaginatedResponseDto } from '../common/dto/paginated-response.dto';
 import { CreateDoctorDto } from './dto/create-doctor.dto.js';
 import { CreateDoctorSchedulesDto } from './dto/create-doctor-schedules.dto.js';
+import { UpdateDoctorDto } from './dto/update-doctor.dto.js';
 import { DoctorsRepository } from './doctors.repository';
 
 @Injectable()
@@ -147,6 +148,25 @@ export class DoctorsService {
 
       throw error;
     }
+  }
+
+  async update(id: number, payload: UpdateDoctorDto) {
+    const doctorId = BigInt(id);
+    const doctor = await this.doctorsRepository.findDoctorById(doctorId);
+
+    if (!doctor) {
+      throw new NotFoundException('Doctor not found.');
+    }
+
+    if (payload.officeId !== undefined && payload.officeId !== null) {
+      const existingOffice = await this.doctorsRepository.findOfficeById(payload.officeId);
+
+      if (!Array.isArray(existingOffice) || existingOffice.length === 0) {
+        throw new BadRequestException('The provided officeId does not exist.');
+      }
+    }
+
+    return this.toJsonSafe(await this.doctorsRepository.updateDoctor(doctorId, payload));
   }
 
   async createSchedules(doctorId: number, payload: CreateDoctorSchedulesDto) {

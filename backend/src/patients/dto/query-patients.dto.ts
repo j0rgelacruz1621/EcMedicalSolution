@@ -18,6 +18,12 @@ export class QueryPatientsDto {
   @Type(() => Number)
   @IsInt()
   @Min(1)
+  doctorId?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
   page?: number;
 
   @IsOptional()

@@ -13,6 +13,7 @@ export interface PatientFilters {
   nationalId?: string;
   firstName?: string;
   lastName?: string;
+  doctorId?: bigint;
 }
 
 export interface VitalsInput {
@@ -146,6 +147,9 @@ export class PatientsRepository {
         : {}),
       ...(filters.lastName
         ? { lastName: { contains: filters.lastName, mode: 'insensitive' } }
+        : {}),
+      ...(filters.doctorId
+        ? { appointments: { some: { doctorId: filters.doctorId } } }
         : {}),
     };
   }

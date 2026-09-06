@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useEffect, useMemo, useState } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import LeftSideBar from '../../left-sideBar'
 import './style.scss'
 import { getAppointments, type Appointment } from '../../../services/appointments/appointment-services'
+import { getDoctor, type Doctor } from '../../../services/doctors/doctor-services'
 import {
   Bell,
   CircleHelp,
@@ -12,29 +13,37 @@ import {
   Plus,
 } from 'lucide-react'
 
-const weekDays = [
-  { label: 'LUN', date: 12 },
-  { label: 'MAR', date: 13 },
-  { label: 'MIÉ', date: 14 },
-  { label: 'JUE', date: 15 },
-  { label: 'VIE', date: 16 },
-  { label: 'SÁB', date: 17 },
-  { label: 'DOM', date: 18 },
-];
-
 export default function AgendaView() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const role = localStorage.getItem('user_rol');
+  const doctorId = role === 'DOCTOR' ? Number(localStorage.getItem('doctor_id')) : Number(searchParams.get('doctorId') || sessionStorage.getItem('active_doctor_id')) || undefined;
+  const [doctor, setDoctor] = useState<Doctor | null>(null);
   const [viewMode, setViewMode] = useState('Semana');
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [currentDate, setCurrentDate] = useState(() => new Date());
+  const weekDays = useMemo(() => {
+    const monday = new Date(currentDate)
+    const day = monday.getDay() || 7
+    monday.setDate(monday.getDate() - day + 1)
+    return Array.from({ length: 7 }, (_, index) => {
+      const date = new Date(monday)
+      date.setDate(monday.getDate() + index)
+      return { label: date.toLocaleDateString('es-ES', { weekday: 'short' }).replace('.', '').toUpperCase(), date: date.getDate() }
+    })
+  }, [currentDate]);
+  const monthLabel = currentDate.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' }).toUpperCase()
+  const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate()
 
   useEffect(() => {
-    getAppointments({ limit: 100 })
+    if (doctorId) getDoctor(doctorId).then(setDoctor).catch(() => setDoctor(null));
+    getAppointments({ limit: 100, doctorId })
       .then((result) => setAppointments(result.data))
       .catch(() => setError('No se pudieron cargar las citas.'))
       .finally(() => setLoading(false));
-  }, []);
+  }, [doctorId]);
 
   return (
     <div className="agenda-root">
@@ -53,7 +62,7 @@ export default function AgendaView() {
             <button className="icon-btn"><CircleHelp size={20} /></button>
             <div className="user-profile">
               <div className="avatar" aria-label="Perfil">JD</div>
-              <span>Dra. Josiana Piña</span>
+              <span>{doctor ? `${doctor.firstName} ${doctor.lastName}` : 'Administración'}</span>
             </div>
           </div>
         </header>
@@ -65,7 +74,7 @@ export default function AgendaView() {
           <section className="agenda-header-actions">
             <div>
               <h1>Agenda</h1>
-              <p className="current-date-text">Lunes, 12 de Octubre, 2026</p>
+              <p className="current-date-text">{currentDate.toLocaleDateString('es-ES', { dateStyle: 'full' })}</p>
             </div>
             
             <div className="actions-right">
@@ -82,12 +91,12 @@ export default function AgendaView() {
               </div>
               
               <div className="date-nav">
-                <button><ChevronLeft size={20} /></button>
-                <button className="today-btn">Hoy</button>
-                <button><ChevronRight size={20} /></button>
+                <button onClick={() => setCurrentDate(date => new Date(date.getFullYear(), date.getMonth(), date.getDate() - 7))}><ChevronLeft size={20} /></button>
+                <button className="today-btn" onClick={() => setCurrentDate(new Date())}>Hoy</button>
+                <button onClick={() => setCurrentDate(date => new Date(date.getFullYear(), date.getMonth(), date.getDate() + 7))}><ChevronRight size={20} /></button>
               </div>
 
-              <button className="btn-add-appointment" type="button" onClick={() => navigate('/date')}>
+              <button className="btn-add-appointment" type="button" onClick={() => navigate(doctorId ? `/date?doctorId=${doctorId}` : '/date')}>
                 <Plus size={18} /> Agendar cita
               </button>
             </div>
@@ -100,7 +109,7 @@ export default function AgendaView() {
             <aside className="agenda-sidebar-left">
               <div className="mini-calendar-card">
                 <div className="mini-cal-header">
-                  <span>OCTUBRE 2026</span>
+                  <span>{monthLabel}</span>
                   <div className="nav">
                     <ChevronLeft size={16} />
                     <ChevronRight size={16} />
@@ -109,8 +118,8 @@ export default function AgendaView() {
                 <div className="mini-cal-grid">
                   {['L','M','X','J','V','S','D'].map(d => <div key={d} className="day-name">{d}</div>)}
                   {/* Renderizado simplificado de días */}
-                  {Array.from({length: 31}, (_, i) => (
-                    <div key={i} className={`day-num ${i+1 === 12 ? 'selected' : ''}`}>
+                  {Array.from({length: daysInMonth}, (_, i) => (
+                    <div key={i} className={`day-num ${i + 1 === currentDate.getDate() ? 'selected' : ''}`}>
                       {i + 1}
                     </div>
                   ))}

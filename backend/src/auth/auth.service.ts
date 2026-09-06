@@ -47,12 +47,15 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials.');
     }
 
+    const tokenPayload = await this.buildTokenPayload(data);
+
     return {
-      access_token: await this.jwtService.signAsync(
-        await this.buildTokenPayload(data),
-      ),
+      access_token: await this.jwtService.signAsync(tokenPayload),
       user: true,
       rol: data.rol,
+      ...(typeof tokenPayload.doctorId === 'number'
+        ? { doctorId: tokenPayload.doctorId }
+        : {}),
     };
   }
 

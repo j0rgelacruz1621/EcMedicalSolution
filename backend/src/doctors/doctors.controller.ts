@@ -5,6 +5,7 @@ import {
   Param,
   ParseIntPipe,
   Post,
+  Patch,
   Query,
   UsePipes,
   ValidationPipe,
@@ -18,9 +19,11 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { Public } from '../auth/public.decorator.js';
+import { Roles } from '../auth/roles.decorator.js';
 import { PaginatedResponseDto } from '../common/dto/paginated-response.dto';
 import { CreateDoctorDto } from './dto/create-doctor.dto.js';
 import { CreateDoctorSchedulesDto } from './dto/create-doctor-schedules.dto.js';
+import { UpdateDoctorDto } from './dto/update-doctor.dto.js';
 import { DoctorsService } from './doctors.service.js';
 
 @ApiTags('doctors')
@@ -71,6 +74,15 @@ export class DoctorsController {
   @ApiParam({ name: 'id', type: Number, example: 1 })
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.doctorsService.findOne(id);
+  }
+
+  @Patch(':id')
+  @Roles('SA')
+  @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
+  @ApiOperation({ summary: 'Update a doctor' })
+  @ApiParam({ name: 'id', type: Number, example: 1 })
+  update(@Param('id', ParseIntPipe) id: number, @Body() payload: UpdateDoctorDto) {
+    return this.doctorsService.update(id, payload);
   }
 
   @Public()

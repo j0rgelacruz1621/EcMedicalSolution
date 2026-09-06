@@ -23,6 +23,7 @@ model Doctor {
   updatedAt     DateTime?        @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
   description   String?
   schedules     DoctorSchedule[]
+  appointments  Appointment[]
   office        Office?          @relation(fields: [officeId], references: [id], onUpdate: NoAction, map: "fk_doctors_office")
   reports       reports[]
   tasks         tasks[]
@@ -38,7 +39,8 @@ model MedicalCenter {
   isActive  Boolean?  @default(true) @map("is_active")
   createdAt DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt DateTime? @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
-  offices   Office[]
+  offices      Office[]
+  appointments Appointment[]
 
   @@map("medical_centers")
 }
@@ -51,6 +53,7 @@ model Office {
   isActive        Boolean?       @default(true) @map("is_active")
   createdAt       DateTime?      @default(now()) @map("created_at") @db.Timestamptz(6)
   doctors         Doctor[]
+  appointments    Appointment[]
   medicalCenter   MedicalCenter? @relation(fields: [medicalCenterId], references: [id], onUpdate: NoAction, map: "fk_offices_medical_center")
 
   @@map("offices")
@@ -91,6 +94,9 @@ model Appointment {
   status          appointment_status_enum? @default(SCHEDULED)
   createdAt       DateTime?                @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt       DateTime?                @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  doctor          Doctor                   @relation(fields: [doctorId], references: [id], onDelete: Restrict, onUpdate: Cascade, map: "appointments_doctor_id_fkey")
+  medicalCenter   MedicalCenter?           @relation(fields: [medicalCenterId], references: [id], onDelete: SetNull, onUpdate: Cascade, map: "appointments_medical_center_id_fkey")
+  office          Office?                  @relation(fields: [officeId], references: [id], onDelete: SetNull, onUpdate: Cascade, map: "appointments_office_id_fkey")
   patient         Patient                  @relation(fields: [patientId], references: [id], onUpdate: NoAction, map: "fk_appointments_patient")
   patient_vitals  patient_vitals[]
   reports         reports[]

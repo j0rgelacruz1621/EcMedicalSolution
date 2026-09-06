@@ -2,18 +2,23 @@ import {
   Injectable,
   InternalServerErrorException,
   NotFoundException,
+  BadRequestException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
 import { SafeUserRow } from '../supabase/database.types';
 import { SupabaseService } from '../supabase/supabase.service';
 import { CreateUserDto } from './create-user.dto';
 import { UpdateUserDto } from './update-user.dto';
+import { PrismaService } from '../prisma/prisma.service';
 
 const SALT_ROUNDS = 10;
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly supabaseService: SupabaseService) {}
+  constructor(
+    private readonly supabaseService: SupabaseService,
+    private readonly prisma: PrismaService,
+  ) {}
 
   private async hashPassword(password: string): Promise<string> {
     return bcrypt.hash(password, SALT_ROUNDS);
@@ -57,12 +62,36 @@ export class UsersService {
   }
 
   async create(payload: CreateUserDto): Promise<SafeUserRow> {
+    let userName = payload.user_name;
+
+    if (payload.rol === 'DOCTOR') {
+      if (!payload.doctor_id) {
+        throw new BadRequestException('A doctor must be selected for a DOCTOR account.');
+      }
+
+      const doctor = await this.prisma.doctor.findUnique({
+        where: { id: BigInt(payload.doctor_id) },
+        select: { email: true },
+      });
+
+      if (!doctor) {
+        throw new NotFoundException('The selected doctor does not exist.');
+      }
+
+      userName = doctor.email;
+    }
+
     const password = await this.hashPassword(payload.password);
 
     const { data, error } = await this.supabaseService
       .getClient()
       .from('users')
-      .insert({ ...payload, password })
+      .insert({
+        user_name: userName,
+        password,
+        rol: payload.rol,
+        application: payload.application,
+      })
       .select('id, created_at, user_name, rol, application')
       .single();
 
