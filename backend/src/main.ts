@@ -7,11 +7,29 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.enableCors({
-    origin: [
-      'http://localhost:5173',
-      'http://127.0.0.1:5173',
-      'https://app.smartmedicalcontrol.us',
-    ],
+    origin: (
+      origin: string | undefined,
+      callback: (error: Error | null, allow?: boolean) => void,
+    ) => {
+      if (!origin) {
+        return callback(null, true);
+      }
+
+      try {
+        const { hostname, protocol } = new URL(origin);
+        const isLocalOrigin =
+          (hostname === 'localhost' || hostname === '127.0.0.1') &&
+          protocol === 'http:';
+        const isProductionOrigin =
+          protocol === 'https:' &&
+          (hostname === 'smartmedicalcontrol.us' ||
+            hostname.endsWith('.smartmedicalcontrol.us'));
+
+        return callback(null, isLocalOrigin || isProductionOrigin);
+      } catch {
+        return callback(null, false);
+      }
+    },
     credentials: true,
   });
 

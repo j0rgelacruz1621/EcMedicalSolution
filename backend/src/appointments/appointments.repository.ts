@@ -139,7 +139,7 @@ export class AppointmentsRepository {
             reasonForVisit: payload.reasonForVisit,
             status: 'SCHEDULED',
           },
-          include: { patient: true, doctor: true },
+          include: { patient: true },
         });
       });
     } catch (error: unknown) {
@@ -241,9 +241,6 @@ export class AppointmentsRepository {
         },
         include: {
           patient: true,
-          doctor: true,
-          medicalCenter: true,
-          office: true,
         },
       });
     });
@@ -312,9 +309,6 @@ export class AppointmentsRepository {
       take,
       include: {
         patient: true,
-        doctor: true,
-        medicalCenter: true,
-        office: true,
       },
     });
   }
@@ -338,9 +332,6 @@ export class AppointmentsRepository {
       orderBy: [{ appointmentDate: 'desc' }, { startTime: 'desc' }],
       include: {
         patient: true,
-        doctor: true,
-        medicalCenter: true,
-        office: true,
       },
     });
   }

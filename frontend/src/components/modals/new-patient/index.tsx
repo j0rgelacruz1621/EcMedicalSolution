@@ -2,11 +2,12 @@ import React from 'react';
 import { X, UserPlus, Save, Activity } from 'lucide-react';
 import './style.scss';
 import { useState } from 'react';
+import { createPatient, type Patient, type PatientGender } from '../../../services/patients/patient-services';
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess: (data: any) => void; // Nueva prop
+  onSuccess: (patient: Patient) => void;
 }
 
 
@@ -16,8 +17,9 @@ export default function NewPatientModal({ isOpen, onClose, onSuccess }: Props) {
     name: '',
     lastName: '',
     ci: '',
-    age: '',
-    origin: '',
+    email: '',
+    dateOfBirth: '',
+    gender: '' as PatientGender | '',
     phone: '',
     pa: '',
     fc: '',
@@ -25,17 +27,37 @@ export default function NewPatientModal({ isOpen, onClose, onSuccess }: Props) {
     address: ''
   });
 
+  const [error, setError] = useState('');
+  const [saving, setSaving] = useState(false);
+
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSuccess({
-      name: `${formData.name} ${formData.lastName}`,
-      ci: formData.ci,
-      age: formData.age,
-      origin: formData.origin,
-      email: `${formData.name.toLowerCase().replace(' ', '.')}@email.com`
-    });
+    setError('');
+    setSaving(true);
+
+    try {
+      const result = await createPatient({
+        nationalId: formData.ci,
+        firstName: formData.name,
+        lastName: formData.lastName,
+        email: formData.email,
+        phone: formData.phone,
+        dateOfBirth: formData.dateOfBirth,
+        gender: formData.gender as PatientGender,
+        vitals: {
+          ...(formData.pa ? { bloodPressure: formData.pa.replace(/\s*mmHg\s*$/i, '') } : {}),
+          ...(formData.fc ? { heartRateBpm: Number(formData.fc.replace(/\s*bpm\s*$/i, '')) } : {}),
+          ...(formData.weight ? { weightKg: Number(formData.weight.replace(/\s*kg\s*$/i, '')) } : {}),
+        },
+      });
+      onSuccess(result.patient);
+    } catch {
+      setError('No se pudo guardar el paciente. Verifica los datos e inténtalo nuevamente.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -84,33 +106,42 @@ export default function NewPatientModal({ isOpen, onClose, onSuccess }: Props) {
               <input 
                 type="text" 
                 placeholder="V-00.000.000" 
-                value={formData.ci}
+                  value={formData.ci}
                 onChange={(e) => setFormData({...formData, ci: e.target.value})}
                 required 
               />
             </div>
             <div className="form-group">
-              <label>Edad</label>
+              <label>Fecha de nacimiento</label>
               <input 
-                type="text" 
-                placeholder="Años" 
-                value={formData.age}
-                onChange={(e) => setFormData({...formData, age: e.target.value})}
+                type="date"
+                value={formData.dateOfBirth}
+                onChange={(e) => setFormData({...formData, dateOfBirth: e.target.value})}
                 required 
               />
             </div>
 
             <div className="form-group">
-              <label>Procedencia</label>
+              <label>Correo electrónico</label>
+              <input
+                type="email"
+                placeholder="paciente@email.com"
+                value={formData.email}
+                onChange={(e) => setFormData({...formData, email: e.target.value})}
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label>Género</label>
                 <select 
-                  value={formData.origin}
-                  onChange={(e) => setFormData({...formData, origin: e.target.value})}
+                  value={formData.gender}
+                  onChange={(e) => setFormData({...formData, gender: e.target.value as PatientGender})}
                   required
                 >
                   <option value="">Seleccione una opción</option>
-                  <option value="Mérida">Mérida</option>
-                  <option value="Tovar">Tovar</option>
-                  <option value="Ejido">Ejido</option>
+                  <option value="MASCULINO">Masculino</option>
+                  <option value="FEMENINO">Femenino</option>
+                  <option value="OTRO">Otro</option>
                 </select>
             </div>
             <div className="form-group">
@@ -120,6 +151,7 @@ export default function NewPatientModal({ isOpen, onClose, onSuccess }: Props) {
                 placeholder="+58 412-0000000" 
                 value={formData.phone}
                 onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                required
               />
             </div>
 
@@ -160,13 +192,7 @@ export default function NewPatientModal({ isOpen, onClose, onSuccess }: Props) {
             </div>
 
             <div className="form-group full-width">
-              <label>Dirección detallada</label>
-              <textarea 
-  placeholder="Calle, edificio, urbanización, ciudad..." 
-  rows={3}
-  value={formData.address}
-  onChange={(e) => setFormData({...formData, address: e.target.value})}
-></textarea>
+              {error && <p className="text-danger mb-0">{error}</p>}
             </div>
           </div>
         </form>
@@ -175,9 +201,9 @@ export default function NewPatientModal({ isOpen, onClose, onSuccess }: Props) {
           <button type="button" className="btn-text" onClick={onClose}>
             Cancelar
           </button>
-          <button type="submit" className="btn-save-large" form="new-patient-form">
+          <button type="submit" className="btn-save-large" form="new-patient-form" disabled={saving}>
             <Save size={18} />
-            Guardar Paciente
+            {saving ? 'Guardando...' : 'Guardar Paciente'}
           </button>
         </footer>
       </div>

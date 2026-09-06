@@ -7,6 +7,22 @@ import { CreateOfficeDto } from './dto/create-office.dto';
 export class MedicalCentersRepository {
   constructor(private readonly prisma: PrismaService) {}
 
+  findMedicalCenters() {
+    return this.prisma.medicalCenter.findMany({
+      where: { isActive: true },
+      include: { offices: { where: { isActive: true } } },
+      orderBy: { name: 'asc' },
+    });
+  }
+
+  findOffices() {
+    return this.prisma.office.findMany({
+      where: { isActive: true },
+      include: { medicalCenter: true },
+      orderBy: { officeNumber: 'asc' },
+    });
+  }
+
   createMedicalCenter(payload: CreateMedicalCenterDto) {
     return this.prisma.medicalCenter.create({ data: payload });
   }

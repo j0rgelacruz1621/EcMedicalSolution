@@ -1,6 +1,4 @@
-import axios from 'axios';
-
-const API_URL = 'https://api.smartmedicalcontrol.us/doctors';
+import { apiClient } from '../api-client';
 
 // Definimos la estructura exacta que pide tu API
 export interface DoctorRequestBody {
@@ -14,13 +12,23 @@ export interface DoctorRequestBody {
   officeId: number;
 }
 
+export interface Doctor {
+  id: number;
+  firstName: string;
+  lastName: string;
+  specialty?: string | null;
+}
+
+export async function getDoctors(): Promise<Doctor[]> {
+  const response = await apiClient.get<{ data: Doctor[] }>('/doctors', {
+    params: { page: 1, limit: 100 },
+  });
+  return response.data.data;
+}
+
 export const registerDoctor = async (doctorData: DoctorRequestBody) => {
   try {
-    const response = await axios.post(API_URL, doctorData, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    const response = await apiClient.post('/doctors', doctorData);
     return response.data;
   } catch (error: any) {
     // Si el backend devuelve un error específico, lo lanzamos

@@ -3,8 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model Doctor {
@@ -20,11 +21,11 @@ model Doctor {
   isActive      Boolean?         @default(true) @map("is_active")
   createdAt     DateTime?        @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt     DateTime?        @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  description   String?
   schedules     DoctorSchedule[]
   office        Office?          @relation(fields: [officeId], references: [id], onUpdate: NoAction, map: "fk_doctors_office")
   reports       reports[]
   tasks         tasks[]
-  appointments  Appointment[]
 
   @@map("doctors")
 }
@@ -38,7 +39,6 @@ model MedicalCenter {
   createdAt DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt DateTime? @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
   offices   Office[]
-  appointments Appointment[]
 
   @@map("medical_centers")
 }
@@ -52,7 +52,6 @@ model Office {
   createdAt       DateTime?      @default(now()) @map("created_at") @db.Timestamptz(6)
   doctors         Doctor[]
   medicalCenter   MedicalCenter? @relation(fields: [medicalCenterId], references: [id], onUpdate: NoAction, map: "fk_offices_medical_center")
-  appointments    Appointment[]
 
   @@map("offices")
 }
@@ -93,15 +92,10 @@ model Appointment {
   createdAt       DateTime?                @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt       DateTime?                @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
   patient         Patient                  @relation(fields: [patientId], references: [id], onUpdate: NoAction, map: "fk_appointments_patient")
-  doctor          Doctor                   @relation(fields: [doctorId], references: [id])
-  medicalCenter   MedicalCenter?           @relation(fields: [medicalCenterId], references: [id])
-  office          Office?                  @relation(fields: [officeId], references: [id])
   patient_vitals  patient_vitals[]
   reports         reports[]
 
   @@index([appointmentDate, doctorId], map: "idx_appointments_date_doctor")
-  @@index([medicalCenterId], map: "idx_appointments_medical_center")
-  @@index([status], map: "idx_appointments_status")
   @@map("appointments")
 }
 

@@ -1,6 +1,4 @@
-import axios from 'axios';
-
-const API_URL = 'https://api.smartmedicalcontrol.us/auth/login';
+import { apiClient } from '../api-client';
 
 export interface LoginRequest {
   user_name: string;
@@ -15,14 +13,7 @@ export interface LoginResponse {
 
 export const loginUser = async (credentials: LoginRequest): Promise<LoginResponse> => {
   try {
-        console.log({
-        credentials
-        })
-    const response = await axios.post<LoginResponse>(API_URL, credentials, {
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    });
+    const response = await apiClient.post<LoginResponse>('/auth/login', credentials);
     return response.data;
   } catch (error: any) {
     const message = error.response?.data?.message || 'Error al iniciar sesión';

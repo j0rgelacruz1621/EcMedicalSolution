@@ -32,6 +32,14 @@ function toJsonSafe(value: unknown): unknown {
 export class MedicalCentersService {
   constructor(private readonly repository: MedicalCentersRepository) {}
 
+  async findMedicalCenters() {
+    return toJsonSafe(await this.repository.findMedicalCenters());
+  }
+
+  async findOffices() {
+    return toJsonSafe(await this.repository.findOffices());
+  }
+
   async createMedicalCenter(
     payload: CreateMedicalCenterDto,
   ): Promise<Record<string, unknown>> {

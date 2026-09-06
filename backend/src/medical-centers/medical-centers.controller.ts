@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Post,
+  Get,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
@@ -15,6 +16,20 @@ import { MedicalCentersService } from './medical-centers.service';
 @Controller('medical-centers')
 export class MedicalCentersController {
   constructor(private readonly service: MedicalCentersService) {}
+
+  @Public()
+  @Get()
+  @ApiOperation({ summary: 'List active medical centers with offices' })
+  findMedicalCenters() {
+    return this.service.findMedicalCenters();
+  }
+
+  @Public()
+  @Get('offices')
+  @ApiOperation({ summary: 'List active medical offices' })
+  findOffices() {
+    return this.service.findOffices();
+  }
 
   @Public()
   @Post()
