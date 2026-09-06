@@ -16,6 +16,7 @@ import {
   ApiOperation,
   ApiParam,
   ApiQuery,
+  ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
 import { appointment_status_enum } from '@prisma/client';
@@ -176,5 +177,34 @@ export class AppointmentsController {
     @Body() payload: UpdateAppointmentDto,
   ) {
     return this.appointmentsService.update(id, payload);
+  }
+
+  @Public()
+  @Patch(':id/cancel')
+  @ApiOperation({
+    summary: 'Cancel an appointment (soft delete)',
+    description:
+      'Sets the appointment status to CANCELLED, freeing up the slot in the schedule. Accepts either the numeric ' +
+      'appointment id or its appointment_code in the id path parameter. Rejects with 422 Unprocessable Entity if ' +
+      'the appointment is already COMPLETED, CANCELLED or NO_SHOW.',
+  })
+  @ApiParam({
+    name: 'id',
+    type: String,
+    example: '1',
+    description: 'Numeric appointment id or appointment_code (e.g. APT-20260810-A1B2).',
+  })
+  @ApiOkResponse({ description: 'The cancelled appointment.' })
+  @ApiResponse({
+    status: 404,
+    description: 'No appointment matches the given id or appointment_code.',
+  })
+  @ApiResponse({
+    status: 422,
+    description:
+      'The appointment is already COMPLETED, CANCELLED or NO_SHOW and can no longer be cancelled.',
+  })
+  cancel(@Param('id') id: string) {
+    return this.appointmentsService.cancel(id);
   }
 }

@@ -53,6 +53,10 @@ export class PatientsRepository {
     return this.prisma.patient.findUnique({ where: { nationalId } });
   }
 
+  findByEmail(email: string) {
+    return this.prisma.patient.findFirst({ where: { email } });
+  }
+
   findById(id: bigint) {
     return this.prisma.patient.findUnique({ where: { id } });
   }
@@ -70,6 +74,10 @@ export class PatientsRepository {
 
       return { patient, vitals: patientVitals };
     });
+  }
+
+  createPatientOnly(patientData: PatientData) {
+    return this.prisma.patient.create({ data: patientData });
   }
 
   updatePatientOnly(id: bigint, patientData: Partial<PatientData>) {

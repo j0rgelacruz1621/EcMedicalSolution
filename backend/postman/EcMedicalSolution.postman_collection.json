@@ -329,6 +329,19 @@
               "path": ["appointments", "patient", "0912345678"]
             }
           }
+        },
+        {
+          "name": "Cancel appointment",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/appointments/{{appointmentId}}/cancel",
+              "host": ["{{baseUrl}}"],
+              "path": ["appointments", "{{appointmentId}}", "cancel"]
+            },
+            "description": "Cancela la cita (soft delete: status -> CANCELLED). El {{appointmentId}} puede reemplazarse por el appointment_code (ej. APT-20260810-A1B2). Responde 200 OK, 404 si no existe, o 422 si ya esta COMPLETED/CANCELLED/NO_SHOW."
+          }
         }
       ]
     },
@@ -377,6 +390,40 @@
               "host": ["{{baseUrl}}"],
               "path": ["api", "v1", "patients"]
             }
+          }
+        },
+        {
+          "name": "Create patient (no vitals)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "if (body.patient && body.patient.id) pm.collectionVariables.set('patientId', body.patient.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nationalId\": \"0912345679\",\n  \"firstName\": \"Carlos\",\n  \"lastName\": \"Ramirez\",\n  \"email\": \"carlos.ramirez@example.com\",\n  \"phone\": \"0988888888\",\n  \"dateOfBirth\": \"1985-03-15\",\n  \"gender\": \"MASCULINO\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/patients",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "patients"]
+            },
+            "description": "Registro basico de paciente sin signos vitales (HU1). Responde 201 con el paciente creado; 409 si national_id o email ya existen; 400 si falta un campo obligatorio o dateOfBirth no es una fecha pasada valida."
           }
         },
         {

@@ -72,6 +72,13 @@ export class AppointmentsService {
     return toJsonSafe(appointment) as Record<string, unknown>;
   }
 
+  async cancel(idOrCode: string): Promise<Record<string, unknown>> {
+    const appointment =
+      await this.appointmentsRepository.cancelAppointment(idOrCode);
+
+    return toJsonSafe(appointment) as Record<string, unknown>;
+  }
+
   async findByPatientNationalId(
     nationalId: string,
   ): Promise<Record<string, unknown>[]> {
