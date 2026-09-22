@@ -1,6 +1,6 @@
 :root {
   /* TEMA POR DEFECTO: VINOTINTO (Control Panel, Agenda, etc.) */
-  --primary-color: #800020;         /* Vinotinto */
+  --primary-color: rgb(133 4 15 / var(--tw-bg-opacity, 1));         /* Vinotinto */
   --primary-hover: #5a0017;         
   --primary-light: #f8d7da;         /* Vinotinto clarito para fondos */
   --primary-shadow: rgba(128, 0, 32, 0.15);

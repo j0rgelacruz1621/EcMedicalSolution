@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect, useRef } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import Header from '../../header'
 import Footer from '../../footer'
@@ -6,26 +6,32 @@ import './style.scss'
 import ConfirmDatePreview from '../../modals/confirm-date-preview'
 import ConfirmDate from '../../modals/confirm-date'
 import { createAppointment } from '../../../services/appointments/appointment-services'
-import { getDoctors, type Doctor } from '../../../services/doctors/doctor-services'
+import { getDoctors } from '../../../services/doctors/doctor-services'
 import { getOffices, type Office } from '../../../services/medical-center/medical-center-services'
 
-// Importamos los iconos profesionales
-import { 
-  User, 
-  IdCard, 
-  Fingerprint, 
-  Cake, 
-  Phone, 
-  Hospital, 
-  ChevronLeft, 
-  ChevronRight, 
-  Calendar as CalendarIcon, 
-  Clock, 
-  Info 
+import {
+  User,
+  IdCard,
+  Fingerprint,
+  Cake,
+  Phone,
+  Hospital,
+  ChevronLeft,
+  ChevronRight,
+  Calendar as CalendarIcon,
+  Clock,
+  Info
 } from 'lucide-react'
 
-// --- FUNCIONES AUXILIARES ---
 const weekDays = ['D', 'L', 'M', 'M', 'J', 'V', 'S']
+
+const formatShortDate = (date: Date | null) => {
+  if (!date) return ''
+  const day = String(date.getDate()).padStart(2, '0')
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const year = date.getFullYear()
+  return `${day}/${month}/${year}`
+}
 
 const formatLongDate = (date: Date | null) => {
   if (!date) return ''
@@ -48,6 +54,21 @@ const getCalendarDays = (year: number, month: number) => {
   })
 }
 
+const applyCedulaMask = (value: string) => {
+  const digits = value.replace(/\D/g, '').slice(0, 11)
+  if (digits.length <= 3) return digits
+  if (digits.length <= 10) return `${digits.slice(0, 3)}-${digits.slice(3)}`
+  return `${digits.slice(0, 3)}-${digits.slice(3, 10)}-${digits.slice(10)}`
+}
+
+const applyPhoneMask = (value: string) => {
+  const cleaned = value.replace(/\D/g, '').slice(0, 12)
+  if (cleaned.length <= 2) return cleaned ? `+${cleaned}` : ''
+  if (cleaned.length <= 5) return `+${cleaned.slice(0, 2)} ${cleaned.slice(2)}`
+  if (cleaned.length <= 8) return `+${cleaned.slice(0, 2)} ${cleaned.slice(2, 5)} ${cleaned.slice(5)}`
+  return `+${cleaned.slice(0, 2)} ${cleaned.slice(2, 5)} ${cleaned.slice(5, 8)} ${cleaned.slice(8)}`
+}
+
 export default function DateView() {
   const navigate = useNavigate()
   const activeRole = localStorage.getItem('user_rol')
@@ -59,13 +80,13 @@ export default function DateView() {
   const controlPanelPath = selectedContextDoctorId
     ? `/control-panel?doctorId=${selectedContextDoctorId}`
     : '/control-panel'
+
   const today = useMemo(() => {
     const current = new Date()
     current.setHours(0, 0, 0, 0)
     return current
   }, [])
 
-  // ESTADOS PRINCIPALES
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date())
   const [visibleDate, setVisibleDate] = useState<Date>(() => {
     const date = new Date()
@@ -73,43 +94,33 @@ export default function DateView() {
     date.setHours(0, 0, 0, 0)
     return date
   })
-
   const visibleMonth = visibleDate.getMonth()
   const visibleYear = visibleDate.getFullYear()
-  
+
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [cedula, setCedula] = useState('')
   const [age, setAge] = useState('')
   const [phone, setPhone] = useState('')
-  const [email, setEmail] = useState('')
-  const [dateOfBirth, setDateOfBirth] = useState('')
-  const [gender, setGender] = useState<'MASCULINO' | 'FEMENINO' | 'OTRO'>('OTRO')
+  const [consultationType, setConsultationType] = useState('')
 
   const sanitizeName = (value: string) => value.replace(/[^A-Za-zÀ-ÿ\s]/g, '')
-  const sanitizeCedula = (value: string) => value.replace(/[^0-9-]/g, '')
-  const sanitizeAge = (value: string) => value.replace(/\D/g, '')
-  const sanitizePhone = (value: string) => value.replace(/[^0-9+()\s-]/g, '')
-  
-  const [doctors, setDoctors] = useState<Doctor[]>([])
+  const sanitizeAge = (value: string) => value.replace(/\D/g, '').slice(0, 2)
+
   const [offices, setOffices] = useState<Office[]>([])
   const [selectedDoctorId, setSelectedDoctorId] = useState('')
   const [selectedOfficeId, setSelectedOfficeId] = useState('')
   const [catalogError, setCatalogError] = useState('')
   const [submitError, setSubmitError] = useState('')
-  
-  // Partes del selector de hora
+
   const [timeHour, setTimeHour] = useState<string>('10')
   const [timeMinute, setTimeMinute] = useState<string>('00')
   const [timeMeridiem, setTimeMeridiem] = useState<string>('AM')
 
-  // MODALES
   const [isConfirmOpen, setIsConfirmOpen] = useState(false)
   const [isFinalOpen, setIsFinalOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [finalBooking, setFinalBooking] = useState<any>(null)
-
-  const calendarRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
     Promise.all([getDoctors(), getOffices()])
@@ -117,7 +128,6 @@ export default function DateView() {
         const availableDoctors = selectedContextDoctorId
           ? loadedDoctors.filter(doctor => String(doctor.id) === selectedContextDoctorId)
           : loadedDoctors
-        setDoctors(availableDoctors)
         setOffices(loadedOffices)
         const defaultDoctorId = selectedContextDoctorId || String(availableDoctors[0]?.id ?? '')
         setSelectedDoctorId(defaultDoctorId)
@@ -134,8 +144,48 @@ export default function DateView() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!firstName || !lastName || !cedula || !email || !dateOfBirth || !phone || !selectedDate || !selectedDoctorId || !selectedOfficeId) return alert('Complete los campos obligatorios')
     setSubmitError('')
+
+    if (!firstName.trim() || !lastName.trim()) {
+      setSubmitError('Debe completar nombres y apellidos.')
+      return
+    }
+
+    if (!cedula || cedula.length < 13) {
+      setSubmitError('La cédula debe tener el formato 000-0000000-0.')
+      return
+    }
+
+    if (!age || Number(age) <= 0) {
+      setSubmitError('La edad debe ser un valor numérico positivo.')
+      return
+    }
+
+    if (!phone || phone.length < 12) {
+      setSubmitError('El número de teléfono debe tener formato internacional válido.')
+      return
+    }
+
+    if (!selectedOfficeId) {
+      setSubmitError('Debe seleccionar un consultorio.')
+      return
+    }
+
+    if (!selectedDate || selectedDate < today) {
+      setSubmitError('Debe seleccionar una fecha válida.')
+      return
+    }
+
+    if (!consultationType) {
+      setSubmitError('Debe seleccionar un tipo de consulta.')
+      return
+    }
+
+    if (!selectedDoctorId) {
+      setSubmitError('No hay médico disponible para esta solicitud.')
+      return
+    }
+
     setIsConfirmOpen(true)
   }
 
@@ -156,7 +206,15 @@ export default function DateView() {
         endAt: endAt.toISOString(),
         medicalCenterId: office.medicalCenterId,
         officeId: office.id,
-        patient: { nationalId: cedula, firstName, lastName, email, phone, dateOfBirth, gender },
+        patient: {
+          nationalId: cedula,
+          firstName,
+          lastName,
+          email: '',
+          phone,
+          dateOfBirth: '',
+          gender: 'OTRO'
+        }
       })
 
       setIsSubmitting(false)
@@ -164,7 +222,7 @@ export default function DateView() {
       setFinalBooking({
         dateLabel: formatLongDate(selectedDate),
         timeLabel: `${timeHour}:${timeMinute} ${timeMeridiem}`,
-        specialty: doctors.find(item => item.id === Number(selectedDoctorId))?.specialty ?? 'Consulta médica',
+        specialty: consultationType,
         location: office.officeNumber,
         appointmentCode: appointment.appointmentCode,
       })
@@ -182,25 +240,20 @@ export default function DateView() {
       <Header />
       <section className="date-view py-5">
         <div className="container">
-          <div className="text-center mb-4 w-100"> 
-            <h1 className="date-view__main-title display-5 fw-bold">
-              Agendar Cita Médica
-            </h1>
+          <div className="date-view__header-box">
+            <h1 className="date-view__main-title">Agendar Cita Médica</h1>
             <p className="date-view__subtitle">
-              Completa el formulario a continuación para programar tu consulta de cardiología especializada.
+              Complete el formulario a continuación para programar su consulta de cardiología especializada.
             </p>
           </div>
 
-          <div className="date-view__card shadow-lg">
-            <form onSubmit={handleSubmit}>
-              {/* FILA 1: NOMBRES Y APELLIDOS */}
-              <div className="row g-4 mb-4">
-                <div className="col-md-6">
+          <div className="date-view__card">
+            <form onSubmit={handleSubmit} className="date-view__form">
+              <div className="date-view__fields-grid">
+                <div className="date-view__field">
                   <label className="form-label">Nombres</label>
                   <div className="input-group">
-                    <span className="input-group-text">
-                      <User size={18} strokeWidth={2.5} />
-                    </span>
+                    <span className="input-group-text"><User size={18} strokeWidth={2.2} /></span>
                     <input
                       className="form-control"
                       type="text"
@@ -210,12 +263,11 @@ export default function DateView() {
                     />
                   </div>
                 </div>
-                <div className="col-md-6">
+
+                <div className="date-view__field">
                   <label className="form-label">Apellidos</label>
                   <div className="input-group">
-                    <span className="input-group-text">
-                      <IdCard size={18} strokeWidth={2.5} />
-                    </span>
+                    <span className="input-group-text"><IdCard size={18} strokeWidth={2.2} /></span>
                     <input
                       className="form-control"
                       type="text"
@@ -226,28 +278,24 @@ export default function DateView() {
                   </div>
                 </div>
 
-                {/* FILA 2: CÉDULA Y EDAD */}
-                <div className="col-md-6">
+                <div className="date-view__field">
                   <label className="form-label">Cédula de Identidad</label>
                   <div className="input-group">
-                    <span className="input-group-text">
-                      <Fingerprint size={18} strokeWidth={2.5} />
-                    </span>
+                    <span className="input-group-text"><Fingerprint size={18} strokeWidth={2.2} /></span>
                     <input
                       className="form-control"
                       type="text"
                       placeholder="000-0000000-0"
                       value={cedula}
-                      onChange={e => setCedula(sanitizeCedula(e.target.value))}
+                      onChange={e => setCedula(applyCedulaMask(e.target.value))}
                     />
                   </div>
                 </div>
-                <div className="col-md-6">
+
+                <div className="date-view__field">
                   <label className="form-label">Edad</label>
                   <div className="input-group">
-                    <span className="input-group-text">
-                      <Cake size={18} strokeWidth={2.5} />
-                    </span>
+                    <span className="input-group-text"><Cake size={18} strokeWidth={2.2} /></span>
                     <input
                       className="form-control"
                       type="text"
@@ -258,94 +306,64 @@ export default function DateView() {
                   </div>
                 </div>
 
-                <div className="col-md-6">
-                  <label className="form-label">Fecha de nacimiento</label>
-                  <input className="form-control" type="date" value={dateOfBirth} onChange={e => setDateOfBirth(e.target.value)} />
-                </div>
-                <div className="col-md-6">
-                  <label className="form-label">Correo electrónico</label>
-                  <input className="form-control" type="email" value={email} onChange={e => setEmail(e.target.value)} />
-                </div>
-                <div className="col-md-6">
-                  <label className="form-label">Género</label>
-                  <select className="form-select" value={gender} onChange={e => setGender(e.target.value as typeof gender)}>
-                    <option value="MASCULINO">Masculino</option>
-                    <option value="FEMENINO">Femenino</option>
-                    <option value="OTRO">Otro</option>
-                  </select>
-                </div>
-
-                {/* FILA 3: TELÉFONO Y CONSULTORIO */}
-                <div className="col-md-6">
+                <div className="date-view__field">
                   <label className="form-label">Número de teléfono</label>
                   <div className="input-group">
-                    <span className="input-group-text">
-                      <Phone size={18} strokeWidth={2.5} />
-                    </span>
+                    <span className="input-group-text"><Phone size={18} strokeWidth={2.2} /></span>
                     <input
                       className="form-control"
                       type="tel"
                       placeholder="+00 000 000 0000"
                       value={phone}
-                      onChange={e => setPhone(sanitizePhone(e.target.value))}
+                      onChange={e => setPhone(applyPhoneMask(e.target.value))}
                     />
                   </div>
                 </div>
-                <div className="col-md-6">
+
+                <div className="date-view__field">
                   <label className="form-label">Consultorio</label>
                   <div className="input-group">
-                    <span className="input-group-text">
-                      <Hospital size={18} strokeWidth={2.5} />
-                    </span>
+                    <span className="input-group-text"><Hospital size={18} strokeWidth={2.2} /></span>
                     <select className="form-select" value={selectedOfficeId} onChange={e => setSelectedOfficeId(e.target.value)}>
                       <option value="">Seleccione ubicación</option>
-                      {offices.map(office => <option key={office.id} value={office.id}>{office.officeNumber} {office.locationDetails ? `- ${office.locationDetails}` : ''}</option>)}
+                      {offices.map(office => (
+                        <option key={office.id} value={office.id}>
+                          {office.officeNumber}{office.locationDetails ? ` - ${office.locationDetails}` : ''}
+                        </option>
+                      ))}
                     </select>
                   </div>
                 </div>
-                <div className="col-md-6">
-                  <label className="form-label">Médico</label>
-                  <select className="form-select" disabled={Boolean(selectedContextDoctorId)} value={selectedDoctorId} onChange={e => setSelectedDoctorId(e.target.value)}>
-                    <option value="">Seleccione médico</option>
-                    {doctors.map(doctor => <option key={doctor.id} value={doctor.id}>Dr. {doctor.firstName} {doctor.lastName}</option>)}
-                  </select>
-                </div>
-                {catalogError && <div className="col-12"><div className="alert alert-danger">{catalogError}</div></div>}
               </div>
 
-              {/* SECCIÓN CALENDARIO Y DETALLES */}
-              <div className="row g-5 pt-4 border-top">
-                <div className="col-lg-6">
-                  <label className="form-label mb-3">Fecha de la cita</label>
-                  <div className="calendar-box" ref={calendarRef}>
+              <div className="date-view__date-layout">
+                <div className="date-view__calendar-wrap">
+                  <label className="form-label">Fecha de la cita</label>
+                  <div className="calendar-box">
                     <div className="calendar-box__header">
                       <span>{monthLabel}</span>
-                      <div className="d-flex gap-3">
-                        <button
-                          type="button"
-                          className="border-0 bg-transparent p-0"
-                          onClick={() => setVisibleDate(date => new Date(date.getFullYear(), date.getMonth() - 1, 1))}
-                        >
-                          <ChevronLeft size={22} />
+                      <div className="calendar-box__nav">
+                        <button type="button" onClick={() => setVisibleDate(date => new Date(date.getFullYear(), date.getMonth() - 1, 1))}>
+                          <ChevronLeft size={20} strokeWidth={2.2} />
                         </button>
-                        <button
-                          type="button"
-                          className="border-0 bg-transparent p-0"
-                          onClick={() => setVisibleDate(date => new Date(date.getFullYear(), date.getMonth() + 1, 1))}
-                        >
-                          <ChevronRight size={22} />
+                        <button type="button" onClick={() => setVisibleDate(date => new Date(date.getFullYear(), date.getMonth() + 1, 1))}>
+                          <ChevronRight size={20} strokeWidth={2.2} />
                         </button>
                       </div>
                     </div>
+
                     <div className="calendar-box__grid">
-                      {weekDays.map((d, i) => <span key={i} className="calendar-box__weekday">{d}</span>)}
-                      {calendarDays.map((date, i) => {
-                        if (!date) return <span key={i} />
+                      {weekDays.map((day, index) => (
+                        <span key={`${day}-${index}`} className="calendar-box__weekday">{day}</span>
+                      ))}
+
+                      {calendarDays.map((date, index) => {
+                        if (!date) return <span key={`empty-${index}`} className="calendar-box__empty" />
                         const isPast = date.getTime() < today.getTime()
                         const isSelected = selectedDate?.getTime() === date.getTime()
                         return (
                           <button
-                            key={i}
+                            key={date.toISOString()}
                             type="button"
                             className={`calendar-box__day ${isSelected ? 'is-selected' : ''} ${isPast ? 'is-disabled' : ''}`}
                             disabled={isPast}
@@ -362,60 +380,81 @@ export default function DateView() {
                   </div>
                 </div>
 
-                <div className="col-lg-6">
-                  <label className="form-label">Fecha seleccionada</label>
-                  <div className="input-group mb-4">
-                    <span className="input-group-text">
-                      <CalendarIcon size={18} strokeWidth={2.5} />
-                    </span>
-                    <input className="form-control" type="text" readOnly value={formatLongDate(selectedDate)} />
+                <div className="date-view__right-side">
+                  <div className="date-view__field">
+                    <label className="form-label">Fecha seleccionada</label>
+                    <div className="input-group">
+                      <span className="input-group-text"><CalendarIcon size={18} strokeWidth={2.2} /></span>
+                      <input
+                        className="form-control"
+                        type="text"
+                        readOnly
+                        value={formatShortDate(selectedDate)}
+                      />
+                    </div>
                   </div>
 
-                  <>
-                      <label className="form-label">Seleccionar hora</label>
-                      <div className="time-picker-row">
-                        <Clock size={18} className="clock-icon" />
-                        <select value={timeHour} onChange={e => setTimeHour(e.target.value)}>
-                          {Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, '0')).map(h => <option key={h} value={h}>{h}</option>)}
-                        </select>
-                        <span>:</span>
-                        <select value={timeMinute} onChange={e => setTimeMinute(e.target.value)}>
-                          {Array.from({ length: 60 }, (_, i) => String(i).padStart(2, '0')).map(m => (
-                            <option key={m} value={m}>
-                              {m}
-                            </option>
-                          ))}
-                        </select>
+                  <div className="date-view__field">
+                    <label className="form-label">Seleccionar hora</label>
+                    <div className="time-picker-row">
+                      <Clock size={18} className="clock-icon" />
+                      <select value={timeHour} onChange={e => setTimeHour(e.target.value)}>
+                        {Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, '0')).map(hour => (
+                          <option key={hour} value={hour}>{hour}</option>
+                        ))}
+                      </select>
+                      <span>:</span>
+                      <select value={timeMinute} onChange={e => setTimeMinute(e.target.value)}>
+                        {Array.from({ length: 60 }, (_, i) => String(i).padStart(2, '0')).map(minute => (
+                          <option key={minute} value={minute}>{minute}</option>
+                        ))}
+                      </select>
+                      <select value={timeMeridiem} onChange={e => setTimeMeridiem(e.target.value)}>
+                        <option value="AM">a. m.</option>
+                        <option value="PM">p. m.</option>
+                      </select>
+                    </div>
+                  </div>
 
-                        <select value={timeMeridiem} onChange={e => setTimeMeridiem(e.target.value)}>
-                          <option value="AM">a. m.</option>
-                          <option value="PM">p. m.</option>
-                        </select>
-                        <Clock size={18} className="ms-auto clock-icon" />
-                      </div>
-                  </>
+                  <div className="date-view__field">
+                    <label className="form-label">Tipo de consulta</label>
+                    <div className="input-group">
+                      <span className="input-group-text"><Hospital size={18} strokeWidth={2.2} /></span>
+                      <select className="form-select" value={consultationType} onChange={e => setConsultationType(e.target.value)}>
+                        <option value="">Seleccione tipo de consulta</option>
+                        <option value="Cardiología especializada">Cardiología especializada</option>
+                        <option value="Control cardiaco">Control cardiaco</option>
+                        <option value="Consulta de valoración">Consulta de valoración</option>
+                      </select>
+                    </div>
+                  </div>
 
-                  <div className="alert alert-light border mt-4 d-flex align-items-start gap-3">
-                    <Info size={20} className="text-primary mt-1" />
-                    <p className="m-0 text-secondary">
+                  <div className="date-view__info-callout">
+                    <div className="date-view__info-icon"><Info size={18} strokeWidth={2.5} /></div>
+                    <p>
                       Las citas están sujetas a disponibilidad. Recibirá una confirmación vía SMS en los próximos 15 minutos.
                     </p>
                   </div>
-                  {submitError && <div className="alert alert-danger mt-3">{submitError}</div>}
+
+                  {submitError && <div className="date-view__error-message">{submitError}</div>}
                 </div>
               </div>
 
-              {/* BOTONES 50/50 */}
+              {catalogError && <div className="date-view__catalog-error">{catalogError}</div>}
+
               <div className="date-view__footer-actions">
-                <button type="button" className="btn-cancel" onClick={() => navigate(controlPanelPath)}>Cancelar</button>
-                <button type="submit" className="btn-submit">Agendar cita</button>
+                <button type="button" className="btn-cancel" onClick={() => navigate(controlPanelPath)}>
+                  Cancelar
+                </button>
+                <button type="submit" className="btn-submit">
+                  Agendar cita
+                </button>
               </div>
             </form>
           </div>
         </div>
       </section>
 
-      {/* MODALES */}
       <ConfirmDatePreview
         isOpen={isConfirmOpen}
         dateText={formatLongDate(selectedDate)}
@@ -430,7 +469,10 @@ export default function DateView() {
         isOpen={isFinalOpen}
         booking={finalBooking}
         onClose={() => setIsFinalOpen(false)}
-        onFinish={() => { setIsFinalOpen(false); navigate(controlPanelPath); }}
+        onFinish={() => {
+          setIsFinalOpen(false)
+          navigate(controlPanelPath)
+        }}
       />
       <Footer />
     </>
