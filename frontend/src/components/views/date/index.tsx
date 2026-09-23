@@ -206,6 +206,7 @@ export default function DateView() {
         endAt: endAt.toISOString(),
         medicalCenterId: office.medicalCenterId,
         officeId: office.id,
+        reasonForVisit: consultationType || undefined,
         patient: {
           nationalId: cedula,
           firstName,
@@ -243,7 +244,7 @@ export default function DateView() {
           <div className="date-view__header-box">
             <h1 className="date-view__main-title">Agendar Cita Médica</h1>
             <p className="date-view__subtitle">
-              Complete el formulario a continuación para programar su consulta de cardiología especializada.
+              Complete el formulario a continuación para programar su consulta <br />de cardiología especializada.
             </p>
           </div>
 
@@ -421,10 +422,9 @@ export default function DateView() {
                     <div className="input-group">
                       <span className="input-group-text"><Hospital size={18} strokeWidth={2.2} /></span>
                       <select className="form-select" value={consultationType} onChange={e => setConsultationType(e.target.value)}>
-                        <option value="">Seleccione tipo de consulta</option>
-                        <option value="Cardiología especializada">Cardiología especializada</option>
-                        <option value="Control cardiaco">Control cardiaco</option>
-                        <option value="Consulta de valoración">Consulta de valoración</option>
+                        <option value="">Seleccionar tipo de consulta</option>
+                        <option value="De primera">De primera</option>
+                        <option value="Control">Control</option>
                       </select>
                     </div>
                   </div>
