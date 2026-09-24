@@ -1,5 +1,5 @@
 import './style.scss'
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import LeftSideBar from '../../left-sideBar'
 import NewPatientModal from '../../modals/new-patient';
@@ -8,10 +8,12 @@ import ConfirmNewPatientModal from '../../modals/confirm-new-patient';
 import {
   Plus, Bell, CircleHelp,
   ChevronLeft,
-  ChevronRight, Edit, Eye,
-  Calendar as CalIcon, MapPin
+  ChevronRight, Eye, PencilLine,
+  MapPin,
+  UsersRound, UserRoundPlus, AlertCircle
 } from 'lucide-react'
 import { getPatients, type Patient } from '../../../services/patients/patient-services';
+import { getAppointments } from '../../../services/appointments/appointment-services';
 
 function getAge(dateOfBirth: string) {
   const birthDate = new Date(dateOfBirth);
@@ -52,6 +54,12 @@ export default function PatientsView() {
   const [nationalIdFilter, setNationalIdFilter] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [stats, setStats] = useState({
+    newThisMonth: 0,
+    activePatients: 0,
+    appointmentsThisWeek: 0,
+    totalPatients: 0,
+  });
 
   useEffect(() => {
     let active = true;
@@ -71,18 +79,43 @@ export default function PatientsView() {
       setError('');
 
       try {
-        const result = await getPatients({
-          page,
-          limit: 10,
-          firstName: nameFilter || undefined,
-          nationalId: nationalIdFilter || undefined,
-          doctorId,
-        });
+        const [result, appointmentsResult] = await Promise.all([
+          getPatients({
+            page,
+            limit: 10,
+            firstName: nameFilter || undefined,
+            nationalId: nationalIdFilter || undefined,
+            doctorId,
+          }),
+          getAppointments({ doctorId, limit: 200 }),
+        ]);
 
-        if (active) {
-          setPatients(result.data);
-          setTotalPatients(result.total);
-        }
+        if (!active) return;
+
+        const now = new Date();
+        const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+        const currentWeekStart = new Date(now);
+        currentWeekStart.setDate(now.getDate() - ((now.getDay() + 6) % 7));
+        currentWeekStart.setHours(0, 0, 0, 0);
+
+        const newThisMonth = result.data.filter(patient => {
+          if (!patient.createdAt) return false;
+          return new Date(patient.createdAt) >= monthStart;
+        }).length;
+
+        const appointmentsThisWeek = appointmentsResult.data.filter(appointment => {
+          if (!appointment.appointmentDate) return false;
+          return new Date(appointment.appointmentDate) >= currentWeekStart;
+        }).length;
+
+        setPatients(result.data);
+        setTotalPatients(result.total);
+        setStats({
+          newThisMonth,
+          activePatients: result.data.filter(patient => patient.isActive).length || result.data.length,
+          appointmentsThisWeek,
+          totalPatients: result.total,
+        });
       } catch {
         if (active) setError('No se pudo cargar el listado de pacientes.');
       } finally {
@@ -92,7 +125,7 @@ export default function PatientsView() {
 
     void loadPatients();
     return () => { active = false; };
-  }, [nameFilter, nationalIdFilter, page]);
+  }, [nameFilter, nationalIdFilter, page, doctorId]);
 
   const handlePatientCreated = (patient: Patient) => {
     setLastAddedName(`${patient.firstName} ${patient.lastName}`);
@@ -108,6 +141,37 @@ export default function PatientsView() {
     setShowConfirmModal(false);
     navigate(lastAddedId ? `/patients/${lastAddedId}` : '/patients/1');
   };
+
+  const cardMetrics = useMemo(() => [
+    {
+      key: 'newThisMonth',
+      label: 'Nuevos este mes',
+      value: stats.newThisMonth,
+      dark: true,
+      icon: UserRoundPlus,
+    },
+    {
+      key: 'activePatients',
+      label: 'Pacientes Mérida',
+      value: stats.activePatients,
+      dark: false,
+      icon: UsersRound,
+    },
+    {
+      key: 'appointmentsThisWeek',
+      label: 'Pacientes Tovar',
+      value: stats.appointmentsThisWeek,
+      dark: false,
+      icon: AlertCircle,
+    },
+    {
+      key: 'totalPatients',
+      label: 'Citas esta semana',
+      value: stats.totalPatients || totalPatients,
+      dark: false,
+      icon: MapPin,
+    },
+  ], [stats, totalPatients]);
 
   return (
     <div className="patients-root">
@@ -128,9 +192,9 @@ export default function PatientsView() {
 
         <section className="patients-content">
           <div className="content-header">
-            <div>
+            <div className="content-header__text">
               <h1>Listado de Pacientes</h1>
-              <p>Gestione y supervise la salud cardiovascular...</p>
+              <p>Gestione y supervise la salud cardiovascular de sus pacientes</p>
             </div>
 
             <button
@@ -185,8 +249,12 @@ export default function PatientsView() {
                     <td>-</td>
                     <td>
                       <div className="action-btns">
-                        <button title="Ver historia" onClick={() => navigate(`/patients/${p.id}`)}><Eye size={16} /></button>
-                        <button title="Editar"><Edit size={16} /></button>
+                        <button type="button" title="Ver historia" onClick={() => navigate(`/patients/${p.id}`)} aria-label="Ver historia del paciente">
+                          <Eye size={16} />
+                        </button>
+                        <button type="button" title="Editar paciente" aria-label="Editar paciente">
+                          <PencilLine size={16} />
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -205,37 +273,19 @@ export default function PatientsView() {
           </div>
 
           <div className="kpi-grid">
-            <div className="kpi-card dark">
-              <div className="kpi-icon-box"><Plus size={20} /></div>
-              <div className="kpi-data">
-                <span className="kpi-value">{totalPatients}</span>
-                <span className="kpi-label">Pacientes registrados</span>
+            {cardMetrics.map(({ key, label, value, dark, icon: Icon }) => (
+              <div key={key} className={`kpi-card ${dark ? 'dark' : 'outline'}`}>
+                <div className="kpi-content">
+                  <div className={`kpi-icon-box ${dark ? 'dark' : ''}`}>
+                    <Icon size={22} />
+                  </div>
+                  <div className="kpi-data">
+                    <span className="kpi-value">{value}</span>
+                  </div>
+                </div>
+                <span className="kpi-label">{label}</span>
               </div>
-            </div>
-
-            <div className="kpi-card outline">
-              <div className="kpi-icon-box green"><MapPin size={20} /></div>
-              <div className="kpi-data">
-                <span className="kpi-value">942</span>
-                <span className="kpi-label">Pacientes Mérida</span>
-              </div>
-            </div>
-
-            <div className="kpi-card outline">
-              <div className="kpi-icon-box orange"><MapPin size={20} /></div>
-              <div className="kpi-data">
-                <span className="kpi-value">15</span>
-                <span className="kpi-label">Pacientes Tovar</span>
-              </div>
-            </div>
-
-            <div className="kpi-card outline">
-              <div className="kpi-icon-box vinotinto"><CalIcon size={20} /></div>
-              <div className="kpi-data">
-                <span className="kpi-value">42</span>
-                <span className="kpi-label">Citas esta semana</span>
-              </div>
-            </div>
+            ))}
           </div>
         </section>
       </main>

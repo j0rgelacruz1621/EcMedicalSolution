@@ -41,10 +41,9 @@ $color-callout: #e9e9e9;
     margin: 18px auto 0;
     max-width: 680px;
     color: $color-text-muted;
-    line-height: 1.45;
     font-size: 18px;
     line-height: 28px;
-    font-weight: 400; 
+    font-weight: 400;
   }
 
   &__card {
@@ -112,7 +111,7 @@ $color-callout: #e9e9e9;
       height: 44px;
       background: transparent;
       padding: 10px 12px;
-      font-size: 0.98rem;
+      font-size: 16px;
       color: $color-text-main;
 
       &:focus {
@@ -156,7 +155,7 @@ $color-callout: #e9e9e9;
       justify-content: space-between;
       align-items: center;
       color: $color-primary;
-      font-size: 1.04rem;
+      font-size: 17px;
       font-weight: 700;
       margin-bottom: 12px;
       text-transform: capitalize;
@@ -196,7 +195,7 @@ $color-callout: #e9e9e9;
     &__weekday,
     &__empty {
       min-height: 18px;
-      font-size: 0.78rem;
+      font-size: 13px;
       font-weight: 700;
       color: #8a7a7c;
     }
@@ -210,7 +209,7 @@ $color-callout: #e9e9e9;
       border-radius: 8px;
       background: transparent;
       color: #4b3d3f;
-      font-size: 0.96rem;
+      font-size: 15px;
       font-weight: 500;
       cursor: pointer;
       transition: 0.18s ease;
@@ -251,7 +250,7 @@ $color-callout: #e9e9e9;
       border: none;
       background: transparent;
       color: $color-text-main;
-      font-size: 0.96rem;
+      font-size: 15px;
       padding: 11px 4px;
       cursor: pointer;
       appearance: none;
@@ -276,7 +275,7 @@ $color-callout: #e9e9e9;
 
     p {
       margin: 0;
-      font-size: 0.84rem;
+      font-size: 13px;
       line-height: 1.45;
     }
   }
@@ -296,7 +295,7 @@ $color-callout: #e9e9e9;
 
   &__error-message,
   &__catalog-error {
-    font-size: 0.88rem;
+    font-size: 14px;
     color: $color-error;
     background: rgba(212, 71, 91, 0.08);
     border: 1px solid rgba(212, 71, 91, 0.2);
@@ -315,7 +314,7 @@ $color-callout: #e9e9e9;
     button {
       min-height: 52px;
       border-radius: 8px;
-      font-size: 1.04rem;
+      font-size: 17px;
       font-weight: 700;
       cursor: pointer;
       transition: 0.2s ease;
@@ -362,7 +361,7 @@ $color-callout: #e9e9e9;
     }
 
     &__main-title {
-      font-size: 2.3rem;
+      font-size: 37px;
     }
   }
 }

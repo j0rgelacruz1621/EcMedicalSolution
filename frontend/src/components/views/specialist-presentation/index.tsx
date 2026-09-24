@@ -1,6 +1,5 @@
 import { useParams, Link } from 'react-router-dom' // 1. Importamos Link
 import Header from '../../header'
-import Footer from '../../footer'
 import './style.scss'
 import { Calendar, Activity } from 'lucide-react'
 import pred from '../../../assets/pred-img.jpeg'
@@ -83,7 +82,6 @@ function SpecialistPresentation() {
         </div>
       </main>
 
-      <Footer />
     </div>
   )
 }
