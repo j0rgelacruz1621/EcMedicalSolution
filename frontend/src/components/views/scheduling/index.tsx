@@ -7,11 +7,29 @@ import { getDoctor, type Doctor } from '../../../services/doctors/doctor-service
 import {
   Bell,
   CircleHelp,
-  Search,
   ChevronLeft,
   ChevronRight,
   Plus,
 } from 'lucide-react'
+
+const formatAppointmentTime = (value?: string) => {
+  if (!value) return '--:--';
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+
+  return date.toLocaleTimeString('es-ES', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true,
+  });
+};
+
+const formatAppointmentType = (appointment: Appointment) => {
+  if (appointment.reasonForVisit) return appointment.reasonForVisit;
+  if (appointment.status) return appointment.status;
+  return 'SCHEDULED';
+};
 
 export default function AgendaView() {
   const navigate = useNavigate();
@@ -21,6 +39,8 @@ export default function AgendaView() {
   const [doctor, setDoctor] = useState<Doctor | null>(null);
   const [viewMode, setViewMode] = useState('Semana');
   const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const activeDoctorName = doctor ? `${doctor.firstName} ${doctor.lastName}` : sessionStorage.getItem('active_doctor_name') || 'Administración';
+  const activeDoctorInitials = doctor ? `${doctor.firstName[0] || ''}${doctor.lastName[0] || ''}`.toUpperCase() : (sessionStorage.getItem('active_doctor_name') || 'JD').split(/\s+/).filter(Boolean).slice(0, 2).map(part => part[0]).join('').toUpperCase() || 'JD';
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [currentDate, setCurrentDate] = useState(() => new Date());
@@ -38,7 +58,14 @@ export default function AgendaView() {
   const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate()
 
   useEffect(() => {
-    if (doctorId) getDoctor(doctorId).then(setDoctor).catch(() => setDoctor(null));
+    if (doctorId) {
+      getDoctor(doctorId)
+        .then((doctorResult) => {
+          setDoctor(doctorResult);
+          sessionStorage.setItem('active_doctor_name', `${doctorResult.firstName} ${doctorResult.lastName}`);
+        })
+        .catch(() => setDoctor(null));
+    }
     getAppointments({ limit: 100, doctorId })
       .then((result) => setAppointments(result.data))
       .catch(() => setError('No se pudieron cargar las citas.'))
@@ -50,19 +77,14 @@ export default function AgendaView() {
       <LeftSideBar />
       
       <div className="agenda-main">
-        {/* HEADER SUPERIOR */}
-        <header className="agenda-top-header">
-          <div className="search-bar">
-            <Search size={18} className="search-icon" />
-            <input type="text" placeholder="Buscar pacientes o citas..." />
-          </div>
-          
-          <div className="header-right">
-            <button className="icon-btn"><Bell size={20} /></button>
-            <button className="icon-btn"><CircleHelp size={20} /></button>
-            <div className="user-profile">
-              <div className="avatar" aria-label="Perfil">JD</div>
-              <span>{doctor ? `${doctor.firstName} ${doctor.lastName}` : 'Administración'}</span>
+        <header className="cp-header">
+          <h1>Agenda</h1>
+          <div className="cp-header-right">
+            <button className="icon" aria-label="Notificaciones"><Bell size={18} /></button>
+            <button className="icon" aria-label="Ayuda"><CircleHelp size={18} /></button>
+            <div className="cp-user">
+              <span>{activeDoctorName}</span>
+              <span className="cp-user-badge">{activeDoctorInitials}</span>
             </div>
           </div>
         </header>
@@ -159,9 +181,9 @@ export default function AgendaView() {
                       .filter(app => new Date(app.appointmentDate ?? '').getDate() === day.date)
                       .map(app => (
                         <div key={app.id} className="appointment-card" style={{ borderLeftColor: 'var(--primary-color)' }}>
-                          <span className="app-time" style={{ color: 'var(--primary-color)' }}>{app.startTime ?? '--:--'}</span>
+                          <span className="app-time" style={{ color: 'var(--primary-color)' }}>{formatAppointmentTime(app.startTime)}</span>
                           <span className="app-patient">{app.patient?.firstName} {app.patient?.lastName}</span>
-                          <span className="app-type">{app.status ?? 'SCHEDULED'}</span>
+                          <span className="app-type">{formatAppointmentType(app)}</span>
                         </div>
                       ))}
                   </div>

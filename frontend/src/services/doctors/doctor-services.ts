@@ -12,6 +12,8 @@ export interface DoctorRequestBody {
   officeId?: number;
 }
 
+export type DoctorGender = 'MASCULINO' | 'FEMENINO' | 'OTRO';
+
 export interface Doctor {
   id: number;
   licenseNumber?: string;
@@ -22,6 +24,7 @@ export interface Doctor {
   phone?: string | null;
   specialty?: string | null;
   officeId?: number | null;
+  gender?: DoctorGender | null;
 }
 
 export async function getDoctors(): Promise<Doctor[]> {

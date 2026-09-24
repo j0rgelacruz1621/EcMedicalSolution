@@ -6,7 +6,7 @@ import NewPatientModal from '../../modals/new-patient';
 import ConfirmNewPatientModal from '../../modals/confirm-new-patient';
 
 import {
-  Plus, Bell, CircleHelp, User,
+  Plus, Bell, CircleHelp,
   ChevronLeft,
   ChevronRight, Edit, Eye,
   Calendar as CalIcon, MapPin
@@ -46,6 +46,8 @@ export default function PatientsView() {
   const [patients, setPatients] = useState<Patient[]>([]);
   const [totalPatients, setTotalPatients] = useState(0);
   const [page, setPage] = useState(1);
+  const activeDoctorName = sessionStorage.getItem('active_doctor_name') || 'Administración';
+  const activeDoctorInitials = (sessionStorage.getItem('active_doctor_name') || 'JD').split(/\s+/).filter(Boolean).slice(0, 2).map(part => part[0]).join('').toUpperCase() || 'JD';
   const [nameFilter, setNameFilter] = useState('');
   const [nationalIdFilter, setNationalIdFilter] = useState('');
   const [loading, setLoading] = useState(true);
@@ -53,6 +55,16 @@ export default function PatientsView() {
 
   useEffect(() => {
     let active = true;
+
+    if (doctorId) {
+      import('../../../services/doctors/doctor-services').then(({ getDoctor }) => {
+        getDoctor(doctorId)
+          .then((doctorResult) => {
+            sessionStorage.setItem('active_doctor_name', `${doctorResult.firstName} ${doctorResult.lastName}`)
+          })
+          .catch(() => undefined)
+      })
+    }
 
     async function loadPatients() {
       setLoading(true);
@@ -102,14 +114,14 @@ export default function PatientsView() {
       <LeftSideBar />
 
       <main className="patients-main">
-        <header className="patients-top-header">
-          <h2 className="page-title">Pacientes</h2>
-          <div className="header-right">
-            <button className="icon-btn"><Bell size={20} /></button>
-            <button className="icon-btn"><CircleHelp size={20} /></button>
-            <div className="user-info">
-              <span>{doctorId ? 'Panel del especialista' : 'Administración'}</span>
-              <div className="mini-avatar"><User size={16}/></div>
+        <header className="cp-header">
+          <h1>Pacientes</h1>
+          <div className="cp-header-right">
+            <button className="icon" aria-label="Notificaciones"><Bell size={18} /></button>
+            <button className="icon" aria-label="Ayuda"><CircleHelp size={18} /></button>
+            <div className="cp-user">
+              <span>{activeDoctorName}</span>
+              <span className="cp-user-badge">{activeDoctorInitials}</span>
             </div>
           </div>
         </header>

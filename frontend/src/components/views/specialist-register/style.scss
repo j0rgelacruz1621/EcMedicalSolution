@@ -1,24 +1,29 @@
-// 1. VARIABLE DE COLOR EXACTA (Mismo azul de Home)
 $primary-blue: var(--primary-color);
-$primary-hover: var(--primary-color);  // Un tono más oscuro para el hover
-$error-red: #d32f2f;     
-$bg-neutral: #f8fafc;    
-$border-color: #e2e8f0;
-$text-main: #1a1a1a;
-$text-muted: #64748b;
+$primary-hover: #0047ab;
+$error-red: #d32f2f;
+$bg-neutral: #f4f6f8;
+$border-color: #d7dfe7;
+$text-main: #1d2a36;
+$text-muted: #59677a;
+$input-bg: #ffffff;
 
-// 2. HEADER (Sin botón de login)
+.sr-wrapper {
+  min-height: 100vh;
+  background: $bg-neutral;
+}
+
 .sr-header {
   width: 100%;
-  background: #ffffff;
-  border-bottom: 1px solid $border-color;
+  background: rgba(255, 255, 255, 0.9);
+  border-bottom: 1px solid #dfe5ec;
 
   &__inner {
-    max-width: 1200px;
+    max-width: 1180px;
     margin: 0 auto;
-    padding: 16px 24px;
+    padding: 18px 24px;
     display: flex;
     align-items: center;
+    justify-content: space-between;
   }
 }
 
@@ -26,217 +31,338 @@ $text-muted: #64748b;
   display: flex;
   align-items: center;
   gap: 12px;
-  &__logo { width: 38px; height: 38px; object-fit: contain; }
-  &__text { 
-    color: $primary-blue; // Azul exacto
-    font-size: 1.15rem; 
-    font-weight: 700; 
+
+  &__logo {
+    width: 36px;
+    height: 36px;
+    object-fit: contain;
+    border-radius: 8px;
+  }
+
+  &__text {
+    color: $primary-blue;
+    font-size: 1.15rem;
+    font-weight: 700;
+    line-height: 1.2;
   }
 }
 
-// 3. ESTRUCTURA DE PÁGINA
+.sr-login-link {
+  color: $primary-blue;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
 .sr-page {
-  min-height: calc(100vh - 80px);
-  padding: 60px 20px;
-  background: $bg-neutral;
   display: flex;
   justify-content: center;
+  padding: 42px 20px 34px;
 }
 
 .sr-card {
   width: 100%;
-  max-width: 1000px; 
-  background: #ffffff;
-  border-radius: 20px; // Bordes más redondeados según diseño
-  padding: 48px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+  max-width: 980px;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid #dfe5ec;
+  border-radius: 18px;
+  padding: 30px 44px 28px;
+  box-shadow: 0 8px 20px rgba(14, 33, 58, 0.06);
 }
 
 .sr-title {
-  color: var(--primary-color); // Azul exacto
-  font-size: 2.2rem;
-  font-weight: 800;
-  margin-bottom: 10px;
+  margin: 0 0 16px;
+  color: $primary-blue;
+  font-size: 2.15rem;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  font-weight: 700;
   text-align: center;
 }
 
 .sr-subtitle {
+  margin: 0 0 30px;
   color: $text-muted;
+  font-size: 1rem;
+  line-height: 1.5;
   text-align: center;
-  margin-bottom: 45px;
-  font-size: 1.05rem;
 }
 
-// 4. GRID Y CAMPOS (Espaciados corregidos)
+.sr-form {
+  width: 100%;
+}
+
 .sr-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 15px 35px; // Espaciado horizontal y vertical
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px 34px;
+}
+
+.sr-column {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
 }
 
 .sr-field {
-  margin-bottom: 22px; 
+  margin-bottom: 16px;
 
-  .sr-label {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 0.88rem;
-    font-weight: 700; // Más negrita según diseño
-    color: $text-main;
-    margin-bottom: 8px; // ESPACIO TÍTULO-INPUT
-
-    span { color: $error-red; }
-  }
-
-  input, select, textarea {
-    width: 100%;
-    min-height: 48px;
-    padding: 12px 16px;
-    border: 1px solid $border-color;
-    border-radius: 10px;
-    font-size: 15px;
-    background-color: #ffffff;
-    transition: all 0.2s ease;
-
-    &:focus {
-      outline: none;
-      border-color: $primary-blue; // Borde azul al enfocar
-      box-shadow: 0 0 0 3px rgba(0, 51, 128, 0.08);
-    }
-
-    &::placeholder { color: #cbd5e1; }
-  }
-
-  textarea {
-    min-height: 110px;
-    resize: none;
+  &--textarea {
+    margin-bottom: 0;
   }
 }
 
-// 5. TÉRMINOS Y CHECKBOX (Eliminación del recuadro de enfoque)
-.sr-terms {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin: 35px 0 25px;
-  padding: 0 5px;
-
-  input[type="checkbox"] {
-    width: 19px;
-    height: 19px;
-    cursor: pointer;
-    accent-color: $primary-blue; // Azul exacto para el check
-    
-    // ELIMINA EL EFECTO DE RECUADRO AZUL EXTERNO
-    outline: none !important;
-    box-shadow: none !important;
-    
-    &:focus {
-      outline: none !important;
-      box-shadow: none !important;
-    }
-  }
-
-  label {
-    font-size: 0.92rem;
-    color: $text-muted;
-    cursor: pointer;
-    user-select: none;
-  }
-}
-
-// Link único solicitado
-.sr-link-unified {
-  color: $primary-blue; // Azul exacto
-  font-weight: 700;
-  text-decoration: none;
-  &:hover { text-decoration: underline; }
-}
-
-// 6. BOTÓN DE ENVÍO
-.sr-submit-btn {
-  width: 100%;
-  background-color: $primary-blue; // Azul exacto
-  color: #ffffff;
-  padding: 16px;
-  border-radius: 12px;
-  font-size: 1.1rem;
-  font-weight: 700;
-  border: none;
-  cursor: pointer;
-  transition: background 0.3s ease, transform 0.1s ease;
-
-  &:hover:not(:disabled) {
-    background-color: $primary-hover;
-  }
-
-  &:active:not(:disabled) {
-    transform: scale(0.99);
-  }
-
-  &:disabled {
-    background-color: #e2e8f0;
-    color: #94a3b8;
-    cursor: not-allowed;
-  }
-}
-
-// Tooltips
-.sr-info-wrapper {
-  color: #94a3b8;
+.sr-label {
   display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: $text-main;
+}
+
+.sr-required {
+  color: $error-red;
+}
+
+.sr-info-wrapper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: $primary-blue;
+  opacity: 0.8;
   cursor: help;
-  &:hover { color: $primary-blue; }
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
+.sr-info-icon {
+  display: block;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  min-height: 46px;
+  padding: 11px 12px;
+  border: 1px solid $border-color;
+  border-radius: 8px;
+  background: $input-bg;
+  color: $text-main;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+  &::placeholder {
+    color: #a4afbb;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: $primary-blue;
+    box-shadow: 0 0 0 3px rgba(0, 49, 126, 0.08);
+  }
+
+  &.is-error {
+    border-color: $error-red;
+    box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.06);
+  }
+}
+
+textarea {
+  min-height: 96px;
+  max-height: 150px;
+  resize: vertical;
+}
+
+.sr-bio-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 6px;
+  color: $text-muted;
+  font-size: 0.75rem;
 }
 
 .sr-file-custom {
   display: flex;
   align-items: center;
   gap: 12px;
+  min-height: 46px;
+  padding: 4px 8px 4px 10px;
   border: 1px solid $border-color;
-  border-radius: 10px;
-  padding: 4px 8px;
-  background: #ffffff;
-  min-height: 48px; // Para que tenga la misma altura que los otros inputs
+  border-radius: 8px;
+  background: $input-bg;
+}
 
-  .sr-file-btn {
-    background-color: #f1f5f9;
-    border: 1px solid #e2e8f0;
-    padding: 8px 14px;
-    border-radius: 8px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: $text-main;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    white-space: nowrap;
-    transition: background 0.2s;
+.sr-file-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 34px;
+  padding: 7px 12px;
+  border: 1px solid #d6dfe8;
+  border-radius: 7px;
+  background: #f4f7fb;
+  color: $text-main;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
 
-    &:hover {
-      background-color: #e2e8f0;
-    }
-
-    &.disabled {
-      cursor: not-allowed;
-      opacity: 0.6;
-    }
+  &:hover {
+    background: #edf3fb;
   }
 
-  .sr-file-status {
-    font-size: 0.85rem;
-    color: $text-muted;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+  &.disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
   }
 }
 
-// Responsivo
-@media (max-width: 850px) {
-  .sr-grid { grid-template-columns: 1fr; }
-  .sr-card { padding: 35px 25px; }
-  .sr-title { font-size: 1.9rem; }
+.sr-file-status {
+  flex: 1;
+  min-width: 0;
+  color: $text-muted;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sr-terms {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 20px 0 8px;
+
+  input[type='checkbox'] {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    cursor: pointer;
+    accent-color: $primary-blue;
+    flex-shrink: 0;
+    outline: none;
+    box-shadow: none;
+
+    &:focus,
+    &:focus-visible {
+      outline: none;
+      box-shadow: none;
+    }
+  }
+
+  label {
+    color: $text-main;
+    font-size: 0.96rem;
+    line-height: 1.5;
+    cursor: pointer;
+  }
+}
+
+.sr-link-unified {
+  color: $primary-blue;
+  text-decoration: none;
+  font-weight: 600;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.sr-error {
+  display: block;
+  margin-top: 6px;
+  color: $error-red;
+  font-size: 0.76rem;
+  line-height: 1.4;
+}
+
+.sr-error--inline {
+  margin: 0 0 12px;
+}
+
+.sr-submit-btn {
+  width: 100%;
+  margin-top: 10px;
+  border: none;
+  border-radius: 8px;
+  background: $primary-blue;
+  color: #fff;
+  font-size: 1.04rem;
+  font-weight: 700;
+  line-height: 1.2;
+  padding: 16px 20px;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.1s ease;
+
+  &:hover:not(:disabled) {
+    background: $primary-hover;
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(1px);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+  }
+}
+
+.sr-backend-error,
+.sr-backend-success {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 18px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.sr-backend-error {
+  background: #fff1f2;
+  color: #a4262c;
+  border: 1px solid #f3c6cb;
+}
+
+.sr-backend-success {
+  background: #edf9f1;
+  color: #1f7a45;
+  border: 1px solid #cfead9;
+}
+
+@media (max-width: 840px) {
+  .sr-header__inner {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  .sr-card {
+    padding: 26px 20px 22px;
+  }
+
+  .sr-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .sr-title {
+    font-size: 1.9rem;
+  }
+
+  .sr-subtitle {
+    margin-bottom: 20px;
+  }
 }

@@ -2,7 +2,17 @@ import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import LeftSideBar from '../../left-sideBar'
 import './style.scss'
-import { Bell, CircleHelp, ChevronLeft, ChevronRight, Plus } from 'lucide-react'
+import {
+  Bell,
+  CalendarDays,
+  CircleHelp,
+  ChevronLeft,
+  ChevronRight,
+  ClipboardList,
+  FileText,
+  Plus,
+  Users,
+} from 'lucide-react'
 import { getDoctor, type Doctor } from '../../../services/doctors/doctor-services'
 import { getAppointments, type Appointment } from '../../../services/appointments/appointment-services'
 
@@ -22,6 +32,15 @@ const getCalendarDays = (year: number, month: number) => {
   })
 }
 
+const getInitialsFromName = (name?: string | null) => {
+  if (!name) return 'JD'
+
+  const parts = name.trim().split(/\s+/).filter(Boolean)
+  if (parts.length === 0) return 'JD'
+
+  return `${parts[0][0] || ''}${parts[1]?.[0] || ''}`.toUpperCase()
+}
+
 export default function ControlPanel() {
   const [searchParams] = useSearchParams()
   const role = localStorage.getItem('user_rol')
@@ -36,6 +55,11 @@ export default function ControlPanel() {
   )
   const [doctor, setDoctor] = useState<Doctor | null>(null)
   const [appointments, setAppointments] = useState<Appointment[]>([])
+  const doctorTitle = doctor?.gender === 'MASCULINO' ? 'Dr.' : doctor?.gender === 'FEMENINO' ? 'Dra.' : ''
+  const activeDoctorName = doctor
+    ? `${doctor.firstName} ${doctor.lastName}`
+    : sessionStorage.getItem('active_doctor_name') || 'Administración'
+  const doctorInitials = doctor ? `${doctor.firstName[0] || ''}${doctor.lastName[0] || ''}`.toUpperCase() : getInitialsFromName(sessionStorage.getItem('active_doctor_name'))
   const patients = Array.from(
     new Map(
       appointments
@@ -75,7 +99,11 @@ export default function ControlPanel() {
     Promise.all([getDoctor(doctorId), getAppointments({ doctorId, limit: 100 })])
       .then(([doctorResult, appointmentResult]) => {
         setDoctor(doctorResult)
+        sessionStorage.setItem('active_doctor_name', `${doctorResult.firstName} ${doctorResult.lastName}`)
         setAppointments(appointmentResult.data)
+      })
+      .catch(() => {
+        setDoctor(null)
       })
   }, [doctorId])
 
@@ -84,35 +112,52 @@ export default function ControlPanel() {
     year: 'numeric'
   }).format(visibleDate)
 
+  const formatAppointmentTypeLabel = (appointment: Appointment) => {
+    const value = appointment.reasonForVisit || appointment.status || 'Consulta'
+    return value.toUpperCase()
+  }
+
+  const getPatientInitials = (appointment: Appointment) => {
+    const firstName = appointment.patient?.firstName || ''
+    const lastName = appointment.patient?.lastName || ''
+    const initials = `${firstName[0] || ''}${lastName[0] || ''}`.toUpperCase()
+    return initials || 'AM'
+  }
+
   return (
     <div className="cp-root">
       <LeftSideBar />
       <div className="cp-main">
         <header className="cp-header">
-          <h1>{doctor ? `Panel de ${doctor.firstName} ${doctor.lastName}` : 'Panel de Control'}</h1>
+          <h1>Panel de Control</h1>
             <div className="cp-header-right">
               <button className="icon" aria-label="Notificaciones"><Bell size={18} /></button>
               <button className="icon" aria-label="Ayuda"><CircleHelp size={18} /></button>
               <div className="cp-user">
-                <span>{doctor ? `${doctor.specialty || 'Especialista'} · ${doctor.email || ''}` : 'Dra. Josiana Piña'}</span>
+                <span>{doctor ? `${doctorTitle} ${doctor.firstName} ${doctor.lastName}` : activeDoctorName}</span>
+                <span className="cp-user-badge">{doctorInitials}</span>
               </div>
             </div>
         </header>
 
         <section className="cp-kpis">
-          <div className="kpi">
+          <div className="kpi kpi-total">
+            <div className="kpi-icon"><Users size={20} /></div>
             <div className="kpi-label">Total de pacientes</div>
             {doctor ? <div className="kpi-value">{patients.length}</div> : <div className="kpi-value empty-value" aria-label="Sin valor" />}
           </div>
-            <div className="kpi">
+          <div className="kpi kpi-date">
+            <div className="kpi-icon"><CalendarDays size={20} /></div>
             <div className="kpi-label">Citas hoy</div>
-              {doctor ? <div className="kpi-value">{todayAppointments.length}</div> : <div className="kpi-value empty-value" aria-label="Sin valor" />}
+            {doctor ? <div className="kpi-value">{todayAppointments.length}</div> : <div className="kpi-value empty-value" aria-label="Sin valor" />}
           </div>
-          <div className="kpi">
+          <div className="kpi kpi-tasks">
+            <div className="kpi-icon"><ClipboardList size={20} /></div>
             <div className="kpi-label">Tareas pendientes</div>
             <div className="kpi-value empty-value" aria-label="Sin valor" />
           </div>
-            <div className="kpi">
+          <div className="kpi kpi-reports">
+            <div className="kpi-icon"><FileText size={20} /></div>
             <div className="kpi-label">Informes por revisar</div>
             <div className="kpi-value empty-value" aria-label="Sin valor" />
           </div>
@@ -122,36 +167,56 @@ export default function ControlPanel() {
           <div className="cp-left">
             <div className="panel upcoming">
               <div className="panel-title">
-                <span>{doctor ? 'Agenda del especialista' : 'Tareas pendientes'}</span>
-                <button className="add" type="button" aria-label="Agregar tarea"><Plus size={18} /></button>
+                <span>Próximas citas</span>
+                <a href="#" className="panel-link">Ver agenda completa</a>
               </div>
 
-              {doctor ? <ul className="up-list">{appointments.slice(0, 4).map(appointment => <li className="list-row" key={appointment.id}><span className="avatar placeholder-avatar" /><span className="appointment-name">{appointment.patient?.firstName || 'Paciente'} {appointment.patient?.lastName || ''}</span><span className="appointment-time">{appointment.startTime || '--:--'}</span><span className="placeholder-pill">{appointment.status || 'CITA'}</span></li>)}</ul> : <ul className="up-list">
-                <li className="list-row empty-row">
-                  <span className="avatar placeholder-avatar" />
-                  <span className="placeholder-line placeholder-name" />
-                  <span className="placeholder-line placeholder-time" />
-                  <span className="placeholder-pill" />
-                </li>
-                <li className="list-row empty-row">
-                  <span className="avatar placeholder-avatar" />
-                  <span className="placeholder-line placeholder-name" />
-                  <span className="placeholder-line placeholder-time" />
-                  <span className="placeholder-pill" />
-                </li>
-                <li className="list-row empty-row">
-                  <span className="avatar placeholder-avatar" />
-                  <span className="placeholder-line placeholder-name" />
-                  <span className="placeholder-line placeholder-time" />
-                  <span className="placeholder-pill" />
-                </li>
-                <li className="list-row empty-row">
-                  <span className="avatar placeholder-avatar" />
-                  <span className="placeholder-line placeholder-name" />
-                  <span className="placeholder-line placeholder-time" />
-                  <span className="placeholder-pill" />
-                </li>
-              </ul>}
+              {doctor ? (
+                <div className="upcoming-table">
+                  <div className="upcoming-head">
+                    <span>Paciente</span>
+                    <span>Hora</span>
+                    <span>Tipo de consulta</span>
+                  </div>
+
+                  {appointments.slice(0, 4).map(appointment => {
+                    const rawStartTime = appointment.startTime ? new Date(appointment.startTime) : null;
+                    const formattedTime = rawStartTime && !Number.isNaN(rawStartTime.getTime())
+                      ? rawStartTime.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', hour12: true })
+                      : appointment.startTime || '--:--';
+
+                    return (
+                      <div className="upcoming-row" key={appointment.id}>
+                        <div className="patient-cell">
+                          <span className="avatar patient-avatar">{getPatientInitials(appointment)}</span>
+                          <span className="appointment-name">{appointment.patient?.firstName || 'Paciente'} {appointment.patient?.lastName || ''}</span>
+                        </div>
+                        <span className="appointment-time">{formattedTime}</span>
+                        <span className="appointment-type">{formatAppointmentTypeLabel(appointment)}</span>
+                      </div>
+                    )
+                  })}
+                </div>
+              ) : (
+                <div className="upcoming-table">
+                  <div className="upcoming-head">
+                    <span>Paciente</span>
+                    <span>Hora</span>
+                    <span>Tipo de consulta</span>
+                  </div>
+
+                  {[1, 2, 3, 4].map(item => (
+                    <div className="upcoming-row empty-row" key={item}>
+                      <div className="patient-cell">
+                        <span className="avatar placeholder-avatar" />
+                        <span className="placeholder-line placeholder-name" />
+                      </div>
+                      <span className="placeholder-line placeholder-time" />
+                      <span className="placeholder-pill" />
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="panel chart">
@@ -171,32 +236,34 @@ export default function ControlPanel() {
 
           <aside className="cp-right">
             <div className="panel tasks">
-              <div className="panel-title">
+              <div className="panel-title tasks-header">
                 <span>Tareas pendientes</span>
-                <button className="add" type="button" aria-label="Agregar tarea">+</button>
+                <button type="button" className="tasks-add" aria-label="Agregar tarea">
+                  <Plus size={16} />
+                </button>
               </div>
 
-              <ul className="tasks-list">
-                <li>
-                  <input type="checkbox" aria-label="Tarea pendiente" />
-                  <div className="task-placeholder">
+              <ul className="tasks-list tasks-list--placeholder">
+                <li className="task-item task-item--primary">
+                  <div className="task-copy task-copy--placeholder">
                     <span className="placeholder-line task-title" />
                     <span className="placeholder-line task-sub" />
                   </div>
+                  <input type="checkbox" aria-label="Tarea pendiente" />
                 </li>
-                <li>
-                  <input type="checkbox" aria-label="Tarea pendiente" />
-                  <div className="task-placeholder">
+                <li className="task-item task-item--success">
+                  <div className="task-copy task-copy--placeholder">
                     <span className="placeholder-line task-title" />
                     <span className="placeholder-line task-sub" />
                   </div>
+                  <input type="checkbox" aria-label="Tarea pendiente" />
                 </li>
-                <li>
-                  <input type="checkbox" aria-label="Tarea pendiente" />
-                  <div className="task-placeholder">
+                <li className="task-item task-item--danger">
+                  <div className="task-copy task-copy--placeholder">
                     <span className="placeholder-line task-title" />
                     <span className="placeholder-line task-sub" />
                   </div>
+                  <input type="checkbox" aria-label="Tarea pendiente" />
                 </li>
               </ul>
 

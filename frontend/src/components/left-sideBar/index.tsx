@@ -3,17 +3,19 @@ import { useEffect, useState } from 'react'
 import { NavLink, useNavigate, useSearchParams } from 'react-router-dom'
 import { 
   LayoutDashboard, Calendar, Users, FileText, 
-  CheckSquare, Settings, Plus, LogOut 
+  CheckSquare, Settings, Plus, LogOut, Building2, UserRoundCog 
 } from 'lucide-react'
 import { getDoctor, type Doctor } from '../../services/doctors/doctor-services'
 
 const navItems = [
-  { label: 'Panel de control', to: '/control-panel', icon: <LayoutDashboard size={18} /> },
+  { label: 'Panel de Control', to: '/control-panel', icon: <LayoutDashboard size={18} /> },
   { label: 'Agenda', to: '/agenda', icon: <Calendar size={18} /> },
   { label: 'Pacientes', to: '/patients', icon: <Users size={18} /> },
   { label: 'Informes', to: '/reports', icon: <FileText size={18} /> },
-  { label: 'Tareas Pendientes', to: '/pending-tasks', icon: <CheckSquare size={18} /> },
-  { label: 'Settings', to: '/settings', icon: <Settings size={18} /> },
+  { label: 'Tareas pendientes', to: '/pending-tasks', icon: <CheckSquare size={18} /> },
+  { label: 'Consultorios', to: '/consultorios', icon: <Building2 size={18} /> },
+  { label: 'Usuarios', to: '/users', icon: <UserRoundCog size={18} /> },
+  { label: 'Configuración', to: '/settings', icon: <Settings size={18} /> },
 ]
 
 export default function LeftSideBar() {
@@ -23,9 +25,18 @@ export default function LeftSideBar() {
   const doctorId = Number(role === 'DOCTOR' ? localStorage.getItem('doctor_id') : searchParams.get('doctorId') || sessionStorage.getItem('active_doctor_id'))
   const [doctor, setDoctor] = useState<Doctor | null>(null)
   const contextQuery = doctorId ? `?doctorId=${doctorId}` : ''
+  const doctorTitle = doctor?.gender === 'MASCULINO' ? 'Dr.' : 'Dra.'
+  const sidebarUserName = doctor ? `${doctorTitle} ${doctor.firstName} ${doctor.lastName}` : sessionStorage.getItem('active_doctor_name') || 'Administración'
 
   useEffect(() => {
-    if (doctorId) getDoctor(doctorId).then(setDoctor).catch(() => setDoctor(null))
+    if (doctorId) {
+      getDoctor(doctorId)
+        .then((doctorResult) => {
+          setDoctor(doctorResult)
+          sessionStorage.setItem('active_doctor_name', `${doctorResult.firstName} ${doctorResult.lastName}`)
+        })
+        .catch(() => setDoctor(null))
+    }
   }, [doctorId])
 
   function handleLogout() {
@@ -40,10 +51,9 @@ export default function LeftSideBar() {
     <aside className="lsb">
       <div className="lsb-top">
         <div className="lsb-user">
-          <div className="lsb-avatar">{doctor ? `${doctor.firstName[0]}${doctor.lastName[0]}` : 'JD'}</div>
-          <div>
-            <div className="lsb-name">{doctor ? `${doctor.firstName} ${doctor.lastName}` : 'Dra. Josiana Piña'}</div>
-            <div className="lsb-sub">{doctor?.specialty || 'Cardiólogo Clínico'}</div>
+          <div className="lsb-user-text">
+            <strong>{sidebarUserName}</strong>
+            <span>{doctor?.specialty || 'Cardiología Clínica'}</span>
           </div>
         </div>
 
@@ -52,7 +62,6 @@ export default function LeftSideBar() {
             <NavLink 
             key={label} 
             to={`${to}${contextQuery}`} 
-            // La propiedad 'end' evita que se marquen varios si las rutas son similares
             end 
             className={({ isActive }) => isActive ? 'active' : ''}
           >
