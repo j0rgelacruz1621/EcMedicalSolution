@@ -11,23 +11,28 @@ import ProtectedRoute from './components/protected-route'
 import AdminPanel from './components/views/admin-panel'
 import AdminRoute from './components/admin-route'
 
+import Footer from './components/footer'
+
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<HomeView />} />
-      <Route path="/date" element={<DateView />} />
-      <Route path="/specialist-register" element={<SpecialistRegister />} />
-      <Route path="/specialist/:slug" element={<SpecialistPresentation />} />
-      <Route element={<AdminRoute />}>
-        <Route path="/admin" element={<AdminPanel />} />
-      </Route>
-      <Route element={<ProtectedRoute />}>
-        <Route path="/control-panel" element={<ControlPanel />} />
-        <Route path="/agenda" element={<AgendaView />} />
-        <Route path="/patients" element={<PatientsView />} />
-        <Route path="/patients/:id" element={<PatientFileView />} />
-      </Route>
-    </Routes>
+    <>
+      <Routes>
+        <Route path="/" element={<HomeView />} />
+        <Route path="/date" element={<DateView />} />
+        <Route path="/specialist-register" element={<SpecialistRegister />} />
+        <Route path="/specialist/:slug" element={<SpecialistPresentation />} />
+        <Route element={<AdminRoute />}>
+          <Route path="/admin" element={<AdminPanel />} />
+        </Route>
+        <Route element={<ProtectedRoute />}>
+          <Route path="/control-panel" element={<ControlPanel />} />
+          <Route path="/agenda" element={<AgendaView />} />
+          <Route path="/patients" element={<PatientsView />} />
+          <Route path="/patients/:id" element={<PatientFileView />} />
+        </Route>
+      </Routes>
+      <Footer />
+    </>
   )
 }
 

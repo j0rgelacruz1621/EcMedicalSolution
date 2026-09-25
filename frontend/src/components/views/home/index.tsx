@@ -1,7 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import Header from '../../header'
-import Footer from '../../footer'
 import './style.scss'
 import { User, Lock, Eye, EyeOff, Info, ShieldCheck, ArrowRight } from 'lucide-react'
 
@@ -190,7 +189,6 @@ function HomeView() {
           </div>
         </main>
 
-        <Footer />
       </div>
     </div>
 

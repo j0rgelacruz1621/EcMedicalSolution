@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import Footer from '../../footer'
 import './style.scss'
 import logo from '../../../assets/LOGO-HEADER.jpeg'
 import { Info, Upload, AlertCircle, CheckCircle } from 'lucide-react'
@@ -427,7 +426,6 @@ export default function SpecialistRegister() {
           </section>
         </main>
 
-        <Footer />
       </div>
     </div>
   )

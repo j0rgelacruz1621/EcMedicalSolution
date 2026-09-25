@@ -1,7 +1,6 @@
 import { useMemo, useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import Header from '../../header'
-import Footer from '../../footer'
 import './style.scss'
 import ConfirmDatePreview from '../../modals/confirm-date-preview'
 import ConfirmDate from '../../modals/confirm-date'
@@ -474,7 +473,6 @@ export default function DateView() {
           navigate(controlPanelPath)
         }}
       />
-      <Footer />
     </>
   )
 }
