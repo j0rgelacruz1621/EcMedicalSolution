@@ -10,6 +10,21 @@
   --text-main: #191c1e;
 }
 
+body {
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+}
+
+/* Shell global: viewport completo con footer siempre visible */
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.app-shell > .site-footer {
+  flex-shrink: 0;
+}
+
 /* CLASE PARA AZUL (Solo para Home y Registro) */
 .theme-blue {
   --primary-color: #00317e;         /* Azul */

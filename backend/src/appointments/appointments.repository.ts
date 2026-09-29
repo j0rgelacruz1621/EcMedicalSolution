@@ -112,9 +112,13 @@ export class AppointmentsRepository {
             nationalId: payload.patient.nationalId,
             firstName: payload.patient.firstName,
             lastName: payload.patient.lastName,
-            email: payload.patient.email,
+            email:
+              payload.patient.email ||
+              `${payload.patient.nationalId}@pending.local`,
             phone: payload.patient.phone,
-            dateOfBirth: new Date(payload.patient.dateOfBirth),
+            dateOfBirth: payload.patient.dateOfBirth
+              ? new Date(payload.patient.dateOfBirth)
+              : new Date('1970-01-01'),
             gender: GENDER_MAP[payload.patient.gender],
             medicalHistoryNotes: payload.patient.medicalHistoryNotes,
           },
@@ -137,6 +141,7 @@ export class AppointmentsRepository {
             medicalCenterId: payload.medicalCenterId,
             officeId: payload.officeId,
             reasonForVisit: payload.reasonForVisit,
+            type: payload.type,
             status: 'SCHEDULED',
           },
           include: { patient: true },
@@ -238,6 +243,7 @@ export class AppointmentsRepository {
           endTime: new Date(`1970-01-01T${endTimeValue}.000Z`),
           officeId,
           status,
+          type: payload.type,
         },
         include: {
           patient: true,

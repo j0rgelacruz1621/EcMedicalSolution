@@ -1,20 +1,22 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import LeftSideBar from '../../left-sideBar'
 import './style.scss'
 import {
   Bell,
-  CalendarDays,
   CircleHelp,
   ChevronLeft,
   ChevronRight,
-  ClipboardList,
   FileText,
-  Plus,
-  Users,
+  Plus
 } from 'lucide-react'
 import { getDoctor, type Doctor } from '../../../services/doctors/doctor-services'
 import { getAppointments, type Appointment } from '../../../services/appointments/appointment-services'
+import { getDoctorTasks, createDoctorTask, updateTaskStatus, type Task } from '../../../services/tasks/task-services'
+import GroupOutlinedIcon from '@mui/icons-material/GroupOutlined';
+import CalendarTodayOutlinedIcon from '@mui/icons-material/CalendarTodayOutlined';
+import PendingActionsOutlinedIcon from '@mui/icons-material/PendingActionsOutlined';
+import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
 
 const weekDays = ['L', 'M', 'M', 'J', 'V', 'S', 'D']
 
@@ -42,6 +44,7 @@ const getInitialsFromName = (name?: string | null) => {
 }
 
 export default function ControlPanel() {
+  const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const role = localStorage.getItem('user_rol')
   const selectedDoctorFromUrl = searchParams.get('doctorId')
@@ -55,6 +58,10 @@ export default function ControlPanel() {
   )
   const [doctor, setDoctor] = useState<Doctor | null>(null)
   const [appointments, setAppointments] = useState<Appointment[]>([])
+  const [tasks, setTasks] = useState<Task[]>([])
+  const [newTaskTitle, setNewTaskTitle] = useState('')
+  const [tasksLoading, setTasksLoading] = useState(false)
+  const [showTaskInput, setShowTaskInput] = useState(false)
   const doctorTitle = doctor?.gender === 'MASCULINO' ? 'Dr.' : doctor?.gender === 'FEMENINO' ? 'Dra.' : ''
   const activeDoctorName = doctor
     ? `${doctor.firstName} ${doctor.lastName}`
@@ -107,15 +114,50 @@ export default function ControlPanel() {
       })
   }, [doctorId])
 
+  useEffect(() => {
+    if (!doctorId) return
+    setTasksLoading(true)
+    getDoctorTasks(doctorId, { limit: 6 })
+      .then(result => setTasks(result.data))
+      .catch(() => setTasks([]))
+      .finally(() => setTasksLoading(false))
+  }, [doctorId])
+
+  const handleCreateTask = async () => {
+    const title = newTaskTitle.trim()
+    if (!title || !doctorId) return
+    try {
+      const created = await createDoctorTask(doctorId, { title })
+      setTasks(prev => [created, ...prev].slice(0, 6))
+      setNewTaskTitle('')
+      setShowTaskInput(false)
+    } catch {
+      /* noop */
+    }
+  }
+
+  const handleToggleTask = async (task: Task) => {
+    const nextStatus = task.status === 'COMPLETED' ? 'PENDING' : 'COMPLETED'
+    setTasks(prev => prev.map(item => item.id === task.id ? { ...item, status: nextStatus } : item))
+    try {
+      await updateTaskStatus(task.id, nextStatus)
+    } catch {
+      setTasks(prev => prev.map(item => item.id === task.id ? { ...item, status: task.status } : item))
+    }
+  }
+
   const monthLabel = new Intl.DateTimeFormat('es-ES', {
     month: 'long',
     year: 'numeric'
   }).format(visibleDate)
 
   const formatAppointmentTypeLabel = (appointment: Appointment) => {
-    const value = appointment.reasonForVisit || appointment.status || 'Consulta'
+    const value = appointment.type || appointment.reasonForVisit || appointment.status || 'Consulta'
     return value.toUpperCase()
   }
+
+  const isControlType = (appointment: Appointment) =>
+    (appointment.type || '').toLowerCase() === 'control'
 
   const getPatientInitials = (appointment: Appointment) => {
     const firstName = appointment.patient?.firstName || ''
@@ -124,6 +166,42 @@ export default function ControlPanel() {
     return initials || 'AM'
   }
 
+  const monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
+
+  const chartData = useMemo(() => {
+    const now = new Date()
+    const months: { key: string; label: string; year: number; month: number; control: number; firstTime: number }[] = []
+    for (let i = 3; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
+      months.push({
+        key: `${d.getFullYear()}-${d.getMonth()}`,
+        label: monthNames[d.getMonth()],
+        year: d.getFullYear(),
+        month: d.getMonth(),
+        control: 0,
+        firstTime: 0,
+      })
+    }
+    const byKey = new Map(months.map(m => [m.key, m]))
+    appointments.forEach(appointment => {
+      const raw = appointment.appointmentDate
+      if (!raw) return
+      const date = new Date(raw)
+      if (Number.isNaN(date.getTime())) return
+      const entry = byKey.get(`${date.getFullYear()}-${date.getMonth()}`)
+      if (!entry) return
+      const type = (appointment.type || appointment.reasonForVisit || '').toLowerCase()
+      if (type === 'control') entry.control += 1
+      else if (type === 'de primera' || type === 'first_time') entry.firstTime += 1
+    })
+    return months
+  }, [appointments])
+
+  const chartMax = Math.max(1, ...chartData.map(m => Math.max(m.control, m.firstTime)))
+  // La barra más alta ocupa 85% para dejar siempre sitio al número encima
+  const barHeight = (value: number) =>
+    value === 0 ? 3 : Math.max(3, Math.round((value / chartMax) * 85))
+
   return (
     <div className="cp-root">
       <LeftSideBar />
@@ -131,8 +209,8 @@ export default function ControlPanel() {
         <header className="cp-header">
           <h1>Panel de Control</h1>
             <div className="cp-header-right">
-              <button className="icon" aria-label="Notificaciones"><Bell size={18} /></button>
-              <button className="icon" aria-label="Ayuda"><CircleHelp size={18} /></button>
+              <button className="icon" aria-label="Notificaciones"><NotificationsNoneOutlinedIcon style={{ fontSize: 24 }} /></button>
+              <button className="icon" aria-label="Ayuda"><CircleHelp size={24} /></button>
               <div className="cp-user">
                 <span>{doctor ? `${doctorTitle} ${doctor.firstName} ${doctor.lastName}` : activeDoctorName}</span>
                 <span className="cp-user-badge">{doctorInitials}</span>
@@ -142,19 +220,23 @@ export default function ControlPanel() {
 
         <section className="cp-kpis">
           <div className="kpi kpi-total">
-            <div className="kpi-icon"><Users size={20} /></div>
+            <div className="kpi-icon"><GroupOutlinedIcon sx={{ fontSize: 24 }} /></div>
             <div className="kpi-label">Total de pacientes</div>
             {doctor ? <div className="kpi-value">{patients.length}</div> : <div className="kpi-value empty-value" aria-label="Sin valor" />}
           </div>
           <div className="kpi kpi-date">
-            <div className="kpi-icon"><CalendarDays size={20} /></div>
+            <div className="kpi-icon"><CalendarTodayOutlinedIcon sx={{ fontSize: 24 }} /></div>
             <div className="kpi-label">Citas hoy</div>
             {doctor ? <div className="kpi-value">{todayAppointments.length}</div> : <div className="kpi-value empty-value" aria-label="Sin valor" />}
           </div>
           <div className="kpi kpi-tasks">
-            <div className="kpi-icon"><ClipboardList size={20} /></div>
+            <div className="kpi-icon"><PendingActionsOutlinedIcon sx={{ fontSize: 24 }} /></div>
             <div className="kpi-label">Tareas pendientes</div>
-            <div className="kpi-value empty-value" aria-label="Sin valor" />
+            {doctor ? (
+              <div className="kpi-value">{tasks.filter(task => task.status !== 'COMPLETED').length}</div>
+            ) : (
+              <div className="kpi-value empty-value" aria-label="Sin valor" />
+            )}
           </div>
           <div className="kpi kpi-reports">
             <div className="kpi-icon"><FileText size={20} /></div>
@@ -192,7 +274,7 @@ export default function ControlPanel() {
                           <span className="appointment-name">{appointment.patient?.firstName || 'Paciente'} {appointment.patient?.lastName || ''}</span>
                         </div>
                         <span className="appointment-time">{formattedTime}</span>
-                        <span className="appointment-type">{formatAppointmentTypeLabel(appointment)}</span>
+                        <span className={`appointment-type${isControlType(appointment) ? ' appointment-type--control' : ''}`}>{formatAppointmentTypeLabel(appointment)}</span>
                       </div>
                     )
                   })}
@@ -220,16 +302,35 @@ export default function ControlPanel() {
             </div>
 
             <div className="panel chart">
-              <div className="panel-title">
-                <span>Consultas por tipo y mes</span>
+              <div className="panel-title chart-title-row">
+                <span>Consultas por Tipo y Mes</span>
+                <div className="chart-legend">
+                  <span className="chart-legend-item"><i className="dot dot-control" />Control</span>
+                  <span className="chart-legend-item"><i className="dot dot-first" />De primera</span>
+                </div>
               </div>
-              <div className="chart-placeholder" aria-label="Espacio para gráfica">
-                <div className="chart-bar"><span style={{ height: '30%' }} /><small /></div>
-                <div className="chart-bar"><span style={{ height: '42%' }} /><small /></div>
-                <div className="chart-bar"><span style={{ height: '58%' }} /><small /></div>
-                <div className="chart-bar"><span style={{ height: '36%' }} /><small /></div>
-                <div className="chart-bar"><span style={{ height: '48%' }} /><small /></div>
-                <div className="chart-bar"><span style={{ height: '62%' }} /><small /></div>
+              <div className="chart-area" aria-label="Consultas por tipo y mes">
+                {chartData.map(month => (
+                  <div className="chart-group" key={month.key}>
+                    <div className="chart-bars">
+                      <div className="chart-col">
+                        <em className="chart-value chart-value--control">{month.control}</em>
+                        <span
+                          className="bar bar-control"
+                          style={{ height: `${barHeight(month.control)}%` }}
+                        />
+                      </div>
+                      <div className="chart-col">
+                        <em className="chart-value chart-value--first">{month.firstTime}</em>
+                        <span
+                          className="bar bar-first"
+                          style={{ height: `${barHeight(month.firstTime)}%` }}
+                        />
+                      </div>
+                    </div>
+                    <small className="chart-month">{month.label}</small>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
@@ -238,36 +339,80 @@ export default function ControlPanel() {
             <div className="panel tasks">
               <div className="panel-title tasks-header">
                 <span>Tareas pendientes</span>
-                <button type="button" className="tasks-add" aria-label="Agregar tarea">
+                <button
+                  type="button"
+                  className="tasks-add"
+                  aria-label="Agregar tarea"
+                  onClick={() => setShowTaskInput(value => !value)}
+                >
                   <Plus size={16} />
                 </button>
               </div>
 
-              <ul className="tasks-list tasks-list--placeholder">
-                <li className="task-item task-item--primary">
-                  <div className="task-copy task-copy--placeholder">
-                    <span className="placeholder-line task-title" />
-                    <span className="placeholder-line task-sub" />
-                  </div>
-                  <input type="checkbox" aria-label="Tarea pendiente" />
-                </li>
-                <li className="task-item task-item--success">
-                  <div className="task-copy task-copy--placeholder">
-                    <span className="placeholder-line task-title" />
-                    <span className="placeholder-line task-sub" />
-                  </div>
-                  <input type="checkbox" aria-label="Tarea pendiente" />
-                </li>
-                <li className="task-item task-item--danger">
-                  <div className="task-copy task-copy--placeholder">
-                    <span className="placeholder-line task-title" />
-                    <span className="placeholder-line task-sub" />
-                  </div>
-                  <input type="checkbox" aria-label="Tarea pendiente" />
-                </li>
+              <ul className={`tasks-list${tasks.length === 0 ? ' tasks-list--placeholder' : ''}`}>
+                {tasks.length === 0 && (
+                  <>
+                    <li className="task-item task-item--primary">
+                      <div className="task-copy task-copy--placeholder">
+                        <span className="placeholder-line task-title" />
+                        <span className="placeholder-line task-sub" />
+                      </div>
+                      <input type="checkbox" aria-label="Tarea pendiente" />
+                    </li>
+                    <li className="task-item task-item--success">
+                      <div className="task-copy task-copy--placeholder">
+                        <span className="placeholder-line task-title" />
+                        <span className="placeholder-line task-sub" />
+                      </div>
+                      <input type="checkbox" aria-label="Tarea pendiente" />
+                    </li>
+                    <li className="task-item task-item--danger">
+                      <div className="task-copy task-copy--placeholder">
+                        <span className="placeholder-line task-title" />
+                        <span className="placeholder-line task-sub" />
+                      </div>
+                      <input type="checkbox" aria-label="Tarea pendiente" />
+                    </li>
+                  </>
+                )}
+                {tasks.map(task => (
+                  <li
+                    key={task.id}
+                    className={`task-item ${task.priority === 'HIGH' ? 'task-item--danger' : task.priority === 'LOW' ? 'task-item--success' : 'task-item--primary'}`}
+                  >
+                    <div className="task-copy">
+                      <p style={task.status === 'COMPLETED' ? { textDecoration: 'line-through', opacity: 0.55 } : undefined}>{task.title}</p>
+                      {task.description ? (
+                        <small>{task.description}</small>
+                      ) : (
+                        <small>Pendiente</small>
+                      )}
+                    </div>
+                    <input
+                      type="checkbox"
+                      aria-label={`Completar ${task.title}`}
+                      checked={task.status === 'COMPLETED'}
+                      onChange={() => handleToggleTask(task)}
+                    />
+                  </li>
+                ))}
               </ul>
 
-              <button type="button" className="outline">Ver historial de tareas</button>
+              {showTaskInput && (
+                <input
+                  className="outline"
+                  placeholder="Nueva tarea... (Enter para guardar)"
+                  value={newTaskTitle}
+                  onChange={e => setNewTaskTitle(e.target.value)}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter') handleCreateTask()
+                    if (e.key === 'Escape') { setShowTaskInput(false); setNewTaskTitle('') }
+                  }}
+                  autoFocus
+                />
+              )}
+
+              <button type="button" className="outline" onClick={() => navigate('/pending-tasks')}>Ver historial de tareas</button>
             </div>
 
             <div className="panel mini-cal">

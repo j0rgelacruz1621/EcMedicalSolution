@@ -8,6 +8,7 @@ export interface CreateAppointmentRequest {
   medicalCenterId: number;
   officeId: number;
   reasonForVisit?: string;
+  type?: string;
   patient: {
     nationalId: string;
     firstName: string;
@@ -27,6 +28,7 @@ export interface Appointment {
   endTime?: string;
   status?: string;
   reasonForVisit?: string;
+  type?: string;
   patient?: { id?: number; nationalId?: string; firstName?: string; lastName?: string };
 }
 

@@ -3,19 +3,22 @@ import { useEffect, useState } from 'react'
 import { NavLink, useNavigate, useSearchParams } from 'react-router-dom'
 import { 
   LayoutDashboard, Calendar, Users, FileText, 
-  CheckSquare, Settings, Plus, LogOut, Building2, UserRoundCog 
+  Settings, Plus, UserRoundCog
 } from 'lucide-react'
+import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
+import AssignmentOutlinedIcon from '@mui/icons-material/AssignmentOutlined';
+import MeetingRoomOutlinedIcon from '@mui/icons-material/MeetingRoomOutlined';
 import { getDoctor, type Doctor } from '../../services/doctors/doctor-services'
 
 const navItems = [
-  { label: 'Panel de Control', to: '/control-panel', icon: <LayoutDashboard size={18} /> },
-  { label: 'Agenda', to: '/agenda', icon: <Calendar size={18} /> },
-  { label: 'Pacientes', to: '/patients', icon: <Users size={18} /> },
-  { label: 'Informes', to: '/reports', icon: <FileText size={18} /> },
-  { label: 'Tareas pendientes', to: '/pending-tasks', icon: <CheckSquare size={18} /> },
-  { label: 'Consultorios', to: '/consultorios', icon: <Building2 size={18} /> },
-  { label: 'Usuarios', to: '/users', icon: <UserRoundCog size={18} /> },
-  { label: 'Configuración', to: '/settings', icon: <Settings size={18} /> },
+  { label: 'Panel de Control', to: '/control-panel', icon: <LayoutDashboard size={24} /> },
+  { label: 'Agenda', to: '/agenda', icon: <Calendar size={24} /> },
+  { label: 'Pacientes', to: '/patients', icon: <Users size={24} /> },
+  { label: 'Informes', to: '/reports', icon: <FileText size={24} /> },
+  { label: <>Tareas<br />pendientes</>, to: '/pending-tasks', icon: <AssignmentOutlinedIcon sx={{ fontSize: 24 }} /> },
+  { label: 'Consultorios', to: '/consultorios', icon: <MeetingRoomOutlinedIcon sx={{ fontSize: 24 }} /> },
+  { label: 'Usuarios', to: '/users', icon: <UserRoundCog size={24} /> },
+  { label: 'Configuración', to: '/settings', icon: <Settings size={24} /> },
 ]
 
 export default function LeftSideBar() {
@@ -60,13 +63,13 @@ export default function LeftSideBar() {
         <nav className="lsb-nav">
           {navItems.map(({ label, to, icon }) => (
             <NavLink 
-            key={label} 
+            key={to} 
             to={`${to}${contextQuery}`} 
             end 
             className={({ isActive }) => isActive ? 'active' : ''}
           >
             <span className="nav-icon">{icon}</span>
-            <span>{label}</span>
+            <span className="nav-label">{label}</span>
           </NavLink>
           ))}
         </nav>
@@ -74,7 +77,7 @@ export default function LeftSideBar() {
 
       <div className="lsb-actions">
         <button className="lsb-new" type="button" onClick={() => navigate(`/date${contextQuery}`)}><Plus size={18} /> Nueva cita</button>
-        <button className="lsb-logout" type="button" onClick={handleLogout}><LogOut size={18} /> Cerrar sesión</button>
+        <button className="lsb-logout" type="button" onClick={handleLogout}><LogoutOutlinedIcon sx={{ fontSize: 18 }} /> Cerrar sesión</button>
       </div>
     </aside>
   )

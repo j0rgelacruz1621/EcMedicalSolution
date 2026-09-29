@@ -1,6 +1,7 @@
 .lsb {
   width: 260px;
-  min-height: 100vh;
+  height: 100%;
+  min-height: 0;
   background: #ffffff;
   border-right: 1px solid #c3c6d5;
   display: flex;
@@ -38,7 +39,14 @@
 }
 
 .lsb-nav a.active {
-  background: #e8edf2;
+  --tw-bg-opacity: 1;
+  background-color: rgb(230 232 234 / var(--tw-bg-opacity, 1));
+  color: var(--primary-color);
+}
+
+.lsb-nav a:not(.active):hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(230 232 234 / var(--tw-bg-opacity, 1));
   color: var(--primary-color);
 }
 
@@ -58,7 +66,7 @@
 .lsb-top { display: flex; flex-direction: column; gap: 18px; }
 .lsb-sub { margin-top: 3px; font-size: 0.75rem; color: #737784; }
 .lsb-nav { display: flex; flex-direction: column; gap: 6px; }
-.lsb-nav a { display: flex; align-items: center; gap: 10px; padding: 11px 12px; border-radius: 10px; font-weight: 500; color: #434653; text-decoration: none; font-size: 1.1rem; }
+.lsb-nav a { display: flex; align-items: center; gap: 10px; padding: 11px 12px; border-radius: 10px; line-height: 24px; font-weight: 400; color: #434653; text-decoration: none; font-size: 16px; }
 .lsb-nav a .nav-icon { display: inline-flex; align-items: center; justify-content: center; }
 .lsb-actions { display: flex; flex-direction: column; gap: 10px; padding-top: 18px; }
-.lsb-logout { background: transparent; color: #45515f; border: 1px solid rgba(148, 163, 184, 0.2); border-radius: 12px; padding: 12px 14px; font-weight: 700; cursor: pointer; }
+.lsb-logout { background: transparent; color: #45515f; border: none; padding: 12px 21px; font-weight: 400; font-size: 16px; line-height: 24px; cursor: pointer; display: flex; align-items: center; gap: 8px; }
