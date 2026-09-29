@@ -27,6 +27,8 @@ export interface Appointment {
   endTime?: string;
   status?: string;
   reasonForVisit?: string;
+  officeId?: number;
+  medicalCenterId?: number;
   patient?: { id?: number; nationalId?: string; firstName?: string; lastName?: string };
 }
 

@@ -53,12 +53,7 @@ const getCalendarDays = (year: number, month: number) => {
   })
 }
 
-const applyCedulaMask = (value: string) => {
-  const digits = value.replace(/\D/g, '').slice(0, 11)
-  if (digits.length <= 3) return digits
-  if (digits.length <= 10) return `${digits.slice(0, 3)}-${digits.slice(3)}`
-  return `${digits.slice(0, 3)}-${digits.slice(3, 10)}-${digits.slice(10)}`
-}
+const applyCedulaMask = (value: string) => value.replace(/\D/g, '').slice(0, 12)
 
 const applyPhoneMask = (value: string) => {
   const cleaned = value.replace(/\D/g, '').slice(0, 12)
@@ -127,10 +122,25 @@ export default function DateView() {
         const availableDoctors = selectedContextDoctorId
           ? loadedDoctors.filter(doctor => String(doctor.id) === selectedContextDoctorId)
           : loadedDoctors
-        setOffices(loadedOffices)
         const defaultDoctorId = selectedContextDoctorId || String(availableDoctors[0]?.id ?? '')
+        const selectedDoctor = availableDoctors.find(doctor => String(doctor.id) === defaultDoctorId)
+
+        // Los consultorios se muestran agrupados por el CENTRO MÉDICO del
+        // médico seleccionado: se deduce a partir de su oficina asignada
+        // (officeId -> medicalCenterId). Sin asignación, se muestran todas.
+        const doctorCenterId = selectedDoctor?.officeId
+          ? loadedOffices.find(office => office.id === Number(selectedDoctor.officeId))?.medicalCenterId
+          : undefined
+        const centerOffices = doctorCenterId
+          ? loadedOffices.filter(office => office.medicalCenterId === doctorCenterId)
+          : loadedOffices
+        const sortedOffices = [...centerOffices].sort((a, b) =>
+          a.officeNumber.localeCompare(b.officeNumber, 'es', { numeric: true }),
+        )
+
+        setOffices(sortedOffices)
         setSelectedDoctorId(defaultDoctorId)
-        setSelectedOfficeId(String(loadedOffices[0]?.id ?? ''))
+        setSelectedOfficeId(String(sortedOffices[0]?.id ?? ''))
       })
       .catch(() => setCatalogError('No se pudieron cargar médicos y consultorios.'))
   }, [activeRole, loggedDoctorId, selectedContextDoctorId])
@@ -150,8 +160,8 @@ export default function DateView() {
       return
     }
 
-    if (!cedula || cedula.length < 13) {
-      setSubmitError('La cédula debe tener el formato 000-0000000-0.')
+    if (!cedula) {
+      setSubmitError('Debe ingresar la cédula (máximo 12 dígitos).')
       return
     }
 
@@ -194,6 +204,11 @@ export default function DateView() {
       const office = offices.find(item => item.id === Number(selectedOfficeId))
       if (!office?.medicalCenterId) throw new Error('El consultorio no tiene centro médico asociado.')
 
+      // El backend exige email y fecha de nacimiento válidos: se derivan
+      // del formulario (edad) ya que la vista no los pide directamente
+      const birthYear = new Date().getFullYear() - Number(age)
+      const nationalIdDigits = cedula.replace(/\D/g, '') || 'paciente'
+
       let hour = Number(timeHour) % 12
       if (timeMeridiem === 'PM') hour += 12
       const startAt = new Date(selectedDate!.getFullYear(), selectedDate!.getMonth(), selectedDate!.getDate(), hour, Number(timeMinute))
@@ -210,9 +225,9 @@ export default function DateView() {
           nationalId: cedula,
           firstName,
           lastName,
-          email: '',
+          email: `paciente.${nationalIdDigits}@sinregistro.local`,
           phone,
-          dateOfBirth: '',
+          dateOfBirth: `${birthYear}-01-01`,
           gender: 'OTRO'
         }
       })
@@ -285,7 +300,8 @@ export default function DateView() {
                     <input
                       className="form-control"
                       type="text"
-                      placeholder="000-0000000-0"
+                      inputMode="numeric"
+                      placeholder="000000000000"
                       value={cedula}
                       onChange={e => setCedula(applyCedulaMask(e.target.value))}
                     />
@@ -328,7 +344,7 @@ export default function DateView() {
                       <option value="">Seleccione ubicación</option>
                       {offices.map(office => (
                         <option key={office.id} value={office.id}>
-                          {office.officeNumber}{office.locationDetails ? ` - ${office.locationDetails}` : ''}
+                          {office.officeNumber}{office.medicalCenter?.name ? ` - ${office.medicalCenter.name}` : ''}{office.locationDetails ? ` (${office.locationDetails})` : ''}
                         </option>
                       ))}
                     </select>
