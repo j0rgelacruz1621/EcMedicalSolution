@@ -30,15 +30,17 @@ export class PatientDataDto {
   @IsNotEmpty()
   lastName: string;
 
+  @IsOptional()
   @IsEmail()
-  email: string;
+  email?: string;
 
   @IsString()
   @IsNotEmpty()
   phone: string;
 
+  @IsOptional()
   @IsDateString()
-  dateOfBirth: string;
+  dateOfBirth?: string;
 
   @IsEnum(PatientGender, {
     message: 'gender must be MASCULINO, FEMENINO or OTRO.',
@@ -72,6 +74,10 @@ export class CreateAppointmentDto {
   @IsOptional()
   @IsString()
   reasonForVisit?: string;
+
+  @IsOptional()
+  @IsString()
+  type?: string;
 
   @ValidateNested()
   @Type(() => PatientDataDto)

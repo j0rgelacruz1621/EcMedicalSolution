@@ -91,6 +91,7 @@ model Appointment {
   startTime       DateTime                 @map("start_time") @db.Time(6)
   endTime         DateTime                 @map("end_time") @db.Time(6)
   reasonForVisit  String?                  @map("reason_for_visit")
+  type            String?                  @default("De primera") @db.VarChar
   status          appointment_status_enum? @default(SCHEDULED)
   createdAt       DateTime?                @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt       DateTime?                @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)

@@ -340,9 +340,11 @@
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  color: #800020;
-  font-weight: 700;
-  margin-bottom: 1rem;
+   --tw-text-opacity: 1;
+  color: rgb(66 71 82 / var(--tw-text-opacity, 1));
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 400;
 }
 
 .appointment-reason {

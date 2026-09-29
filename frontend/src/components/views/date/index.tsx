@@ -4,7 +4,7 @@ import Header from '../../header'
 import './style.scss'
 import ConfirmDatePreview from '../../modals/confirm-date-preview'
 import ConfirmDate from '../../modals/confirm-date'
-import { createAppointment } from '../../../services/appointments/appointment-services'
+import { createAppointment, type CreateAppointmentRequest } from '../../../services/appointments/appointment-services'
 import { getDoctors } from '../../../services/doctors/doctor-services'
 import { getOffices, type Office } from '../../../services/medical-center/medical-center-services'
 
@@ -53,12 +53,7 @@ const getCalendarDays = (year: number, month: number) => {
   })
 }
 
-const applyCedulaMask = (value: string) => {
-  const digits = value.replace(/\D/g, '').slice(0, 11)
-  if (digits.length <= 3) return digits
-  if (digits.length <= 10) return `${digits.slice(0, 3)}-${digits.slice(3)}`
-  return `${digits.slice(0, 3)}-${digits.slice(3, 10)}-${digits.slice(10)}`
-}
+const applyCedulaMask = (value: string) => value.replace(/\D/g, '').slice(0, 11)
 
 const applyPhoneMask = (value: string) => {
   const cleaned = value.replace(/\D/g, '').slice(0, 12)
@@ -150,8 +145,9 @@ export default function DateView() {
       return
     }
 
-    if (!cedula || cedula.length < 13) {
-      setSubmitError('La cédula debe tener el formato 000-0000000-0.')
+    const cedulaDigits = cedula.replace(/\D/g, '')
+    if (!cedulaDigits || cedulaDigits.length < 6 || cedulaDigits.length > 11) {
+      setSubmitError('La cédula debe tener entre 6 y 11 dígitos numéricos.')
       return
     }
 
@@ -199,6 +195,10 @@ export default function DateView() {
       const startAt = new Date(selectedDate!.getFullYear(), selectedDate!.getMonth(), selectedDate!.getDate(), hour, Number(timeMinute))
       const endAt = new Date(startAt.getTime() + 30 * 60 * 1000)
 
+      const currentYear = new Date().getFullYear()
+      const estimatedYear = currentYear - Number(age)
+      const dateOfBirth = `${estimatedYear}-01-01T00:00:00.000Z`
+
       const appointment = await createAppointment({
         doctorId: Number(selectedDoctorId),
         startAt: startAt.toISOString(),
@@ -206,15 +206,15 @@ export default function DateView() {
         medicalCenterId: office.medicalCenterId,
         officeId: office.id,
         reasonForVisit: consultationType || undefined,
+        type: consultationType || undefined,
         patient: {
           nationalId: cedula,
           firstName,
           lastName,
-          email: '',
           phone,
-          dateOfBirth: '',
-          gender: 'OTRO'
-        }
+          dateOfBirth,
+          gender: 'OTRO' as const,
+        } as CreateAppointmentRequest['patient']
       })
 
       setIsSubmitting(false)
@@ -285,7 +285,7 @@ export default function DateView() {
                     <input
                       className="form-control"
                       type="text"
-                      placeholder="000-0000000-0"
+                      placeholder="15654987"
                       value={cedula}
                       onChange={e => setCedula(applyCedulaMask(e.target.value))}
                     />

@@ -1,5 +1,5 @@
 import { appointment_status_enum } from '@prisma/client';
-import { IsDateString, IsEnum, IsInt, IsOptional, Matches, Min } from 'class-validator';
+import { IsDateString, IsEnum, IsInt, IsOptional, IsString, Matches, Min } from 'class-validator';
 
 const TIME_PATTERN = /^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/;
 
@@ -30,4 +30,8 @@ export class UpdateAppointmentDto {
   @IsInt()
   @Min(1)
   office_id?: number;
+
+  @IsOptional()
+  @IsString()
+  type?: string;
 }
