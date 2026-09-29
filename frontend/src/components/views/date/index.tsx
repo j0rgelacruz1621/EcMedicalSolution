@@ -285,7 +285,7 @@ export default function DateView() {
                     <input
                       className="form-control"
                       type="text"
-                      placeholder="16201114"
+                      placeholder="15654987"
                       value={cedula}
                       onChange={e => setCedula(applyCedulaMask(e.target.value))}
                     />
