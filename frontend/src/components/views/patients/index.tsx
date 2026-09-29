@@ -4,6 +4,10 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import LeftSideBar from '../../left-sideBar'
 import NewPatientModal from '../../modals/new-patient';
 import ConfirmNewPatientModal from '../../modals/confirm-new-patient';
+import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
+import PersonAddAlt1OutlinedIcon from '@mui/icons-material/PersonAddAlt1Outlined';
+import EventOutlinedIcon from '@mui/icons-material/EventOutlined';
+
 
 import {
   Plus, Bell, CircleHelp,
@@ -13,7 +17,8 @@ import {
   UsersRound, UserRoundPlus, AlertCircle
 } from 'lucide-react'
 import { getPatients, type Patient } from '../../../services/patients/patient-services';
-import { getAppointments } from '../../../services/appointments/appointment-services';
+import { getAppointments, type Appointment } from '../../../services/appointments/appointment-services';
+import { getOffices, type Office } from '../../../services/medical-center/medical-center-services';
 
 function getAge(dateOfBirth: string) {
   const birthDate = new Date(dateOfBirth);
@@ -56,10 +61,11 @@ export default function PatientsView() {
   const [error, setError] = useState('');
   const [stats, setStats] = useState({
     newThisMonth: 0,
-    activePatients: 0,
     appointmentsThisWeek: 0,
     totalPatients: 0,
   });
+  const [doctorOffices, setDoctorOffices] = useState<Office[]>([]);
+  const [officePatientCounts, setOfficePatientCounts] = useState<Record<number, number>>({});
 
   useEffect(() => {
     let active = true;
@@ -104,7 +110,7 @@ export default function PatientsView() {
         }).length;
 
         const appointmentsThisWeek = appointmentsResult.data.filter(appointment => {
-          if (!appointment.appointmentDate) return false;
+          if (!appointment.appointmentDate) return new Date(appointment.appointmentDate) >= currentWeekStart;
           return new Date(appointment.appointmentDate) >= currentWeekStart;
         }).length;
 
@@ -112,7 +118,6 @@ export default function PatientsView() {
         setTotalPatients(result.total);
         setStats({
           newThisMonth,
-          activePatients: result.data.filter(patient => patient.isActive).length || result.data.length,
           appointmentsThisWeek,
           totalPatients: result.total,
         });
@@ -126,6 +131,56 @@ export default function PatientsView() {
     void loadPatients();
     return () => { active = false; };
   }, [nameFilter, nationalIdFilter, page, doctorId]);
+
+  // Consultorios del centro médico del doctor + pacientes por consultorio
+  useEffect(() => {
+    let active = true;
+    if (!doctorId) return;
+
+    Promise.all([
+      import('../../../services/doctors/doctor-services').then(({ getDoctor }) => getDoctor(doctorId)),
+      getOffices(),
+    ])
+      .then(([doctorResult, allOffices]) => {
+        if (!active) return;
+        const doctorOffice = doctorResult.officeId
+          ? allOffices.find(office => office.id === Number(doctorResult.officeId))
+          : undefined;
+        const centerOffices = doctorOffice?.medicalCenterId
+          ? allOffices.filter(office => office.medicalCenterId === doctorOffice.medicalCenterId)
+          : allOffices;
+        setDoctorOffices(centerOffices);
+      })
+      .catch(() => {
+        if (active) setDoctorOffices([]);
+      });
+
+    return () => { active = false; };
+  }, [doctorId]);
+
+  useEffect(() => {
+    if (!doctorId || doctorOffices.length === 0) return;
+    let active = true;
+
+    getAppointments({ doctorId, limit: 200 })
+      .then(appointmentsResult => {
+        if (!active) return;
+        const counts: Record<number, number> = {};
+        doctorOffices.forEach(office => {
+          counts[office.id] = new Set(
+            appointmentsResult.data
+              .filter(appointment => appointment.officeId === office.id && appointment.patient?.nationalId)
+              .map(appointment => appointment.patient!.nationalId),
+          ).size;
+        });
+        setOfficePatientCounts(counts);
+      })
+      .catch(() => {
+        if (active) setOfficePatientCounts({});
+      });
+
+    return () => { active = false; };
+  }, [doctorId, doctorOffices]);
 
   const handlePatientCreated = (patient: Patient) => {
     setLastAddedName(`${patient.firstName} ${patient.lastName}`);
@@ -148,30 +203,25 @@ export default function PatientsView() {
       label: 'Nuevos este mes',
       value: stats.newThisMonth,
       dark: true,
-      icon: UserRoundPlus,
+      icon: PersonAddAlt1OutlinedIcon,
     },
-    {
-      key: 'activePatients',
-      label: 'Pacientes Mérida',
-      value: stats.activePatients,
+    // Una tarjeta por cada consultorio del centro médico del doctor
+    ...doctorOffices.map((office, index) => ({
+      key: `office-${office.id}`,
+      label: `Pacientes ${office.officeNumber}${office.medicalCenter?.name && office.medicalCenter.name !== office.officeNumber ? ` · ${office.medicalCenter.name}` : ''}`,
+      value: officePatientCounts[office.id] ?? 0,
       dark: false,
-      icon: UsersRound,
-    },
+      icon: CheckCircleOutlineOutlinedIcon,
+      color: index === 0 ? 'success !important' : undefined,
+    })),
     {
       key: 'appointmentsThisWeek',
-      label: 'Pacientes Tovar',
+      label: 'Citas esta semana',
       value: stats.appointmentsThisWeek,
       dark: false,
-      icon: AlertCircle,
+      icon: EventOutlinedIcon,
     },
-    {
-      key: 'totalPatients',
-      label: 'Citas esta semana',
-      value: stats.totalPatients || totalPatients,
-      dark: false,
-      icon: MapPin,
-    },
-  ], [stats, totalPatients]);
+  ], [stats, doctorOffices, officePatientCounts]);
 
   return (
     <div className="patients-root">
@@ -273,11 +323,11 @@ export default function PatientsView() {
           </div>
 
           <div className="kpi-grid">
-            {cardMetrics.map(({ key, label, value, dark, icon: Icon }) => (
-              <div key={key} className={`kpi-card ${dark ? 'dark' : 'outline'}`}>
+            {cardMetrics.map(({ key, label, value, dark, icon: Icon, color }) => (
+              <div key={key} className={`kpi-card ${dark ? 'dark' : 'outline'}${color ? ` kpi-card--${color.replace(' !important', '')}` : ''}`}>
                 <div className="kpi-content">
-                  <div className={`kpi-icon-box ${dark ? 'dark' : ''}`}>
-                    <Icon size={22} />
+                  <div className={`kpi-icon-box ${dark ? 'dark' : ''}${color ? ` ${color.replace(' !important', '')}` : ''}`}>
+                    {Icon ? <Icon size={24} style={color ? { color: '#2e7d32', fontSize: 24 } : undefined} /> : null}
                   </div>
                   <div className="kpi-data">
                     <span className="kpi-value">{value}</span>

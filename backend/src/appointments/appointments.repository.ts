@@ -93,6 +93,7 @@ export class AppointmentsRepository {
           SELECT id
           FROM appointments
           WHERE doctor_id = ${doctor.id}
+            AND office_id = CAST(${payload.officeId} AS bigint)
             AND appointment_date = CAST(${appointmentDateValue} AS date)
             AND status IN ('SCHEDULED', 'CONFIRMED')
             AND start_time < CAST(${endTimeValue} AS time)
@@ -103,6 +104,26 @@ export class AppointmentsRepository {
         if (overlappingAppointment.length > 0) {
           throw new ConflictException(
             'The selected appointment time is no longer available.',
+          );
+        }
+
+        // El consultorio no puede estar ocupado por otro médico a esa hora
+        const officeBusy = await transaction.$queryRaw<
+          [{ id: bigint }]
+        >`
+          SELECT id
+          FROM appointments
+          WHERE office_id = CAST(${payload.officeId} AS bigint)
+            AND appointment_date = CAST(${appointmentDateValue} AS date)
+            AND status IN ('SCHEDULED', 'CONFIRMED')
+            AND start_time < CAST(${endTimeValue} AS time)
+            AND end_time > CAST(${startTimeValue} AS time)
+          LIMIT 1
+        `;
+
+        if (officeBusy.length > 0) {
+          throw new ConflictException(
+            'The selected office is already booked at that time.',
           );
         }
 
@@ -201,6 +222,7 @@ export class AppointmentsRepository {
         SELECT id
         FROM appointments
         WHERE doctor_id = ${current.doctorId}
+          AND office_id = ${officeId ?? current.officeId}
           AND id <> ${current.id}
           AND appointment_date = CAST(${appointmentDateValue} AS date)
           AND status IN ('SCHEDULED', 'CONFIRMED')
@@ -211,7 +233,7 @@ export class AppointmentsRepository {
 
       if (doctorOverlap.length > 0) {
         throw new ConflictException(
-          'The doctor already has another appointment overlapping this schedule.',
+          'The doctor already has another appointment overlapping this schedule in the selected office.',
         );
       }
 

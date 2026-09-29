@@ -122,10 +122,25 @@ export default function DateView() {
         const availableDoctors = selectedContextDoctorId
           ? loadedDoctors.filter(doctor => String(doctor.id) === selectedContextDoctorId)
           : loadedDoctors
-        setOffices(loadedOffices)
         const defaultDoctorId = selectedContextDoctorId || String(availableDoctors[0]?.id ?? '')
+        const selectedDoctor = availableDoctors.find(doctor => String(doctor.id) === defaultDoctorId)
+
+        // Los consultorios se muestran agrupados por el CENTRO MÉDICO del
+        // médico seleccionado: se deduce a partir de su oficina asignada
+        // (officeId -> medicalCenterId). Sin asignación, se muestran todas.
+        const doctorCenterId = selectedDoctor?.officeId
+          ? loadedOffices.find(office => office.id === Number(selectedDoctor.officeId))?.medicalCenterId
+          : undefined
+        const centerOffices = doctorCenterId
+          ? loadedOffices.filter(office => office.medicalCenterId === doctorCenterId)
+          : loadedOffices
+        const sortedOffices = [...centerOffices].sort((a, b) =>
+          a.officeNumber.localeCompare(b.officeNumber, 'es', { numeric: true }),
+        )
+
+        setOffices(sortedOffices)
         setSelectedDoctorId(defaultDoctorId)
-        setSelectedOfficeId(String(loadedOffices[0]?.id ?? ''))
+        setSelectedOfficeId(String(sortedOffices[0]?.id ?? ''))
       })
       .catch(() => setCatalogError('No se pudieron cargar médicos y consultorios.'))
   }, [activeRole, loggedDoctorId, selectedContextDoctorId])
@@ -189,6 +204,11 @@ export default function DateView() {
     try {
       const office = offices.find(item => item.id === Number(selectedOfficeId))
       if (!office?.medicalCenterId) throw new Error('El consultorio no tiene centro médico asociado.')
+
+      // El backend exige email y fecha de nacimiento válidos: se derivan
+      // del formulario (edad) ya que la vista no los pide directamente
+      const birthYear = new Date().getFullYear() - Number(age)
+      const nationalIdDigits = cedula.replace(/\D/g, '') || 'paciente'
 
       let hour = Number(timeHour) % 12
       if (timeMeridiem === 'PM') hour += 12
@@ -328,7 +348,7 @@ export default function DateView() {
                       <option value="">Seleccione ubicación</option>
                       {offices.map(office => (
                         <option key={office.id} value={office.id}>
-                          {office.officeNumber}{office.locationDetails ? ` - ${office.locationDetails}` : ''}
+                          {office.officeNumber}{office.medicalCenter?.name ? ` - ${office.medicalCenter.name}` : ''}{office.locationDetails ? ` (${office.locationDetails})` : ''}
                         </option>
                       ))}
                     </select>
