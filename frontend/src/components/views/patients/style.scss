@@ -363,13 +363,13 @@
 .kpi-card.dark {
   background: var(--primary-color);
   color: #fff;
-  border: 1px solid var(--primary-color);
+  border: none;
   margin-top: 12px;
 }
 
 .kpi-card.outline {
   background: #fff;
-  border: 1px solid var(--primary-color);
+  border: none;
   color: #1e2430;
 }
 
@@ -379,14 +379,21 @@
   border-radius: 12px;
   display: grid;
   place-items: center;
-  background: rgba(255, 255, 255, 0.12);
+  background: transparent;
   color: inherit;
   flex-shrink: 0;
 }
 
 .kpi-card.outline .kpi-icon-box {
-  background: rgba(127, 17, 34, 0.04);
+  background: transparent;
   color: var(--primary-color);
+}
+
+/* Variante verde (tarjeta con color: 'success') */
+.kpi-card--success .kpi-icon-box.success,
+.kpi-card--success .kpi-icon-box {
+  background: transparent !important;
+  color: #2e7d32 !important;
 }
 
 .kpi-data {
