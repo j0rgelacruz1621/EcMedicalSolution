@@ -1,11 +1,13 @@
 import { Type } from 'class-transformer';
 import {
-  IsDateString,
   IsEmail,
   IsEnum,
+  IsInt,
   IsOptional,
   IsString,
+  Max,
   MaxLength,
+  Min,
   ValidateNested,
 } from 'class-validator';
 import { CreatePatientVitalsDto } from './create-patient-vitals.dto';
@@ -32,8 +34,10 @@ export class UpdatePatientDto {
   phone?: string;
 
   @IsOptional()
-  @IsDateString()
-  dateOfBirth?: string;
+  @IsInt()
+  @Min(0)
+  @Max(120)
+  age?: number;
 
   @IsOptional()
   @IsEnum(PatientGender, {

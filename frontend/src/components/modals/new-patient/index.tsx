@@ -8,17 +8,20 @@ interface Props {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: (patient: Patient) => void;
+  doctorId?: number;
 }
 
 
-export default function NewPatientModal({ isOpen, onClose, onSuccess }: Props) {
+export default function NewPatientModal({ isOpen, onClose, onSuccess, doctorId }: Props) {
   // Estado interno para el formulario
   const [formData, setFormData] = useState({
     name: '',
     lastName: '',
     ci: '',
     email: '',
-    dateOfBirth: '',
+    age: '',
+    origin: '',
+    address: '',
     gender: '' as PatientGender | '',
     phone: '',
     pa: '',
@@ -44,7 +47,10 @@ export default function NewPatientModal({ isOpen, onClose, onSuccess }: Props) {
         lastName: formData.lastName,
         email: formData.email,
         phone: formData.phone,
-        dateOfBirth: formData.dateOfBirth,
+        age: Number(formData.age),
+        origin: formData.origin || undefined,
+        address: formData.address || undefined,
+        ...(doctorId ? { assignedDoctorId: doctorId } : {}),
         gender: formData.gender as PatientGender,
         vitals: {
           ...(formData.pa ? { bloodPressure: formData.pa.replace(/\s*mmHg\s*$/i, '') } : {}),
@@ -82,42 +88,45 @@ export default function NewPatientModal({ isOpen, onClose, onSuccess }: Props) {
           <div className="form-grid">
             <div className="form-group">
               <label>Nombres</label>
-              <input 
-                type="text" 
-                placeholder="Ej. Juan Carlos" 
+              <input
+                type="text"
+                placeholder="Ej. Juan Carlos"
                 value={formData.name}
                 onChange={(e) => setFormData({...formData, name: e.target.value})}
-                required 
-              />  
-            </div>
-            <div className="form-group">
-              <label>Apellidos</label>
-                <input 
-                  type="text" 
-                  placeholder="Ej. Pérez García" 
-                  value={formData.lastName}
-                  onChange={(e) => setFormData({...formData, lastName: e.target.value})}
-                  required 
-                />
-            </div>
-            
-            <div className="form-group">
-              <label>Cédula</label>
-              <input 
-                type="text" 
-                placeholder="V-00.000.000" 
-                  value={formData.ci}
-                onChange={(e) => setFormData({...formData, ci: e.target.value})}
-                required 
+                required
               />
             </div>
             <div className="form-group">
-              <label>Fecha de nacimiento</label>
-              <input 
-                type="date"
-                value={formData.dateOfBirth}
-                onChange={(e) => setFormData({...formData, dateOfBirth: e.target.value})}
-                required 
+              <label>Apellidos</label>
+                <input
+                  type="text"
+                  placeholder="Ej. Pérez García"
+                  value={formData.lastName}
+                  onChange={(e) => setFormData({...formData, lastName: e.target.value})}
+                  required
+                />
+            </div>
+
+            <div className="form-group">
+              <label>Cédula</label>
+              <input
+                type="text"
+                placeholder="V-00.000.000"
+                  value={formData.ci}
+                onChange={(e) => setFormData({...formData, ci: e.target.value})}
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label>Edad</label>
+              <input
+                type="number"
+                min={0}
+                max={120}
+                placeholder="Ej. 34"
+                value={formData.age}
+                onChange={(e) => setFormData({...formData, age: e.target.value})}
+                required
               />
             </div>
 
@@ -133,7 +142,7 @@ export default function NewPatientModal({ isOpen, onClose, onSuccess }: Props) {
             </div>
             <div className="form-group">
               <label>Género</label>
-                <select 
+                <select
                   value={formData.gender}
                   onChange={(e) => setFormData({...formData, gender: e.target.value as PatientGender})}
                   required
@@ -145,10 +154,24 @@ export default function NewPatientModal({ isOpen, onClose, onSuccess }: Props) {
                 </select>
             </div>
             <div className="form-group">
+              <label>Procedencia</label>
+              <select
+                value={formData.origin}
+                onChange={(e) => setFormData({...formData, origin: e.target.value})}
+              >
+                <option value="">Seleccione una opción</option>
+                <option value="Mérida">Mérida</option>
+                <option value="Tovar">Tovar</option>
+                <option value="El Vigía">El Vigía</option>
+                <option value="Ejido">Ejido</option>
+                <option value="Otra">Otra</option>
+              </select>
+            </div>
+            <div className="form-group">
               <label>Número de teléfono</label>
-              <input 
-                type="text" 
-                placeholder="+58 412-0000000" 
+              <input
+                type="text"
+                placeholder="+58 412-0000000"
                 value={formData.phone}
                 onChange={(e) => setFormData({...formData, phone: e.target.value})}
                 required
@@ -158,37 +181,46 @@ export default function NewPatientModal({ isOpen, onClose, onSuccess }: Props) {
             {/* SECCIÓN DE SIGNOS VITALES EN UNA LÍNEA */}
             <div className="form-section-title">
               <Activity size={18} />
-              <span>Datos Signos Vitales (Triaje Inicial)</span>
+              <span>Triaje Inicial</span>
             </div>
 
             <div className="vitals-row">
               <div className="form-group">
                 <label>P.A (Presión Arterial)</label>
-                <input 
-                  type="text" 
-                  placeholder="Ej. 120/80 mmHg" 
+                <input
+                  type="text"
+                  placeholder="Ej. 120/80 mmHg"
                   value={formData.pa}
                   onChange={(e) => setFormData({...formData, pa: e.target.value})}
                 />
               </div>
               <div className="form-group">
                 <label>F.C (Frecuencia Cardíaca)</label>
-                <input 
-                  type="text" 
-                  placeholder="Ej. 72 bpm" 
+                <input
+                  type="text"
+                  placeholder="Ej. 72 bpm"
                   value={formData.fc}
                   onChange={(e) => setFormData({...formData, fc: e.target.value})}
                 />
               </div>
               <div className="form-group">
                 <label>Peso</label>
-                <input 
-                  type="text" 
-                  placeholder="Ej. 75 kg" 
+                <input
+                  type="text"
+                  placeholder="Ej. 75 kg"
                   value={formData.weight}
                   onChange={(e) => setFormData({...formData, weight: e.target.value})}
                 />
               </div>
+            </div>
+
+            <div className="form-group full-width">
+              <label>Dirección detallada</label>
+              <textarea
+                placeholder="Calle, edificio, urbanización, ciudad..."
+                value={formData.address}
+                onChange={(e) => setFormData({...formData, address: e.target.value})}
+              />
             </div>
 
             <div className="form-group full-width">

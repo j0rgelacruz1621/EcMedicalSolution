@@ -105,13 +105,30 @@ export class PatientsService {
       );
     }
 
+    if (payload.assignedDoctorId) {
+      const doctor = await this.patientsRepository.findDoctorById(
+        BigInt(payload.assignedDoctorId),
+      );
+
+      if (!doctor) {
+        throw new NotFoundException(
+          `Doctor with id "${payload.assignedDoctorId}" not found.`,
+        );
+      }
+    }
+
     const patientData: PatientData = {
       nationalId: payload.nationalId,
       firstName: payload.firstName,
       lastName: payload.lastName,
       email: payload.email,
       phone: payload.phone,
-      dateOfBirth: new Date(payload.dateOfBirth),
+      age: payload.age,
+      origin: payload.origin,
+      address: payload.address,
+      assignedDoctorId: payload.assignedDoctorId
+        ? BigInt(payload.assignedDoctorId)
+        : undefined,
       gender: GENDER_MAP[payload.gender],
       medicalHistoryNotes: payload.medicalHistoryNotes,
     };
@@ -220,9 +237,7 @@ export class PatientsService {
       lastName: payload.lastName,
       email: payload.email,
       phone: payload.phone,
-      dateOfBirth: payload.dateOfBirth
-        ? new Date(payload.dateOfBirth)
-        : undefined,
+      age: payload.age,
       gender: payload.gender ? GENDER_MAP[payload.gender] : undefined,
       medicalHistoryNotes: payload.medicalHistoryNotes,
     };

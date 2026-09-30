@@ -30,7 +30,10 @@ export interface PatientData {
   lastName: string;
   email: string;
   phone: string;
-  dateOfBirth: Date;
+  age: number;
+  origin?: string;
+  address?: string;
+  assignedDoctorId?: bigint;
   gender: gender_enum;
   medicalHistoryNotes?: string;
 }
@@ -60,6 +63,10 @@ export class PatientsRepository {
 
   findById(id: bigint) {
     return this.prisma.patient.findUnique({ where: { id } });
+  }
+
+  findDoctorById(id: bigint) {
+    return this.prisma.doctor.findUnique({ where: { id } });
   }
 
   /**
@@ -149,7 +156,12 @@ export class PatientsRepository {
         ? { lastName: { contains: filters.lastName, mode: 'insensitive' } }
         : {}),
       ...(filters.doctorId
-        ? { appointments: { some: { doctorId: filters.doctorId } } }
+        ? {
+            OR: [
+              { assignedDoctorId: filters.doctorId },
+              { appointments: { some: { doctorId: filters.doctorId } } },
+            ],
+          }
         : {}),
     };
   }

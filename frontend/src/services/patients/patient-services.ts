@@ -17,7 +17,9 @@ export interface Patient {
   lastName: string;
   email: string;
   phone: string;
-  dateOfBirth: string;
+  age: number;
+  origin: string | null;
+  address: string | null;
   gender: PatientGender;
   medicalHistoryNotes: string | null;
   isActive: boolean;
@@ -40,8 +42,11 @@ export interface CreatePatientRequest {
   lastName: string;
   email: string;
   phone: string;
-  dateOfBirth: string;
+  age: number;
   gender: PatientGender;
+  origin?: string;
+  address?: string;
+  assignedDoctorId?: number;
   vitals: {
     bloodPressure?: string;
     heartRateBpm?: number;

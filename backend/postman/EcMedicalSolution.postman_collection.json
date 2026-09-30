@@ -288,7 +288,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"doctorId\": {{doctorId}},\n  \"medicalCenterId\": 1,\n  \"officeId\": 1,\n  \"startAt\": \"2026-08-10T10:00:00.000Z\",\n  \"endAt\": \"2026-08-10T10:30:00.000Z\",\n  \"reasonForVisit\": \"Consulta general\",\n  \"patient\": {\n    \"nationalId\": \"0912345678\",\n    \"firstName\": \"Maria\",\n    \"lastName\": \"Lopez\",\n    \"email\": \"maria.lopez@example.com\",\n    \"phone\": \"0999999999\",\n    \"dateOfBirth\": \"1990-05-20\",\n    \"gender\": \"FEMENINO\",\n    \"medicalHistoryNotes\": \"Sin antecedentes relevantes\"\n  }\n}"
+              "raw": "{\n  \"doctorId\": {{doctorId}},\n  \"medicalCenterId\": 1,\n  \"officeId\": 1,\n  \"startAt\": \"2026-08-10T10:00:00.000Z\",\n  \"endAt\": \"2026-08-10T10:30:00.000Z\",\n  \"reasonForVisit\": \"Consulta general\",\n  \"patient\": {\n    \"nationalId\": \"0912345678\",\n    \"firstName\": \"Maria\",\n    \"lastName\": \"Lopez\",\n    \"email\": \"maria.lopez@example.com\",\n    \"phone\": \"0999999999\",\n    \"age\": 34,\n    \"gender\": \"FEMENINO\",\n    \"medicalHistoryNotes\": \"Sin antecedentes relevantes\"\n  }\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/appointments",
@@ -383,7 +383,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nationalId\": \"0912345678\",\n  \"firstName\": \"Maria\",\n  \"lastName\": \"Lopez\",\n  \"email\": \"maria.lopez@example.com\",\n  \"phone\": \"0999999999\",\n  \"dateOfBirth\": \"1990-05-20\",\n  \"gender\": \"FEMENINO\",\n  \"medicalHistoryNotes\": \"Sin antecedentes relevantes\",\n  \"vitals\": {\n    \"bloodPressure\": \"120/80\",\n    \"heartRateBpm\": 78,\n    \"weightKg\": 65.5\n  }\n}"
+              "raw": "{\n  \"nationalId\": \"0912345678\",\n  \"firstName\": \"Maria\",\n  \"lastName\": \"Lopez\",\n  \"email\": \"maria.lopez@example.com\",\n  \"phone\": \"0999999999\",\n  \"age\": 34,\n  \"gender\": \"FEMENINO\",\n  \"medicalHistoryNotes\": \"Sin antecedentes relevantes\",\n  \"vitals\": {\n    \"bloodPressure\": \"120/80\",\n    \"heartRateBpm\": 78,\n    \"weightKg\": 65.5\n  }\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/patients",
@@ -416,14 +416,14 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nationalId\": \"0912345679\",\n  \"firstName\": \"Carlos\",\n  \"lastName\": \"Ramirez\",\n  \"email\": \"carlos.ramirez@example.com\",\n  \"phone\": \"0988888888\",\n  \"dateOfBirth\": \"1985-03-15\",\n  \"gender\": \"MASCULINO\"\n}"
+              "raw": "{\n  \"nationalId\": \"0912345679\",\n  \"firstName\": \"Carlos\",\n  \"lastName\": \"Ramirez\",\n  \"email\": \"carlos.ramirez@example.com\",\n  \"phone\": \"0988888888\",\n  \"age\": 35,\n  \"gender\": \"MASCULINO\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/patients",
               "host": ["{{baseUrl}}"],
               "path": ["api", "v1", "patients"]
             },
-            "description": "Registro basico de paciente sin signos vitales (HU1). Responde 201 con el paciente creado; 409 si national_id o email ya existen; 400 si falta un campo obligatorio o dateOfBirth no es una fecha pasada valida."
+            "description": "Registro basico de paciente sin signos vitales (HU1). Responde 201 con el paciente creado; 409 si national_id o email ya existen; 400 si falta un campo obligatorio o age no es un entero entre 0 y 120."
           }
         },
         {

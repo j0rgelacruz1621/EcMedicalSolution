@@ -205,9 +205,7 @@ export default function DateView() {
       const office = offices.find(item => item.id === Number(selectedOfficeId))
       if (!office?.medicalCenterId) throw new Error('El consultorio no tiene centro médico asociado.')
 
-      // El backend exige email y fecha de nacimiento válidos: se derivan
-      // del formulario (edad) ya que la vista no los pide directamente
-      const birthYear = new Date().getFullYear() - Number(age)
+      // El backend espera la edad directamente (campo age, entero 0-120)
       const nationalIdDigits = cedula.replace(/\D/g, '') || 'paciente'
 
       let hour = Number(timeHour) % 12
@@ -215,9 +213,7 @@ export default function DateView() {
       const startAt = new Date(selectedDate!.getFullYear(), selectedDate!.getMonth(), selectedDate!.getDate(), hour, Number(timeMinute))
       const endAt = new Date(startAt.getTime() + 30 * 60 * 1000)
 
-      const currentYear = new Date().getFullYear()
-      const estimatedYear = currentYear - Number(age)
-      const dateOfBirth = `${estimatedYear}-01-01T00:00:00.000Z`
+      const currentAge = Number(age)
 
       const appointment = await createAppointment({
         doctorId: Number(selectedDoctorId),
@@ -232,7 +228,7 @@ export default function DateView() {
           firstName,
           lastName,
           phone,
-          dateOfBirth,
+          age: currentAge,
           gender: 'OTRO' as const,
         } as CreateAppointmentRequest['patient']
       })

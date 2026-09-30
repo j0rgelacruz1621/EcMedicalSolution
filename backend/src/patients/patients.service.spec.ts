@@ -19,7 +19,7 @@ describe('PatientsService', () => {
     lastName: 'Lopez',
     email: 'maria@example.com',
     phone: '0999999999',
-    dateOfBirth: '1990-05-20',
+    age: 34,
     gender: PatientGender.FEMENINO,
   };
 

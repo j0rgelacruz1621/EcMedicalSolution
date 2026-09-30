@@ -6,6 +6,7 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
+  Max,
   Min,
   ValidateNested,
 } from 'class-validator';
@@ -39,8 +40,10 @@ export class PatientDataDto {
   phone: string;
 
   @IsOptional()
-  @IsDateString()
-  dateOfBirth?: string;
+  @IsInt()
+  @Min(0)
+  @Max(120)
+  age?: number;
 
   @IsEnum(PatientGender, {
     message: 'gender must be MASCULINO, FEMENINO or OTRO.',

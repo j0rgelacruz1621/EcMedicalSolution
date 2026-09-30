@@ -56,7 +56,7 @@ const PATIENT_RESPONSE_EXAMPLE = {
     lastName: 'Perez',
     email: 'juan@example.com',
     phone: '0999999999',
-    dateOfBirth: '1990-05-12T00:00:00.000Z',
+    age: 34,
     gender: 'Male',
     medicalHistoryNotes: null,
     isActive: true,
@@ -98,8 +98,8 @@ export class PatientsController {
       'Si se incluye "vitals", se registra además, en la misma transacción de PostgreSQL (BEGIN/COMMIT), su primer ' +
       'signo vital de triaje en "patient_vitals"; si falla cualquiera de las dos inserciones se ejecuta ROLLBACK. ' +
       'El campo "bloodPressure" (ej. "120/80") se desglosa en blood_pressure_systolic = 120 y blood_pressure_diastolic = 80. ' +
-      'Se valida la unicidad de national_id y de email antes de intentar la inserción, y que dateOfBirth sea una fecha ' +
-      'pasada válida (YYYY-MM-DD). is_active toma true por defecto y created_at/updated_at se asignan automáticamente.',
+      'Se valida la unicidad de national_id y de email antes de intentar la inserción. age debe ser un entero entre 0 y 120. ' +
+      'is_active toma true por defecto y created_at/updated_at se asignan automáticamente.',
   })
   @ApiBody({
     schema: {
@@ -110,7 +110,7 @@ export class PatientsController {
         'lastName',
         'email',
         'phone',
-        'dateOfBirth',
+        'age',
         'gender',
       ],
       properties: {
@@ -119,7 +119,10 @@ export class PatientsController {
         lastName: { type: 'string', example: 'Perez' },
         email: { type: 'string', example: 'juan@example.com' },
         phone: { type: 'string', example: '0999999999' },
-        dateOfBirth: { type: 'string', format: 'date', example: '1990-05-12' },
+        age: { type: 'integer', minimum: 0, maximum: 120, example: 34 },
+        origin: { type: 'string', nullable: true, example: 'Mérida' },
+        address: { type: 'string', nullable: true, example: 'Av. Principal, Edif. Los Jaros, Mérida' },
+        assignedDoctorId: { type: 'integer', nullable: true, example: 1, description: 'Id del médico al que se asigna el paciente (opcional). Permite verlo sin necesidad de una cita.' },
         gender: { type: 'string', enum: Object.values(PatientGender) },
         medicalHistoryNotes: { type: 'string', nullable: true },
         vitals: { ...VITALS_SCHEMA, nullable: true },
@@ -135,8 +138,7 @@ export class PatientsController {
   @ApiResponse({
     status: 400,
     description:
-      'Faltan campos obligatorios o algún formato es inválido: email, dateOfBirth (debe ser YYYY-MM-DD y una fecha ' +
-      'pasada), gender, o bloodPressure con un formato distinto de "sistólica/diastólica".',
+      'Faltan campos obligatorios o algún formato es inválido: email, age (entero entre 0 y 120), gender, o bloodPressure con un formato distinto de "sistólica/diastólica".',
   })
   @ApiResponse({
     status: 409,
@@ -196,7 +198,7 @@ export class PatientsController {
             lastName: 'Perez',
             email: 'juan@example.com',
             phone: '0999999999',
-            dateOfBirth: '1990-05-12T00:00:00.000Z',
+            age: 34,
             gender: 'Male',
             medicalHistoryNotes: null,
             isActive: true,
@@ -280,7 +282,7 @@ export class PatientsController {
         lastName: { type: 'string', nullable: true },
         email: { type: 'string', nullable: true },
         phone: { type: 'string', nullable: true },
-        dateOfBirth: { type: 'string', format: 'date', nullable: true },
+        age: { type: 'integer', nullable: true, minimum: 0, maximum: 120 },
         gender: {
           type: 'string',
           enum: Object.values(PatientGender),
