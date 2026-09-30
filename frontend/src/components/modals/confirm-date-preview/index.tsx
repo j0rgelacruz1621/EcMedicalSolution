@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import './style.scss'
+import EditCalendarOutlinedIcon from '@mui/icons-material/EditCalendarOutlined';
 
 type Props = {
   isOpen: boolean
@@ -32,10 +33,7 @@ export default function ConfirmDatePreview({ isOpen, dateText, timeText, loading
     <div className="cdp-backdrop animate__animated animate__fadeIn" onMouseDown={onClose} role="presentation">
       <div className="cdp-dialog animate__animated animate__zoomIn" role="dialog" aria-modal="true" aria-label="Confirmar cita" tabIndex={-1} ref={wrapperRef} onMouseDown={e => e.stopPropagation()}>
         <div className="cdp-icon" aria-hidden>
-          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M7 10h10M7 14h6" stroke="#7b0d14" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-            <rect x="3" y="4" width="18" height="18" rx="2" stroke="#7b0d14" strokeWidth="1.2" />
-          </svg>
+          <EditCalendarOutlinedIcon />
         </div>
 
         <div className="cdp-body">

@@ -68,13 +68,27 @@
 
 .cd-final-row {
   display: flex;
-  justify-content: space-between;
-  padding: 8px 0;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 0;
   border-bottom: 1px dashed rgba(0, 0, 0, 0.04);
 }
 
 .cd-final-row:last-of-type {
   border-bottom: none;
+}
+
+.cd-final-row .row-icon {
+  color: var(--primary-color); /* iconos vinotinto como el diseño */
+  display: flex;
+  align-items: center;
+  margin-top: 2px;
+}
+
+.cd-final-row .row-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .cd-final-row .label {
@@ -85,6 +99,8 @@
 .cd-final-row .value {
   color: #0f172a;
   font-weight: 700;
+  font-size: 15px;
+  text-align: left;
 }
 
 .cd-final-actions {

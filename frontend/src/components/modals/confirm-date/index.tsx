@@ -1,4 +1,8 @@
 import './style.scss'
+import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined'
+import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined'
+import MedicalServicesOutlinedIcon from '@mui/icons-material/MedicalServicesOutlined'
+import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined'
 // Use dynamic import of `jspdf` inside the downloader to avoid Vite import errors when the
 // package is not installed in the environment. A text fallback is provided.
 
@@ -79,7 +83,7 @@ export default function ConfirmDate({ isOpen, booking, onClose, onFinish }: Prop
     <div className="cd-final-backdrop animate__animated animate__fadeIn" onMouseDown={onClose} role="presentation">
       <div className="cd-final-card animate__animated animate__zoomIn" role="dialog" aria-modal="true" onMouseDown={e => e.stopPropagation()}>
         <div className="cd-final-icon">
-          <div className="cd-final-icon__bg"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 6L9 17l-5-5" stroke="#7b0d14" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg></div>
+          <div className="cd-final-icon__bg"><CheckCircleOutlineOutlinedIcon sx={{ fontSize: 28, color: '#7b0d14' }} /></div>
         </div>
 
         <h2 className="cd-final-title">Cita Agendada</h2>
@@ -88,9 +92,27 @@ export default function ConfirmDate({ isOpen, booking, onClose, onFinish }: Prop
         <div className="cd-final-summary">
           <div className="cd-final-summary__title">RESUMEN DE LA CITA</div>
 
-          <div className="cd-final-row"><div className="label">Fecha y Hora</div><div className="value">{booking.dateLabel}{booking.timeLabel ? `, ${booking.timeLabel}` : ''}</div></div>
-          <div className="cd-final-row"><div className="label">Especialidad</div><div className="value">{booking.specialty}</div></div>
-          <div className="cd-final-row"><div className="label">Ubicación</div><div className="value">{booking.location}</div></div>
+          <div className="cd-final-row">
+            <span className="row-icon"><CalendarMonthOutlinedIcon sx={{ fontSize: 20 }} /></span>
+            <div className="row-content">
+              <div className="label">Fecha y Hora</div>
+              <div className="value">{booking.dateLabel}{booking.timeLabel ? `, ${booking.timeLabel}` : ''}</div>
+            </div>
+          </div>
+          <div className="cd-final-row">
+            <span className="row-icon"><MedicalServicesOutlinedIcon sx={{ fontSize: 20 }} /></span>
+            <div className="row-content">
+              <div className="label">Especialidad</div>
+              <div className="value">{booking.specialty}</div>
+            </div>
+          </div>
+          <div className="cd-final-row">
+            <span className="row-icon"><LocationOnOutlinedIcon sx={{ fontSize: 20 }} /></span>
+            <div className="row-content">
+              <div className="label">Ubicación</div>
+              <div className="value">{booking.location}</div>
+            </div>
+          </div>
         </div>
 
         <div className="cd-final-actions">

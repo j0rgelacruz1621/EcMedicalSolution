@@ -7,11 +7,15 @@ import ConfirmDate from '../../modals/confirm-date'
 import { createAppointment, type CreateAppointmentRequest } from '../../../services/appointments/appointment-services'
 import { getDoctors } from '../../../services/doctors/doctor-services'
 import { getOffices, type Office } from '../../../services/medical-center/medical-center-services'
+import BadgeOutlinedIcon from '@mui/icons-material/BadgeOutlined'
+import MedicalServicesOutlinedIcon from '@mui/icons-material/MedicalServicesOutlined'
+import HealthAndSafetyOutlinedIcon from '@mui/icons-material/HealthAndSafetyOutlined'
+import KeyboardArrowDownOutlinedIcon from '@mui/icons-material/KeyboardArrowDownOutlined'
 
 import {
   User,
-  IdCard,
   Fingerprint,
+  ChevronDown,
   Cake,
   Phone,
   Hospital,
@@ -102,6 +106,7 @@ export default function DateView() {
   const sanitizeAge = (value: string) => value.replace(/\D/g, '').slice(0, 2)
 
   const [offices, setOffices] = useState<Office[]>([])
+  const [doctors, setDoctors] = useState<any[]>([])
   const [selectedDoctorId, setSelectedDoctorId] = useState('')
   const [selectedOfficeId, setSelectedOfficeId] = useState('')
   const [catalogError, setCatalogError] = useState('')
@@ -139,6 +144,7 @@ export default function DateView() {
         )
 
         setOffices(sortedOffices)
+        setDoctors(availableDoctors)
         setSelectedDoctorId(defaultDoctorId)
         setSelectedOfficeId(String(sortedOffices[0]?.id ?? ''))
       })
@@ -235,10 +241,12 @@ export default function DateView() {
 
       setIsSubmitting(false)
       setIsConfirmOpen(false)
+      // La especialidad se toma del campo specialty del doctor seleccionado
+      const selectedDoctor = doctors.find(doctor => String(doctor.id) === selectedDoctorId)
       setFinalBooking({
         dateLabel: formatLongDate(selectedDate),
         timeLabel: `${timeHour}:${timeMinute} ${timeMeridiem}`,
-        specialty: consultationType,
+        specialty: selectedDoctor?.specialty || 'Cardiología',
         location: office.officeNumber,
         appointmentCode: appointment.appointmentCode,
       })
@@ -283,7 +291,7 @@ export default function DateView() {
                 <div className="date-view__field">
                   <label className="form-label">Apellidos</label>
                   <div className="input-group">
-                    <span className="input-group-text"><IdCard size={18} strokeWidth={2.2} /></span>
+                    <span className="input-group-text"><BadgeOutlinedIcon sx={{ fontSize: 18 }} /></span>
                     <input
                       className="form-control"
                       type="text"
@@ -339,8 +347,8 @@ export default function DateView() {
                 <div className="date-view__field">
                   <label className="form-label">Consultorio</label>
                   <div className="input-group">
-                    <span className="input-group-text"><Hospital size={18} strokeWidth={2.2} /></span>
-                    <select className="form-select" value={selectedOfficeId} onChange={e => setSelectedOfficeId(e.target.value)}>
+                    <span className="input-group-text"><MedicalServicesOutlinedIcon sx={{ fontSize: 18 }} /></span>
+                    <select className="form-select date-select-arrow" value={selectedOfficeId} onChange={e => setSelectedOfficeId(e.target.value)}>
                       <option value="">Seleccione ubicación</option>
                       {offices.map(office => (
                         <option key={office.id} value={office.id}>
@@ -348,6 +356,7 @@ export default function DateView() {
                         </option>
                       ))}
                     </select>
+                    <span className="select-chevron"><KeyboardArrowDownOutlinedIcon sx={{ fontSize: 18 }} /></span>
                   </div>
                 </div>
               </div>
@@ -435,12 +444,13 @@ export default function DateView() {
                   <div className="date-view__field">
                     <label className="form-label">Tipo de consulta</label>
                     <div className="input-group">
-                      <span className="input-group-text"><Hospital size={18} strokeWidth={2.2} /></span>
-                      <select className="form-select" value={consultationType} onChange={e => setConsultationType(e.target.value)}>
+                      <span className="input-group-text"><HealthAndSafetyOutlinedIcon sx={{ fontSize: 18 }} /></span>
+                      <select className="form-select date-select-arrow" value={consultationType} onChange={e => setConsultationType(e.target.value)}>
                         <option value="">Seleccionar tipo de consulta</option>
                         <option value="De primera">De primera</option>
                         <option value="Control">Control</option>
                       </select>
+                      <span className="select-chevron"><KeyboardArrowDownOutlinedIcon sx={{ fontSize: 18 }} /></span>
                     </div>
                   </div>
 

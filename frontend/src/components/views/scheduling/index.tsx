@@ -179,13 +179,17 @@ export default function AgendaView() {
                   <div key={day.label} className="grid-column">
                     {appointments
                       .filter(app => new Date(app.appointmentDate ?? '').getDate() === day.date)
-                      .map(app => (
-                        <div key={app.id} className="appointment-card" style={{ borderLeftColor: 'var(--primary-color)' }}>
-                          <span className="app-time" style={{ color: 'var(--primary-color)' }}>{formatAppointmentTime(app.startTime)}</span>
-                          <span className="app-patient">{app.patient?.firstName} {app.patient?.lastName}</span>
-                          <span className="app-type">{formatAppointmentType(app)}</span>
-                        </div>
-                      ))}
+                      .map(app => {
+                        const isFirstTime = formatAppointmentType(app).toLowerCase() === 'de primera';
+                        const typeColor = isFirstTime ? 'rgb(0 107 95)' : 'var(--primary-color)';
+                        return (
+                          <div key={app.id} className="appointment-card" style={{ borderLeftColor: typeColor }}>
+                            <span className="app-time" style={{ color: typeColor }}>{formatAppointmentTime(app.startTime)}</span>
+                            <span className="app-patient">{app.patient?.firstName} {app.patient?.lastName}</span>
+                            <span className="app-type">{formatAppointmentType(app)}</span>
+                          </div>
+                        );
+                      })}
                   </div>
                 ))}
               </div>
