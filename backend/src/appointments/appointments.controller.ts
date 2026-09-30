@@ -109,7 +109,7 @@ export class AppointmentsController {
             'lastName',
             'email',
             'phone',
-            'dateOfBirth',
+            'age',
             'gender',
           ],
           properties: {
@@ -118,7 +118,7 @@ export class AppointmentsController {
             lastName: { type: 'string', example: 'Perez' },
             email: { type: 'string', example: 'juan@example.com' },
             phone: { type: 'string', example: '0999999999' },
-            dateOfBirth: { type: 'string', format: 'date' },
+            age: { type: 'integer', minimum: 0, maximum: 120, example: 34 },
             gender: {
               type: 'string',
               enum: ['MASCULINO', 'FEMENINO', 'OTRO'],

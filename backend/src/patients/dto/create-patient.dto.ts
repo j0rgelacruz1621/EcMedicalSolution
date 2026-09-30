@@ -2,14 +2,15 @@ import { Type } from 'class-transformer';
 import {
   IsEmail,
   IsEnum,
+  IsInt,
   IsNotEmpty,
   IsOptional,
   IsString,
-  IsDateString,
+  Max,
   MaxLength,
+  Min,
   ValidateNested,
 } from 'class-validator';
-import { IsPastDate } from '../../common/validators/is-past-date.validator';
 import { CreatePatientVitalsDto } from './create-patient-vitals.dto';
 
 export enum PatientGender {
@@ -42,9 +43,24 @@ export class CreatePatientDto {
   @MaxLength(20)
   phone: string;
 
-  @IsDateString({}, { message: 'dateOfBirth must be a valid date (YYYY-MM-DD).' })
-  @IsPastDate({ message: 'dateOfBirth must be a valid date in the past.' })
-  dateOfBirth: string;
+  @IsInt()
+  @Min(0)
+  @Max(120)
+  age: number;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  origin?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(255)
+  address?: string;
+
+  @IsOptional()
+  @IsInt()
+  assignedDoctorId?: number;
 
   @IsEnum(PatientGender, {
     message: 'gender must be MASCULINO, FEMENINO or OTRO.',

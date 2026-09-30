@@ -137,9 +137,7 @@ export class AppointmentsRepository {
               payload.patient.email ||
               `${payload.patient.nationalId}@pending.local`,
             phone: payload.patient.phone,
-            dateOfBirth: payload.patient.dateOfBirth
-              ? new Date(payload.patient.dateOfBirth)
-              : new Date('1970-01-01'),
+            age: payload.patient.age ?? 0,
             gender: GENDER_MAP[payload.patient.gender],
             medicalHistoryNotes: payload.patient.medicalHistoryNotes,
           },

@@ -15,7 +15,7 @@ export interface CreateAppointmentRequest {
     lastName: string;
     email: string;
     phone: string;
-    dateOfBirth: string;
+    age: number;
     gender: PatientGender;
   };
 }

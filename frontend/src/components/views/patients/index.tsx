@@ -20,17 +20,6 @@ import { getPatients, type Patient } from '../../../services/patients/patient-se
 import { getAppointments, type Appointment } from '../../../services/appointments/appointment-services';
 import { getOffices, type Office } from '../../../services/medical-center/medical-center-services';
 
-function getAge(dateOfBirth: string) {
-  const birthDate = new Date(dateOfBirth);
-  const today = new Date();
-  let age = today.getFullYear() - birthDate.getFullYear();
-  const birthdayHasPassed = today.getMonth() > birthDate.getMonth() ||
-    (today.getMonth() === birthDate.getMonth() && today.getDate() >= birthDate.getDate());
-
-  if (!birthdayHasPassed) age -= 1;
-  return age;
-}
-
 function formatDate(value?: string) {
   if (!value) return 'Sin registro';
   return new Intl.DateTimeFormat('es-ES', { dateStyle: 'medium' }).format(new Date(value));
@@ -294,7 +283,7 @@ export default function PatientsView() {
                       </div>
                     </td>
                     <td>{p.nationalId}</td>
-                    <td>{getAge(p.dateOfBirth)}</td>
+                    <td>{p.age}</td>
                     <td>{formatDate(p.latestVitals?.measured_at)}</td>
                     <td>-</td>
                     <td>
@@ -344,6 +333,7 @@ export default function PatientsView() {
         isOpen={showModal}
         onClose={() => setShowModal(false)}
         onSuccess={handlePatientCreated}
+        doctorId={doctorId}
       />
 
       <ConfirmNewPatientModal
