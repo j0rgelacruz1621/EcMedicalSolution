@@ -1,4 +1,4 @@
-import { Check } from 'lucide-react';
+import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
 import './style.scss';
 
 interface Props {
@@ -16,7 +16,7 @@ export default function ConfirmNewPatientModal({ isOpen, onClose, onViewFile, pa
       <div className="confirm-modal-container">
         <div className="success-icon-wrapper">
           <div className="icon-circle-bg">
-            <Check size={40} strokeWidth={3} />
+            <CheckCircleOutlineOutlinedIcon style={{ fontSize: 56 }} />
           </div>
         </div>
 

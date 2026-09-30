@@ -9,17 +9,17 @@
 }
 
 .cdp-dialog {
-  width: 380px;
-  max-width: calc(100% - 32px);
+  width: 420px;
   background: #fff;
-  border-radius: 12px;
-  padding: 18px 18px 20px;
+  border-radius: 5px;
+  padding: 18px 18px 30px;
   box-shadow: 0 20px 40px rgba(2, 6, 23, 0.35);
   text-align: center;
   font-family: 'Inter', 'Segoe UI', sans-serif;
 }
 
 .cdp-icon {
+  
   margin-bottom: 6px;
   svg path, svg rect {
     stroke: var(--primary-color); /* Para que el icono del calendario cambie de color */
@@ -27,7 +27,15 @@
 }
 
 .cdp-body { color: #0f172a; }
-.cdp-question { font-size: 1rem; margin: 6px 0 12px; }
+.cdp-question { 
+  font-size: 24px;
+  line-height: 32px;
+  font-weight: 600;
+  margin: 6px 0 12px;   
+  --tw-text-opacity: 1;
+  color: rgb(66 71 82 / var(--tw-text-opacity, 1)) !important;
+
+}
 
 .cdp-actions {
   display: flex;

@@ -84,9 +84,24 @@ $color-callout: #e9e9e9;
     display: flex;
     align-items: center;
     border-radius: 8px;
-    overflow: hidden;
     border: 1px solid $color-border;
     background: #fff;
+    position: relative;
+
+    .select-chevron {
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      width: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #6d6466;
+      pointer-events: none; // el clic pasa al select debajo y despliega las opciones
+      border-left: 1px solid $color-border;
+      background: rgba(255, 255, 255, 0.7);
+    }
 
     .input-group-text {
       width: 44px;
@@ -101,6 +116,10 @@ $color-callout: #e9e9e9;
       border-right: 1px solid $color-border;
       border-radius: 0;
       padding: 0;
+
+      &--chevron {
+        display: none; // reemplazado por .select-chevron superpuesto
+      }
     }
 
     .form-control,
@@ -113,6 +132,12 @@ $color-callout: #e9e9e9;
       padding: 10px 12px;
       font-size: 16px;
       color: $color-text-main;
+      appearance: none; // oculta la flecha nativa del select
+      -webkit-appearance: none;
+
+      &.date-select-arrow {
+        padding-right: 52px; // deja espacio al chevron superpuesto
+      }
 
       &:focus {
         outline: none;

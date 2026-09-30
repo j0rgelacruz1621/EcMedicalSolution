@@ -177,8 +177,7 @@ export default function PatientsView() {
     setPatients((current) => [patient, ...current]);
     setTotalPatients((current) => current + 1);
     setShowModal(false);
-    setShowConfirmModal(false);
-    navigate(controlPanelPath);
+    setShowConfirmModal(true);
   };
 
   const handleViewPatientFile = () => {
@@ -197,7 +196,7 @@ export default function PatientsView() {
     // Una tarjeta por cada consultorio del centro médico del doctor
     ...doctorOffices.map((office, index) => ({
       key: `office-${office.id}`,
-      label: `Pacientes ${office.officeNumber}${office.medicalCenter?.name && office.medicalCenter.name !== office.officeNumber ? ` · ${office.medicalCenter.name}` : ''}`,
+      label: `Pacientes ${office.officeNumber}`,
       value: officePatientCounts[office.id] ?? 0,
       dark: false,
       icon: CheckCircleOutlineOutlinedIcon,
