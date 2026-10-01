@@ -68,6 +68,12 @@
   display: grid;
   place-items: center;
   background: #f3f4f6;
+
+  img.avatar-mini,
+  &.avatar-mini--photo {
+    object-fit: cover;
+    border: 1.5px solid var(--primary-color, #7b0d14);
+  }
 }
 
 .patient-file-body {

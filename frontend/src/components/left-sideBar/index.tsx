@@ -28,7 +28,7 @@ export default function LeftSideBar() {
   const doctorId = Number(role === 'DOCTOR' ? localStorage.getItem('doctor_id') : searchParams.get('doctorId') || sessionStorage.getItem('active_doctor_id'))
   const [doctor, setDoctor] = useState<Doctor | null>(null)
   const contextQuery = doctorId ? `?doctorId=${doctorId}` : ''
-  const doctorTitle = doctor?.gender === 'MASCULINO' ? 'Dr.' : 'Dra.'
+  const doctorTitle = doctor?.gender === 'MASCULINO' || doctor?.gender === 'Male' ? 'Dr.' : 'Dra.'
   const sidebarUserName = doctor ? `${doctorTitle} ${doctor.firstName} ${doctor.lastName}` : sessionStorage.getItem('active_doctor_name') || 'Administración'
 
   useEffect(() => {

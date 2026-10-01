@@ -1,5 +1,5 @@
 import './style.scss';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import LeftSideBar from '../../left-sideBar';
 import ClinicalHistoryModal from '../../modals/clinical-history';
@@ -85,6 +85,7 @@ export default function PatientFileView() {
   const { id } = useParams();
   const patient = patientData[Number(id) as keyof typeof patientData] ?? patientData[1];
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [headerDoctor, setHeaderDoctor] = useState<{ name: string; photoUrl?: string | null } | null>(null);
   const [isAddHistoryOpen, setIsAddHistoryOpen] = useState(false);
   const [isPrescriptionHistoryOpen, setIsPrescriptionHistoryOpen] = useState(false);
   const [isPrescriptionFormOpen, setIsPrescriptionFormOpen] = useState(false);
@@ -95,6 +96,19 @@ export default function PatientFileView() {
   const [isNewSupplementaryTestsOpen, setIsNewSupplementaryTestsOpen] = useState(false);
 
   const monthLabel = useMemo(() => 'Octubre 2026', []);
+
+  useEffect(() => {
+    const doctorId = Number(localStorage.getItem('doctor_id') || sessionStorage.getItem('active_doctor_id'));
+    if (!doctorId) return;
+    import('../../../services/doctors/doctor-services').then(({ getDoctor }) => {
+      getDoctor(doctorId)
+        .then((doc) => {
+          const title = doc.gender === 'Male' ? 'Dr.' : 'Dra.';
+          setHeaderDoctor({ name: `${title} ${doc.firstName} ${doc.lastName}`, photoUrl: doc.photoUrl });
+        })
+        .catch(() => undefined);
+    });
+  }, []);
 
   return (
     <div className="patient-file-root">
@@ -110,8 +124,10 @@ export default function PatientFileView() {
               <CalendarDays size={18} />
             </button>
             <div className="doctor-badge">
-              <span>Dra. Josiana Piña</span>
-              <div className="avatar-mini"><UserRound size={14} /></div>
+              <span>{headerDoctor?.name ?? 'Dra. Josiana Piña'}</span>
+              {headerDoctor?.photoUrl
+                ? <img className="avatar-mini" src={headerDoctor.photoUrl} alt="Foto del doctor" />
+                : <div className="avatar-mini"><UserRound size={14} /></div>}
             </div>
           </div>
         </header>

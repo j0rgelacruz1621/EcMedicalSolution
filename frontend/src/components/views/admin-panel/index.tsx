@@ -9,6 +9,7 @@ import {
   Stethoscope,
   Users,
   UserPlus,
+  UserRound,
 } from 'lucide-react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { getDoctors, registerDoctor, updateDoctor, type Doctor } from '../../../services/doctors/doctor-services'
@@ -26,13 +27,14 @@ import { createUserAccount, getUserAccounts, type UserAccount } from '../../../s
 type Section = 'specialists' | 'centers' | 'accounts'
 
 const emptyDoctor = {
-  licenseNumber: '', nationalId: '', firstName: '', lastName: '', email: '', phone: '', specialty: '', officeId: '',
+  licenseNumber: '', nationalId: '', firstName: '', lastName: '', email: '', phone: '', specialty: '', officeId: '', description: '', rif: '', cmNumber: '', gender: '' as '' | 'MASCULINO' | 'FEMENINO' | 'OTRO',
 }
 
 export default function AdminPanel() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const [section, setSection] = useState<Section>('specialists')
+  const [specialistsView, setSpecialistsView] = useState<'list' | 'new'>('list')
   const [doctors, setDoctors] = useState<Doctor[]>([])
   const [editingDoctor, setEditingDoctor] = useState<Doctor | null>(null)
   const [centers, setCenters] = useState<MedicalCenter[]>([])
@@ -45,6 +47,17 @@ export default function AdminPanel() {
   const [center, setCenter] = useState({ name: '', address: '', phone: '' })
   const [office, setOffice] = useState({ medicalCenterId: '', officeNumber: '', locationDetails: '' })
   const [saving, setSaving] = useState(false)
+  const [photoPreview, setPhotoPreview] = useState<string>('')
+  const [photoFile, setPhotoFile] = useState<File | null>(null)
+
+  function handlePhotoChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0]
+    if (!file) return
+    setPhotoFile(file)
+    const reader = new FileReader()
+    reader.onload = () => setPhotoPreview(String(reader.result))
+    reader.readAsDataURL(file)
+  }
   const [account, setAccount] = useState({ user_name: '', password: '', rol: 'DOCTOR' as 'SA' | 'DOCTOR', application: 'medicalControl', doctor_id: '' })
 
   async function loadData() {
@@ -83,10 +96,27 @@ export default function AdminPanel() {
     event.preventDefault()
     setSaving(true); setError(''); setMessage('')
     try {
-      await registerDoctor({ ...doctor, officeId: doctor.officeId ? Number(doctor.officeId) : undefined })
+      let photoUrl: string | undefined
+      if (photoFile) {
+        photoUrl = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader()
+          reader.onload = () => resolve(String(reader.result))
+          reader.onerror = reject
+          reader.readAsDataURL(photoFile)
+        })
+      }
+      await registerDoctor({
+        ...doctor,
+        gender: doctor.gender || undefined,
+        officeId: doctor.officeId ? Number(doctor.officeId) : undefined,
+        photoUrl,
+        ...(doctor.gender ? { gender: doctor.gender } : {}),
+      })
       setDoctor(emptyDoctor)
+      setPhotoFile(null); setPhotoPreview('')
       setMessage('Especialista registrado correctamente.')
       await loadData()
+      setSpecialistsView('list')
     } catch (caught: any) {
       setError(caught?.message || 'No se pudo registrar el especialista.')
     } finally { setSaving(false) }
@@ -171,7 +201,7 @@ export default function AdminPanel() {
         <div className="admin-brand"><ShieldCheck size={24} /><span>EC Medical Control</span></div>
         <div className="admin-context"><span>ADMINISTRACIÓN</span><strong>Panel SA</strong></div>
         <nav className="admin-nav" aria-label="Navegación administrativa">
-          <button className={section === 'specialists' ? 'active' : ''} onClick={() => setSection('specialists')}>
+          <button className={section === 'specialists' ? 'active' : ''} onClick={() => { setSection('specialists'); setSpecialistsView('list') }}>
             <Stethoscope size={18} /> Especialistas <ChevronRight size={16} />
           </button>
           <button className={section === 'centers' ? 'active' : ''} onClick={() => setSection('centers')}>
@@ -186,32 +216,51 @@ export default function AdminPanel() {
 
       <main className="admin-main">
         <header className="admin-header">
-          <div><p className="admin-eyebrow">GESTIÓN DEL SISTEMA</p><h1>{section === 'specialists' ? 'Especialistas' : section === 'centers' ? 'Medical centers' : 'Cuentas de acceso'}</h1></div>
+          <div><p className="admin-eyebrow">GESTIÓN DEL SISTEMA</p><h1>{section === 'specialists' ? (specialistsView === 'new' ? 'Nuevo especialista' : 'Especialistas') : section === 'centers' ? 'Medical centers' : 'Cuentas de acceso'}</h1></div>
           <div className="admin-user"><span className="admin-avatar">SA</span><span>Administrador</span></div>
         </header>
 
         {(message || error) && <div className={`admin-alert ${error ? 'error' : 'success'}`}>{error || message}</div>}
 
-        {section === 'specialists' ? (
+        {section === 'specialists' && specialistsView === 'new' ? (
           <section className="admin-content">
-            <div className="admin-intro"><div><h2>Directorio de especialistas</h2><p>Registra médicos y asígnalos a un consultorio disponible.</p></div><span className="admin-count"><Users size={17} /> {doctors.length} registrados</span></div>
-            <div className="admin-grid">
-              <form className="admin-card admin-form" onSubmit={submitDoctor}>
-                <div className="card-heading"><span className="card-icon"><Plus size={19} /></span><div><h3>Nuevo especialista</h3><p>Completa los datos profesionales.</p></div></div>
-                <div className="form-grid">
-                  <label>Nombres<input required value={doctor.firstName} onChange={e => updateNewDoctor('firstName', e.target.value)} /></label>
-                  <label>Apellidos<input required value={doctor.lastName} onChange={e => updateNewDoctor('lastName', e.target.value)} /></label>
-                  <label>Cédula<input required value={doctor.nationalId} onChange={e => updateNewDoctor('nationalId', e.target.value)} /></label>
-                  <label>Licencia MPPS<input required value={doctor.licenseNumber} onChange={e => updateNewDoctor('licenseNumber', e.target.value)} /></label>
-                  <label>Correo electrónico<input required type="email" value={doctor.email} onChange={e => updateNewDoctor('email', e.target.value)} /></label>
-                  <label>Teléfono<input value={doctor.phone} onChange={e => updateNewDoctor('phone', e.target.value)} /></label>
-                  <label>Especialidad<input required value={doctor.specialty} onChange={e => updateNewDoctor('specialty', e.target.value)} /></label>
-                  <label>Consultorio<select value={doctor.officeId} onChange={e => updateNewDoctor('officeId', e.target.value)}><option value="">Sin asignar</option>{offices.map(item => <option key={item.id} value={item.id}>{item.officeNumber} · {item.medicalCenter?.name}</option>)}</select></label>
+            <div className="admin-intro lead-right"><button className="admin-count as-button" onClick={() => setSpecialistsView('list')}><Users size={17} /> Ver listado</button></div>
+            <form className="register-card" onSubmit={submitDoctor}>
+              <div className="register-head-text">
+                <h2>Registro de Especialistas</h2>
+                <p>Completa el formulario para crear tu cuenta profesional en EC – Medical Control.</p>
+              </div>
+              <div className="register-photo-row">
+                <label className="register-photo-box">
+                  {photoPreview ? <img src={photoPreview} alt="Vista previa" /> : <UserRound size={26} />}
+                  <input type="file" accept="image/*" onChange={handlePhotoChange} hidden />
+                </label>
+                <div>
+                  <p className="register-photo-title">Fotografía de perfil</p>
+                  <p className="register-photo-hint">JPG o PNG, máximo 1 MB. Haz clic en el círculo para subir tu imagen.</p>
                 </div>
-                <button className="primary-button" disabled={saving} type="submit">{saving ? 'Guardando...' : 'Registrar especialista'}</button>
-              </form>
-              <div className="admin-card admin-list"><div className="card-heading"><span className="card-icon"><Stethoscope size={19} /></span><div><h3>Especialistas registrados</h3><p>Haz clic en un médico para abrir su panel.</p></div></div>{loading ? <p className="empty-state">Cargando especialistas...</p> : doctors.length === 0 ? <p className="empty-state">Aún no hay especialistas registrados.</p> : <div className="record-list">{doctors.map(item => <button className="record" key={item.id} type="button" onClick={() => navigate(`/control-panel?doctorId=${item.id}`)}><span className="record-avatar">{item.firstName[0]}{item.lastName[0]}</span><div><strong>{item.firstName} {item.lastName}</strong><small>{item.specialty || 'Especialidad no indicada'}</small></div><CheckCircle2 size={17} /></button>)}</div>}</div>
-            </div>
+              </div>
+              <div className="register-grid">
+                <label>Nombres *<input required value={doctor.firstName} onChange={e => updateNewDoctor('firstName', e.target.value)} /></label>
+                <label>Apellidos *<input required value={doctor.lastName} onChange={e => updateNewDoctor('lastName', e.target.value)} /></label>
+                <label>Especialidad *<select required value={doctor.specialty} onChange={e => updateNewDoctor('specialty', e.target.value)}><option value="">Seleccione una especialidad</option><option>Cardiología</option><option>Endocrinología</option><option>Medicina Interna</option><option>Pediatría</option><option>Ginecología</option><option>Otra</option></select></label>
+                <label>Cédula de Identidad *<input required value={doctor.nationalId} onChange={e => updateNewDoctor('nationalId', e.target.value)} /></label>
+                <label>Número de MPPS *<input required value={doctor.licenseNumber} onChange={e => updateNewDoctor('licenseNumber', e.target.value)} /></label>
+                <label>RIF<input value={doctor.rif} placeholder="Ej: J-12345678-0" onChange={e => updateNewDoctor('rif', e.target.value.toUpperCase())} /></label>
+                <label>Número de CM *<input required value={doctor.cmNumber} placeholder="Colegio de Médicos" onChange={e => updateNewDoctor('cmNumber', e.target.value)} /></label>
+                <label>Género<select value={doctor.gender} onChange={e => updateNewDoctor('gender', e.target.value)}><option value="">Seleccione una opción</option><option value="MASCULINO">Masculino</option><option value="FEMENINO">Femenino</option><option value="OTRO">Otro</option></select></label>
+                <label>Correo Electrónico *<input required type="email" value={doctor.email} onChange={e => updateNewDoctor('email', e.target.value)} /></label>
+                <label>Número de Teléfono *<input required value={doctor.phone} onChange={e => updateNewDoctor('phone', e.target.value)} /></label>
+                <label className="full">Descripción de Experiencia y Servicios *<textarea required maxLength={250} placeholder="Máximo 250 caracteres" value={doctor.description} onChange={e => updateNewDoctor('description', e.target.value)} /></label>
+              </div>
+              <label className="register-terms"><input type="checkbox" required /> Acepto los <strong>términos de servicio</strong> y la <strong>política de privacidad</strong>.</label>
+              <button className="register-submit" disabled={saving} type="submit">{saving ? 'Guardando...' : 'Registrarse'}</button>
+            </form>
+          </section>
+        ) : section === 'specialists' ? (
+          <section className="admin-content">
+            <div className="admin-intro"><div><h2>Directorio de especialistas</h2><p>Registra médicos y asígnalos a un consultorio disponible.</p></div><button className="admin-count as-button" onClick={() => setSpecialistsView('new')}><UserPlus size={17} /> Nuevo especialista</button></div>
+            <div className="admin-card admin-list full"><div className="card-heading"><span className="card-icon"><Stethoscope size={19} /></span><div><h3>Especialistas registrados</h3><p>Haz clic en un médico para abrir su panel.</p></div></div>{loading ? <p className="empty-state">Cargando especialistas...</p> : doctors.length === 0 ? <p className="empty-state">Aún no hay especialistas registrados.</p> : <div className="record-list">{doctors.map(item => <button className="record" key={item.id} type="button" onClick={() => navigate(`/control-panel?doctorId=${item.id}`)}><span className="record-avatar">{item.firstName[0]}{item.lastName[0]}</span><div><strong>{item.firstName} {item.lastName}</strong><small>{item.specialty || 'Especialidad no indicada'}</small></div><CheckCircle2 size={17} /></button>)}</div>}</div>
             {editingDoctor && <form className="admin-card doctor-editor" onSubmit={submitDoctorEdit}><div className="card-heading"><span className="card-icon"><Stethoscope size={19} /></span><div><h3>Panel de {editingDoctor.firstName} {editingDoctor.lastName}</h3><p>Edita la información profesional y su asignación.</p></div></div><div className="form-grid"><label>Nombres<input required value={editingDoctor.firstName} onChange={e => setEditingDoctor({ ...editingDoctor, firstName: e.target.value })} /></label><label>Apellidos<input required value={editingDoctor.lastName} onChange={e => setEditingDoctor({ ...editingDoctor, lastName: e.target.value })} /></label><label>Cédula<input required value={editingDoctor.nationalId || ''} onChange={e => setEditingDoctor({ ...editingDoctor, nationalId: e.target.value })} /></label><label>Licencia MPPS<input required value={editingDoctor.licenseNumber || ''} onChange={e => setEditingDoctor({ ...editingDoctor, licenseNumber: e.target.value })} /></label><label>Correo electrónico<input required type="email" value={editingDoctor.email || ''} onChange={e => setEditingDoctor({ ...editingDoctor, email: e.target.value })} /></label><label>Teléfono<input value={editingDoctor.phone || ''} onChange={e => setEditingDoctor({ ...editingDoctor, phone: e.target.value })} /></label><label>Especialidad<input required value={editingDoctor.specialty || ''} onChange={e => setEditingDoctor({ ...editingDoctor, specialty: e.target.value })} /></label><label>Consultorio<select value={editingDoctor.officeId ?? ''} onChange={e => setEditingDoctor({ ...editingDoctor, officeId: e.target.value ? Number(e.target.value) : null })}><option value="">Sin asignar</option>{offices.map(item => <option key={item.id} value={item.id}>{item.officeNumber} · {item.medicalCenter?.name}</option>)}</select></label></div><div className="editor-actions"><button type="button" className="secondary-button" onClick={() => setEditingDoctor(null)}>Cerrar panel</button><button className="primary-button" disabled={saving} type="submit">{saving ? 'Guardando...' : 'Guardar cambios'}</button></div></form>}
           </section>
         ) : section === 'centers' ? (

@@ -17,11 +17,15 @@ model Doctor {
   email         String           @unique @db.VarChar(150)
   phone         String?          @db.VarChar(20)
   specialty     String?          @db.VarChar(100)
+  gender        gender_enum?
   officeId      BigInt?          @map("office_id")
   isActive      Boolean?         @default(true) @map("is_active")
   createdAt     DateTime?        @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt     DateTime?        @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
   description   String?
+  rif           String?          @map("rif") @db.VarChar(20)
+  cmNumber      String?          @map("cm_number") @db.VarChar(50)
+  photoUrl      String?          @map("photo_url") @db.Text
   schedules     DoctorSchedule[]
   appointments  Appointment[]
   assignedPatients Patient[]

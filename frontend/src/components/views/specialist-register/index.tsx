@@ -110,6 +110,8 @@ export default function SpecialistRegister() {
         email: form.email,
         phone: form.phone,
         specialty: form.specialty,
+        rif: form.rif,
+        cmNumber: form.cm,
         officeId: 1,
       }
 
@@ -144,7 +146,7 @@ export default function SpecialistRegister() {
 
         <main className="sr-page">
           <section className="sr-card">
-            <h1 className="sr-title">Registro de Especialistas</h1>
+            <div className="sr-title">Registro de Especialistas</div>
             <p className="sr-subtitle">Completa el formulario para crear tu cuenta profesional en EC – Medical Control.</p>
 
             {serverError && (
