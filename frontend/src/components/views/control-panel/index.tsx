@@ -8,7 +8,9 @@ import {
   ChevronLeft,
   ChevronRight,
   FileText,
-  Plus
+  Plus,
+  Link2,
+  Check
 } from 'lucide-react'
 import { getDoctor, type Doctor } from '../../../services/doctors/doctor-services'
 import { getAppointments, type Appointment } from '../../../services/appointments/appointment-services'
@@ -60,9 +62,17 @@ export default function ControlPanel() {
   const [appointments, setAppointments] = useState<Appointment[]>([])
   const [tasks, setTasks] = useState<Task[]>([])
   const [newTaskTitle, setNewTaskTitle] = useState('')
+  const [copied, setCopied] = useState(false)
+  const bookingLink = doctor ? `${window.location.origin}/specialist/${String(doctor.id)}` : ''
+
+  const handleCopyLink = () => {
+    navigator.clipboard?.writeText(bookingLink)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
   const [tasksLoading, setTasksLoading] = useState(false)
   const [showTaskInput, setShowTaskInput] = useState(false)
-  const doctorTitle = doctor?.gender === 'MASCULINO' ? 'Dr.' : doctor?.gender === 'FEMENINO' ? 'Dra.' : ''
+  const doctorTitle = doctor?.gender === 'MASCULINO' || doctor?.gender === 'Male' ? 'Dr.' : doctor?.gender === 'FEMENINO' || doctor?.gender === 'Female' ? 'Dra.' : ''
   const activeDoctorName = doctor
     ? `${doctor.firstName} ${doctor.lastName}`
     : sessionStorage.getItem('active_doctor_name') || 'Administración'
@@ -208,12 +218,25 @@ export default function ControlPanel() {
       <div className="cp-main">
         <header className="cp-header">
           <h1>Panel de Control</h1>
+          {doctor && (
+            <button
+              type="button"
+              className="cp-referral-pill"
+              onClick={handleCopyLink}
+              title={bookingLink}
+            >
+              {copied ? <Check size={14} /> : <Link2 size={14} />}
+              <span className="cp-referral-pill-url">{copied ? 'Enlace copiado' : bookingLink.replace(/^https?:\/\//, '')}</span>
+            </button>
+          )}
             <div className="cp-header-right">
               <button className="icon" aria-label="Notificaciones"><NotificationsNoneOutlinedIcon style={{ fontSize: 24 }} /></button>
               <button className="icon" aria-label="Ayuda"><CircleHelp size={24} /></button>
               <div className="cp-user">
                 <span>{doctor ? `${doctorTitle} ${doctor.firstName} ${doctor.lastName}` : activeDoctorName}</span>
-                <span className="cp-user-badge">{doctorInitials}</span>
+                {doctor?.photoUrl
+                  ? <img className="cp-user-badge cp-user-photo" src={doctor.photoUrl} alt="Foto de perfil" />
+                  : <span className="cp-user-badge">{doctorInitials}</span>}
               </div>
             </div>
         </header>

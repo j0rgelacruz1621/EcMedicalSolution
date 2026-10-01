@@ -9,6 +9,11 @@ export interface DoctorRequestBody {
   email: string;
   phone: string;
   specialty: string;
+  description?: string;
+  photoUrl?: string;
+  rif?: string;
+  cmNumber?: string;
+  gender?: 'MASCULINO' | 'FEMENINO' | 'OTRO';
   officeId?: number;
 }
 
@@ -25,6 +30,8 @@ export interface Doctor {
   specialty?: string | null;
   officeId?: number | null;
   gender?: DoctorGender | null;
+  description?: string | null;
+  photoUrl?: string | null;
 }
 
 export async function getDoctors(): Promise<Doctor[]> {

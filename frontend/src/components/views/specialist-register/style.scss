@@ -75,13 +75,14 @@ $input-bg: #ffffff;
 }
 
 .sr-title {
-  margin: 0 0 16px;
-  color: $primary-blue;
-  font-size: 34px;
-  line-height: 1.2;
-  letter-spacing: -0.01em;
-  font-weight: 700;
-  text-align: center;
+    margin: 0 0 16px;
+     font-size: 32px;
+    line-height: 40px;
+    letter-spacing: -0.01em;
+    font-weight: 600;
+    text-align: center;
+  --tw-text-opacity: 1;
+    color: rgb(0 70 173 / var(--tw-text-opacity, 1));
 }
 
 .sr-subtitle {

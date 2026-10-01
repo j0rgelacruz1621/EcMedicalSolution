@@ -3,6 +3,7 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  MaxLength,
 } from 'class-validator';
 
 export class UpdateDoctorDto {
@@ -37,4 +38,24 @@ export class UpdateDoctorDto {
   @IsOptional()
   @IsNumber()
   officeId?: number | null;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(20)
+  rif?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(50)
+  cmNumber?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(1500)
+  description?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(2_000_000)
+  photoUrl?: string;
 }
