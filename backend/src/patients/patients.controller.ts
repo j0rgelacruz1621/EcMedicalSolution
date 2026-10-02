@@ -218,6 +218,44 @@ export class PatientsController {
     return this.patientsService.findAll(query);
   }
 
+  @Get(':id')
+  @ApiOperation({
+    summary: 'Obtener el detalle de un paciente',
+    description:
+      'Retorna los datos demográficos del paciente junto con su último registro de signos vitales (latestVitals).',
+  })
+  @ApiParam({ name: 'id', type: Number, example: 1 })
+  @ApiResponse({
+    status: 200,
+    description: 'Detalle del paciente con su último registro de signos vitales.',
+    schema: {
+      example: {
+        id: 1,
+        nationalId: '0102030405',
+        firstName: 'Juan',
+        lastName: 'Perez',
+        email: 'juan@example.com',
+        phone: '0999999999',
+        age: 34,
+        origin: 'Mérida',
+        address: null,
+        gender: 'Male',
+        medicalHistoryNotes: null,
+        isActive: true,
+        createdAt: '2026-08-20T15:00:00.000Z',
+        updatedAt: '2026-08-20T15:00:00.000Z',
+        latestVitals: PATIENT_RESPONSE_EXAMPLE.vitals,
+      },
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'No existe un paciente con el id indicado.',
+  })
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.patientsService.findOne(id);
+  }
+
   @Get(':id/vitals')
   @UsePipes(
     new ValidationPipe({

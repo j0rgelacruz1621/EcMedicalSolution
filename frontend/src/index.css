@@ -18,7 +18,16 @@ body {
 .app-shell {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: 100dvh; /* dvh evita saltos con barras dinámicas del navegador */
+}
+
+/* El contenido hace scroll, el footer permanece fijo abajo */
+.app-content {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
 }
 
 .app-shell > .site-footer {

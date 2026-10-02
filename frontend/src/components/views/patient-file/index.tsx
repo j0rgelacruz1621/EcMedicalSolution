@@ -23,67 +23,44 @@ import {
   UserRound,
   Pill,
 } from 'lucide-react';
+import { getPatient, type Patient } from '../../../services/patients/patient-services';
+import { getNextAppointmentForPatient, type Appointment } from '../../../services/appointments/appointment-services';
 
-const patientData = {
-  1: {
-    name: 'Ricardo Mendoza',
-    age: '54 años',
-    id: '45.234.112-K',
-    origin: 'Mérida',
-    pa: '132/85 mmHg',
-    fc: '72 BPM',
-    weight: '84.5 Kg',
-    date: '16 Oct 2026',
-    time: '14:30 PM - Viernes 16',
-    specialty: 'Control Cardiología',
-    tabs: ['Información General', 'Historial Clínico', 'Récipes', 'Estudios', 'Paraclínicos', 'RX Tórax', 'Preoperatoria'],
-    timeline: [
-      { title: 'Seguimiento post-infarto (Estable)', date: '24 Sept, 2023', text: 'Paciente hemodinámicamente estable, sin dolor torácico ni cambios de signos vitales en la consulta. Se mantuvo tratamiento y control ambulatorio.' },
-      { title: 'Control de Presión Arterial', date: '10 Ago, 2023', text: 'Presión arterial controlada con mejoría progresiva. Ajuste de medicación posterior a seguimiento domiciliario.' },
-      { title: 'Egreso Hospitalario', date: '15 Jul, 2023', text: 'Alta médica tras manejo clínico. Recomendaciones para seguimiento y control de riesgo cardiovascular.' },
-    ],
-    medications: [
-      { name: 'Aspirina', dose: '100mg', frequency: '1 cada 24h' },
-      { name: 'Atorvastatina', dose: '40mg', frequency: '1 cada noche' },
-      { name: 'Losartán', dose: '50mg', frequency: '1 cada 12h' },
-    ],
-    alerts: [
-      'Alergia conocida a la Penicilina.',
-      'Antecedente familiar de muerte por infarto de madre.',
-      'Riesgo moderado de hipertensión no controlada.',
-    ],
-  },
-  2: {
-    name: 'Elena Gómez',
-    age: '62 años',
-    id: '32.889.001',
-    origin: 'Tovar',
-    pa: '128/80 mmHg',
-    fc: '74 BPM',
-    weight: '71.2 Kg',
-    date: '18 Oct 2026',
-    time: '09:15 AM - Domingo 18',
-    specialty: 'Control Endocrinología',
-    tabs: ['Información General', 'Historial Clínico', 'Récipes', 'Estudios', 'Paraclínicos', 'RX Tórax', 'Preoperatoria'],
-    timeline: [
-      { title: 'Seguimiento endocrino', date: '12 Sept, 2023', text: 'Paciente sin complicaciones, buena adherencia terapéutica y controles de glucosa estables.' },
-      { title: 'Control metabólico', date: '03 Ago, 2023', text: 'Se documenta mejoría en los valores de glicemia y tolerancia al tratamiento indicado.' },
-      { title: 'Evaluación inicial', date: '15 Jun, 2023', text: 'Se inicia protocolo de seguimiento y se establecen metas de control metabólico.' },
-    ],
-    medications: [
-      { name: 'Metformina', dose: '850mg', frequency: '1 cada 12h' },
-      { name: 'Lisinopril', dose: '10mg', frequency: '1 cada 24h' },
-    ],
-    alerts: [
-      'Alergia a sulfas.',
-      'Hipertensión familiar en línea materna.',
-    ],
-  },
-};
+const TABS = [
+  'Información General',
+  'Historial Clínico',
+  'Récipes',
+  'Estudios',
+  'Paraclínicos',
+  'RX Tórax',
+  'Preoperatoria',
+];
+
+function initials(fullName: string): string {
+  return fullName
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() ?? '')
+    .join('');
+}
+
+function formatVitals(patient: Patient | null) {
+  const v = patient?.latestVitals;
+  return {
+    pa: v?.blood_pressure_systolic && v?.blood_pressure_diastolic
+      ? `${v.blood_pressure_systolic}/${v.blood_pressure_diastolic} mmHg`
+      : '—',
+    fc: v?.heart_rate_bpm != null ? `${v.heart_rate_bpm} BPM` : '—',
+    weight: v?.weight_kg != null ? `${v.weight_kg} Kg` : '—',
+  };
+}
 
 export default function PatientFileView() {
   const { id } = useParams();
-  const patient = patientData[Number(id) as keyof typeof patientData] ?? patientData[1];
+  const [patient, setPatient] = useState<Patient | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [headerDoctor, setHeaderDoctor] = useState<{ name: string; photoUrl?: string | null } | null>(null);
   const [isAddHistoryOpen, setIsAddHistoryOpen] = useState(false);
@@ -94,8 +71,47 @@ export default function PatientFileView() {
   const [isClinicalStudiesOpen, setIsClinicalStudiesOpen] = useState(false);
   const [isSupplementaryTestsOpen, setIsSupplementaryTestsOpen] = useState(false);
   const [isNewSupplementaryTestsOpen, setIsNewSupplementaryTestsOpen] = useState(false);
+  const [nextAppointment, setNextAppointment] = useState<Appointment | null>(null);
+  const [calendarMonth, setCalendarMonth] = useState(() => new Date());
 
-  const monthLabel = useMemo(() => 'Octubre 2026', []);
+  useEffect(() => {
+    if (!id) return;
+    setLoading(true);
+    setError(null);
+    getPatient(Number(id))
+      .then((data) => {
+        setPatient(data);
+        return getNextAppointmentForPatient({ id: data.id, nationalId: data.nationalId }).then(setNextAppointment);
+      })
+      .catch(() => setError('No se pudo cargar la información del paciente.'))
+      .finally(() => setLoading(false));
+  }, [id]);
+
+  // El calendario muestra el mes de la próxima cita; navegable con las flechas.
+  useEffect(() => {
+    if (nextAppointment?.appointmentDate) {
+      setCalendarMonth(new Date(nextAppointment.appointmentDate + 'T00:00:00'));
+    }
+  }, [nextAppointment]);
+
+  const calendarYear = calendarMonth.getFullYear();
+  const calendarMonthIndex = calendarMonth.getMonth();
+  const monthLabel = useMemo(
+    () =>
+      calendarMonth.toLocaleDateString('es-VE', { month: 'long', year: 'numeric' }).replace(/^\w/, (c) => c.toUpperCase()),
+    [calendarMonth],
+  );
+  const appointmentDay = nextAppointment?.appointmentDate
+    ? new Date(nextAppointment.appointmentDate + 'T00:00:00').getDate()
+    : null;
+  const daysInMonth = new Date(calendarYear, calendarMonthIndex + 1, 0).getDate();
+  const firstWeekday = new Date(calendarYear, calendarMonthIndex, 1).getDay(); // 0 = domingo
+  const appointmentTime = nextAppointment?.startTime
+    ? nextAppointment.startTime.slice(0, 5)
+    : null;
+
+  const vitals = formatVitals(patient);
+  const patientName = patient ? `${patient.firstName} ${patient.lastName}` : '';
 
   useEffect(() => {
     const doctorId = Number(localStorage.getItem('doctor_id') || sessionStorage.getItem('active_doctor_id'));
@@ -103,7 +119,7 @@ export default function PatientFileView() {
     import('../../../services/doctors/doctor-services').then(({ getDoctor }) => {
       getDoctor(doctorId)
         .then((doc) => {
-          const title = doc.gender === 'Male' ? 'Dr.' : 'Dra.';
+          const title = (doc as { gender?: string }).gender === 'Male' ? 'Dr.' : 'Dra.';
           setHeaderDoctor({ name: `${title} ${doc.firstName} ${doc.lastName}`, photoUrl: doc.photoUrl });
         })
         .catch(() => undefined);
@@ -133,13 +149,17 @@ export default function PatientFileView() {
         </header>
 
         <div className="patient-file-body">
+          {loading && <p className="patient-loading">Cargando paciente…</p>}
+          {error && <p className="patient-error">{error}</p>}
+          {!loading && !error && patient && (
+          <>
           <section className="patient-overview">
             <div className="patient-header-row">
               <div className="patient-identity">
-                <div className="patient-avatar">RM</div>
+                <div className="patient-avatar">{initials(patientName) || '—'}</div>
                 <div>
                   <p className="eyebrow">Paciente</p>
-                  <h1>{patient.name}</h1>
+                  <h1>{patientName}</h1>
                 </div>
               </div>
 
@@ -156,30 +176,30 @@ export default function PatientFileView() {
             <div className="patient-meta-grid">
               <div className="meta-item">
                 <span className="meta-label">Edad</span>
-                <strong>{patient.age}</strong>
+                <strong>{patient.age} años</strong>
               </div>
               <div className="meta-item">
                 <span className="meta-label">Cédula</span>
-                <strong>{patient.id}</strong>
+                <strong>{patient.nationalId}</strong>
               </div>
               <div className="meta-item">
                 <span className="meta-label">Procedencia</span>
-                <strong>{patient.origin}</strong>
+                <strong>{patient.origin ?? '—'}</strong>
               </div>
             </div>
 
             <div className="vital-signs-row">
               <div className="vital-card">
                 <span className="vital-label">P.A</span>
-                <strong>{patient.pa}</strong>
+                <strong>{vitals.pa}</strong>
               </div>
               <div className="vital-card">
                 <span className="vital-label">F.C</span>
-                <strong>{patient.fc}</strong>
+                <strong>{vitals.fc}</strong>
               </div>
               <div className="vital-card">
                 <span className="vital-label">Peso</span>
-                <strong>{patient.weight}</strong>
+                <strong>{vitals.weight}</strong>
               </div>
             </div>
           </section>
@@ -191,21 +211,21 @@ export default function PatientFileView() {
 
             <div className="calendar-panel">
               <div className="calendar-header">
-                <button type="button" aria-label="Mes anterior"><ChevronLeft size={16} /></button>
+                <button type="button" aria-label="Mes anterior" onClick={() => setCalendarMonth(new Date(calendarYear, calendarMonthIndex - 1, 1))}><ChevronLeft size={16} /></button>
                 <span>{monthLabel}</span>
-                <button type="button" aria-label="Mes siguiente"><ChevronRight size={16} /></button>
+                <button type="button" aria-label="Mes siguiente" onClick={() => setCalendarMonth(new Date(calendarYear, calendarMonthIndex + 1, 1))}><ChevronRight size={16} /></button>
               </div>
               <div className="calendar-grid">
                 {['Do','Lu','Ma','Mi','Ju','Vi','Sa'].map((d) => (
                   <span key={d} className="weekday-name">{d}</span>
                 ))}
                 {Array.from({ length: 35 }, (_, index) => {
-                  const day = index - 1;
-                  const isSelected = day === 16;
-                  const isEmpty = day < 1 || day > 30;
+                  const day = index - firstWeekday;
+                  const isSelected = appointmentDay !== null && day === appointmentDay;
+                  const isEmpty = day < 1 || day > daysInMonth;
                   return (
                     <span key={index} className={`day-cell ${isSelected ? 'selected' : ''} ${isEmpty ? 'muted' : ''}`}>
-                      {!isEmpty ? day : ''}
+                      {!isEmpty && day >= 1 && day <= daysInMonth ? day : ''}
                     </span>
                   );
                 })}
@@ -213,26 +233,33 @@ export default function PatientFileView() {
             </div>
 
             <div className="appointment-detail">
-              <div className="appointment-time">
-                <Clock3 size={16} />
-                <span>{patient.time}</span>
-              </div>
+            <div className="appointment-time">
+              <Clock3 size={16} />
+              <span>
+                {nextAppointment?.appointmentDate
+                  ? `${appointmentTime ?? ''} — ${new Date(nextAppointment.appointmentDate + 'T00:00:00').toLocaleDateString('es-VE', { weekday: 'long', day: 'numeric', month: 'long' })}`
+                  : 'Sin próximas citas programadas'}
+              </span>
+            </div>
               <div className="appointment-reason">
                 <div className="reason-icon">
                   <Stethoscope size={18} />
                 </div>
                 <div>
                   <span className="reason-label">Motivo</span>
-                  <strong>{patient.specialty}</strong>
+                  <strong>{patient.medicalHistoryNotes || 'Control general'}</strong>
                 </div>
               </div>
             </div>
           </aside>
+          </>
+          )}
         </div>
 
+        {patient && (
         <section className="patient-tabs-section">
           <nav className="tabs-bar" aria-label="Pestañas del expediente">
-            {patient.tabs.map((tab, index) => (
+            {TABS.map((tab, index) => (
               <button
                 key={tab}
                 type="button"
@@ -270,16 +297,18 @@ export default function PatientFileView() {
               </div>
 
               <div className="timeline-list">
-                {patient.timeline.map((event) => (
-                  <div key={event.title} className="timeline-item">
+                {patient.medicalHistoryNotes ? (
+                  <div className="timeline-item">
                     <div className="timeline-dot" />
                     <div className="timeline-body">
-                      <h4>{event.title}</h4>
-                      <span>{event.date}</span>
-                      <p>{event.text}</p>
+                      <h4>Nota clínica</h4>
+                      <span>{new Date(patient.updatedAt).toLocaleDateString('es-VE')}</span>
+                      <p>{patient.medicalHistoryNotes}</p>
                     </div>
                   </div>
-                ))}
+                ) : (
+                  <p className="timeline-empty">Sin registros de evolución todavía.</p>
+                )}
               </div>
             </div>
 
@@ -293,15 +322,7 @@ export default function PatientFileView() {
                 </div>
 
                 <ul className="medicine-list">
-                  {patient.medications.map((medication) => (
-                    <li key={medication.name} className="medicine-item">
-                      <div className="medicine-name">
-                        <span>{medication.name}</span>
-                        <small>{medication.dose}</small>
-                      </div>
-                      <div className="medicine-frequency">{medication.frequency}</div>
-                    </li>
-                  ))}
+                  <li className="medicine-item medicine-empty">Sin medicamentos registrados.</li>
                 </ul>
               </div>
 
@@ -314,19 +335,20 @@ export default function PatientFileView() {
                 </div>
 
                 <ul className="alert-list">
-                  {patient.alerts.map((alert) => (
-                    <li key={alert}>{alert}</li>
-                  ))}
+                  {patient.medicalHistoryNotes
+                    ? null
+                    : <li>Sin alertas registradas.</li>}
                 </ul>
               </div>
             </div>
           </div>
         </section>
+        )}
       </main>
 
       <ClinicalHistoryModal
         isOpen={isHistoryOpen}
-        patientName={patient.name}
+        patientName={patientName}
         onClose={() => setIsHistoryOpen(false)}
         onAddHistory={() => {
           setIsHistoryOpen(false);
@@ -336,13 +358,13 @@ export default function PatientFileView() {
 
       <NewClinicalHistoryModal
         isOpen={isAddHistoryOpen}
-        patientName={patient.name}
+        patientName={patientName}
         onClose={() => setIsAddHistoryOpen(false)}
       />
 
       <PrescriptionHistoryModal
         isOpen={isPrescriptionHistoryOpen}
-        patientName={patient.name}
+        patientName={patientName}
         onClose={() => setIsPrescriptionHistoryOpen(false)}
         onAddPrescription={() => {
           setIsPrescriptionHistoryOpen(false);
@@ -352,24 +374,24 @@ export default function PatientFileView() {
 
       <PrescriptionFormModal
         isOpen={isPrescriptionFormOpen}
-        patientName={patient.name}
+        patientName={patientName}
         onClose={() => setIsPrescriptionFormOpen(false)}
         onGenerate={() => setIsPrescriptionPreviewOpen(true)}
       />
 
       <PrescriptionPreviewModal
         isOpen={isPrescriptionPreviewOpen}
-        patientName={patient.name}
-        patientAge={patient.age}
-        patientWeight={patient.weight}
-        patientDoc={patient.id}
+        patientName={patientName}
+        patientAge={patient ? `${patient.age} años` : ""}
+        patientWeight={vitals.weight}
+        patientDoc={patient?.nationalId ?? ""}
         emissionDate="13 de Julio de 2026"
         onClose={() => setIsPrescriptionPreviewOpen(false)}
       />
 
       <ClinicalTimelineModal
         isOpen={isClinicalTimelineOpen}
-        patientName={patient.name}
+        patientName={patientName}
         onClose={() => setIsClinicalTimelineOpen(false)}
         onAddStudy={() => {
           setIsClinicalTimelineOpen(false);
@@ -379,13 +401,13 @@ export default function PatientFileView() {
 
       <ClinicalStudiesModal
         isOpen={isClinicalStudiesOpen}
-        patientName={patient.name}
+        patientName={patientName}
         onClose={() => setIsClinicalStudiesOpen(false)}
       />
 
       <SupplementaryTestsModal
         isOpen={isSupplementaryTestsOpen}
-        patientName={patient.name}
+        patientName={patientName}
         onClose={() => setIsSupplementaryTestsOpen(false)}
         onAddTest={() => {
           setIsSupplementaryTestsOpen(false);
@@ -393,7 +415,7 @@ export default function PatientFileView() {
         }}
       />
 
-      {isNewSupplementaryTestsOpen && <NewSupplementaryTests patientName={patient.name} onClose={() => setIsNewSupplementaryTestsOpen(false)} />}
+      {isNewSupplementaryTestsOpen && <NewSupplementaryTests patientName={patientName} onClose={() => setIsNewSupplementaryTestsOpen(false)} />}
     </div>
   );
 }

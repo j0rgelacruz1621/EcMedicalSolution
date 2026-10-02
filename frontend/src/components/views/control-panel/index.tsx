@@ -3,7 +3,6 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import LeftSideBar from '../../left-sideBar'
 import './style.scss'
 import {
-  Bell,
   CircleHelp,
   ChevronLeft,
   ChevronRight,
@@ -72,7 +71,7 @@ export default function ControlPanel() {
   }
   const [tasksLoading, setTasksLoading] = useState(false)
   const [showTaskInput, setShowTaskInput] = useState(false)
-  const doctorTitle = doctor?.gender === 'MASCULINO' || doctor?.gender === 'Male' ? 'Dr.' : doctor?.gender === 'FEMENINO' || doctor?.gender === 'Female' ? 'Dra.' : ''
+  const doctorTitle = doctor?.gender === 'MASCULINO' ? 'Dr.' : doctor?.gender === 'FEMENINO' ? 'Dra.' : ''
   const activeDoctorName = doctor
     ? `${doctor.firstName} ${doctor.lastName}`
     : sessionStorage.getItem('active_doctor_name') || 'Administración'
@@ -169,11 +168,18 @@ export default function ControlPanel() {
   const isControlType = (appointment: Appointment) =>
     (appointment.type || '').toLowerCase() === 'control'
 
+  const getPatientName = (appointment: Appointment) => {
+    const p = appointment.patient;
+    if (p?.firstName || p?.lastName) return `${p.firstName ?? ''} ${p.lastName ?? ''}`.trim();
+    if (appointment.guestFirstName || appointment.guestLastName)
+      return `${appointment.guestFirstName ?? ''} ${appointment.guestLastName ?? ''}`.trim();
+    return '';
+  };
   const getPatientInitials = (appointment: Appointment) => {
-    const firstName = appointment.patient?.firstName || ''
-    const lastName = appointment.patient?.lastName || ''
-    const initials = `${firstName[0] || ''}${lastName[0] || ''}`.toUpperCase()
-    return initials || 'AM'
+    const name = getPatientName(appointment);
+    const parts = name.split(' ').filter(Boolean);
+    const initials = `${parts[0]?.[0] ?? ''}${parts[1]?.[0] ?? parts[0]?.[1] ?? ''}`.toUpperCase();
+    return initials || '—';
   }
 
   const monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
@@ -294,7 +300,7 @@ export default function ControlPanel() {
                       <div className="upcoming-row" key={appointment.id}>
                         <div className="patient-cell">
                           <span className="avatar patient-avatar">{getPatientInitials(appointment)}</span>
-                          <span className="appointment-name">{appointment.patient?.firstName || 'Paciente'} {appointment.patient?.lastName || ''}</span>
+                          <span className="appointment-name">{getPatientName(appointment) || 'Pendiente de registro'}</span>
                         </div>
                         <span className="appointment-time">{formattedTime}</span>
                         <span className={`appointment-type${isControlType(appointment) ? ' appointment-type--control' : ''}`}>{formatAppointmentTypeLabel(appointment)}</span>

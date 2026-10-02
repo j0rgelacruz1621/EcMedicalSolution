@@ -1,6 +1,6 @@
 import { appointment_status_enum } from '@prisma/client';
 import { Type } from 'class-transformer';
-import { IsDateString, IsEnum, IsInt, IsOptional, Min } from 'class-validator';
+import { IsDateString, IsEnum, IsInt, IsOptional, IsString, Min } from 'class-validator';
 
 export class QueryAppointmentsDto {
   @IsOptional()
@@ -20,6 +20,10 @@ export class QueryAppointmentsDto {
   @IsInt()
   @Min(1)
   patient_id?: number;
+
+  @IsOptional()
+  @IsString()
+  guest_national_id?: string;
 
   @IsOptional()
   @IsEnum(appointment_status_enum, {
