@@ -10,6 +10,7 @@ import PrescriptionPreviewModal from '../../modals/prescription-preview';
 import ClinicalTimelineModal from '../../modals/clinical-timeline';
 import ClinicalStudiesModal from '../../modals/Clinica-trials';
 import SupplementaryTestsModal from '../../modals/Supplementary-tests';
+import PreoperativeHistoryModal from '../../modals/preoperative-history';
 import NewSupplementaryTests from '../new-Supplementary-tests';
 import {
   CalendarDays,
@@ -93,6 +94,7 @@ export default function PatientFileView() {
   const [isClinicalStudiesOpen, setIsClinicalStudiesOpen] = useState(false);
   const [isSupplementaryTestsOpen, setIsSupplementaryTestsOpen] = useState(false);
   const [isNewSupplementaryTestsOpen, setIsNewSupplementaryTestsOpen] = useState(false);
+  const [isPreoperativeHistoryOpen, setIsPreoperativeHistoryOpen] = useState(false);
 
   const monthLabel = useMemo(() => 'Octubre 2026', []);
 
@@ -237,6 +239,10 @@ export default function PatientFileView() {
                   if (tab === 'Paraclínicos') {
                     setIsSupplementaryTestsOpen(true);
                   }
+
+                  if (tab === 'Preoperatoria') {
+                    setIsPreoperativeHistoryOpen(true);
+                  }
                 }}
               >
                 {tab}
@@ -375,6 +381,14 @@ export default function PatientFileView() {
           setIsSupplementaryTestsOpen(false);
           setIsNewSupplementaryTestsOpen(true);
         }}
+      />
+
+      <PreoperativeHistoryModal
+        isOpen={isPreoperativeHistoryOpen}
+        patientName={patient.name}
+        patientDoc={patient.id}
+        onClose={() => setIsPreoperativeHistoryOpen(false)}
+        onAddEvaluation={() => setIsPreoperativeHistoryOpen(false)}
       />
 
       {isNewSupplementaryTestsOpen && <NewSupplementaryTests patientName={patient.name} onClose={() => setIsNewSupplementaryTestsOpen(false)} />}

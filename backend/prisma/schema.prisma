@@ -67,7 +67,7 @@ model Patient {
   lastName            String           @map("last_name") @db.VarChar(100)
   email               String           @db.VarChar(150)
   phone               String           @db.VarChar(20)
-  age                 Int
+  age                 Int?
   origin              String?          @db.VarChar(100)
   address             String?          @db.VarChar(255)
   assignedDoctorId    BigInt?          @map("assigned_doctor_id")

@@ -1,5 +1,6 @@
 import { Type } from 'class-transformer';
 import {
+  IsBoolean,
   IsEmail,
   IsEnum,
   IsInt,
@@ -11,6 +12,7 @@ import {
   Min,
   ValidateNested,
 } from 'class-validator';
+import { Trim } from '../../common/transformers/trim.transformer';
 import { CreatePatientVitalsDto } from './create-patient-vitals.dto';
 
 export enum PatientGender {
@@ -20,33 +22,40 @@ export enum PatientGender {
 }
 
 export class CreatePatientDto {
+  @Trim()
   @IsString()
   @IsNotEmpty()
   @MaxLength(30)
   nationalId: string;
 
+  @Trim()
   @IsString()
   @IsNotEmpty()
   @MaxLength(100)
   firstName: string;
 
+  @Trim()
   @IsString()
   @IsNotEmpty()
   @MaxLength(100)
   lastName: string;
 
+  @Trim()
   @IsEmail()
+  @MaxLength(150)
   email: string;
 
+  @Trim()
   @IsString()
   @IsNotEmpty()
   @MaxLength(20)
   phone: string;
 
+  @IsOptional()
   @IsInt()
   @Min(0)
   @Max(120)
-  age: number;
+  age?: number;
 
   @IsOptional()
   @IsString()
@@ -60,7 +69,12 @@ export class CreatePatientDto {
 
   @IsOptional()
   @IsInt()
+  @Min(1)
   assignedDoctorId?: number;
+
+  @IsOptional()
+  @IsBoolean()
+  isActive?: boolean;
 
   @IsEnum(PatientGender, {
     message: 'gender must be MASCULINO, FEMENINO or OTRO.',

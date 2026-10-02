@@ -25,6 +25,9 @@ const NON_CANCELABLE_STATUSES: appointment_status_enum[] = [
   'NO_SHOW',
 ];
 
+// Límite superior de una columna bigint en PostgreSQL
+const MAX_APPOINTMENT_ID = 9223372036854775807n;
+
 export interface AppointmentFilters {
   doctorId?: bigint;
   medicalCenterId?: bigint;
@@ -85,6 +88,18 @@ export class AppointmentsRepository {
 
         if (!doctor) {
           throw new NotFoundException('Doctor not found.');
+        }
+
+        // Un paciente desactivado debe reactivarse antes de poder agendar
+        const existingPatient = await transaction.patient.findUnique({
+          where: { nationalId: payload.patient.nationalId },
+          select: { isActive: true },
+        });
+
+        if (existingPatient?.isActive === false) {
+          throw new UnprocessableEntityException(
+            'The patient is inactive and must be reactivated before scheduling an appointment.',
+          );
         }
 
         const overlappingAppointment = await transaction.$queryRaw<
@@ -207,6 +222,17 @@ export class AppointmentsRepository {
           : current.officeId;
       const status = payload.status ?? current.status;
 
+      if (
+        payload.status === 'CANCELLED' &&
+        current.status &&
+        current.status !== 'CANCELLED' &&
+        NON_CANCELABLE_STATUSES.includes(current.status)
+      ) {
+        throw new UnprocessableEntityException(
+          `Appointment cannot be cancelled because it is already ${current.status}.`,
+        );
+      }
+
       if (endTimeValue <= startTimeValue) {
         throw new BadRequestException(
           'end_time must be greater than start_time.',
@@ -274,6 +300,10 @@ export class AppointmentsRepository {
 
   async cancelAppointment(idOrCode: string) {
     const isNumericId = /^\d+$/.test(idOrCode);
+
+    if (isNumericId && BigInt(idOrCode) > MAX_APPOINTMENT_ID) {
+      throw new NotFoundException('Appointment not found.');
+    }
 
     return this.prisma.$transaction(async (transaction) => {
       const current = await transaction.appointment.findUnique({
