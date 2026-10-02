@@ -9,7 +9,7 @@
 
 .cp-main {
   flex: 1;
-  padding: 22px 22px 24px 24px;
+  padding: 14px 18px 16px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -50,7 +50,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 32px 20px;
+  padding: 10px 32px 12px;
   border-bottom: 1px solid #c3c6d5;
 }
 
@@ -246,25 +246,23 @@
 
 .cp-content {
   display: flex;
-  gap: 18px;
+  gap: 12px;
   align-items: stretch;
   flex: 1;
   min-height: 0;
 }
-
 .cp-left {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 10px;
   min-height: 0;
 }
-
 .cp-right {
   width: 330px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 10px;
   min-height: 0;
 }
 
@@ -273,7 +271,7 @@
   border: 1px solid var(--line);
   border-radius: 18px;
   box-shadow: var(--shadow);
-  padding: 14px 16px 10px;
+  padding: 10px 14px 8px;
   min-height: 0;
 }
 
@@ -312,8 +310,8 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 10px;
-  padding: 4px 2px;
+  margin-bottom: 6px;
+  padding: 2px;
   font-size: 24px;
   line-height: 32px;
   font-weight: 600;
@@ -721,7 +719,7 @@
 }
 
 .mini-cal {
-  padding-bottom: 18px;
+  padding-bottom: 10px;
 }
 
 .mini-cal-nav {
@@ -741,8 +739,8 @@
 .mini-cal-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 8px;
-  padding-top: 8px;
+  gap: 4px;
+  padding-top: 4px;
   color: #4a5564;
 }
 

@@ -12,6 +12,17 @@
 
 body {
   font-family: 'Inter', 'Segoe UI', sans-serif;
+  margin: 0;
+}
+
+/* Garantiza que el shell ocupe toda la pantalla sin dejar huecos */
+html,
+body,
+#root {
+  height: 100%;
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
 }
 
 /* Shell global: viewport completo con footer siempre visible */
