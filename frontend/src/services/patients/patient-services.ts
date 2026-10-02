@@ -73,6 +73,21 @@ export async function getPatient(id: number): Promise<Patient> {
   return response.data;
 }
 
+export async function getPatientVitalsHistory(
+  id: number,
+  params: { page?: number; limit?: number } = {},
+): Promise<{ data: PatientVitals[]; page: number; limit: number; total: number; totalPages: number }> {
+  const response = await apiClient.get<{
+    data: PatientVitals[];
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  }>(`/api/v1/patients/${id}/vitals`, { params });
+
+  return response.data;
+}
+
 export async function createPatient(payload: CreatePatientRequest): Promise<{
   patient: Patient;
   vitals: PatientVitals | null;

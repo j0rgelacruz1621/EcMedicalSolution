@@ -23,19 +23,10 @@ import {
   UserRound,
   Pill,
 } from 'lucide-react';
-import { getPatientById, getPatientVitalsHistory, type Patient, type PatientVitals } from '../../../services/patients/patient-services';
+import { getPatient, getPatientVitalsHistory, type Patient, type PatientVitals } from '../../../services/patients/patient-services';
 import { getAppointments } from '../../../services/appointments/appointment-services';
 
-function getAge(dateOfBirth: string) {
-  const birthDate = new Date(dateOfBirth);
-  const today = new Date();
-  let age = today.getFullYear() - birthDate.getFullYear();
-  const birthdayHasPassed = today.getMonth() > birthDate.getMonth() ||
-    (today.getMonth() === birthDate.getMonth() && today.getDate() >= birthDate.getDate());
 
-  if (!birthdayHasPassed) age -= 1;
-  return age;
-}
 
 const tabs = ['Información General', 'Historial Clínico', 'Récipes', 'Estudios', 'Paraclínicos', 'RX Tórax', 'Preoperatoria'];
 
@@ -71,7 +62,7 @@ export default function PatientFileView() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
-  const [headerDoctor, setHeaderDoctor] = useState<{ name: string; photoUrl?: string | null } | null>(null);
+
   const [isAddHistoryOpen, setIsAddHistoryOpen] = useState(false);
   const [isPrescriptionHistoryOpen, setIsPrescriptionHistoryOpen] = useState(false);
   const [isPrescriptionFormOpen, setIsPrescriptionFormOpen] = useState(false);
@@ -99,7 +90,7 @@ export default function PatientFileView() {
       setError('');
 
       try {
-        const selectedPatient = await getPatientById(Number(id));
+        const selectedPatient = await getPatient(Number(id));
         if (!active) return;
 
         if (!selectedPatient) {
@@ -153,8 +144,7 @@ export default function PatientFileView() {
     [calendarMonth],
   );
   const patientName = patient ? `${patient.firstName} ${patient.lastName}` : 'Paciente';
-  const patientInitials = patient ? `${patient.firstName[0] ?? ''}${patient.lastName[0] ?? ''}`.toUpperCase() : 'P';
-  const patientAge = patient ? `${getAge(patient.dateOfBirth)} años` : 'Sin registro';
+  const patientAge = patient?.age != null ? `${patient.age} años` : 'Sin registro';
   const patientDocument = patient?.nationalId ?? 'Sin registro';
   const patientOrigin = patient?.phone?.trim() ? `Tel. ${patient.phone}` : 'Sin registro';
   const patientPa = patient?.latestVitals
@@ -418,12 +408,13 @@ export default function PatientFileView() {
                   <div key={event.title} className="timeline-item">
                     <div className="timeline-dot" />
                     <div className="timeline-body">
-                      <h4>Nota clínica</h4>
-                      <span>{new Date(patient.updatedAt).toLocaleDateString('es-VE')}</span>
-                      <p>{patient.medicalHistoryNotes}</p>
+                      <h4>{event.title}</h4>
+                      <span>{event.date}</span>
+                      <p>{event.text}</p>
                     </div>
                   </div>
-                ) : (
+                ))}
+                {!patientTimeline.length && (
                   <p className="timeline-empty">Sin registros de evolución todavía.</p>
                 )}
               </div>
