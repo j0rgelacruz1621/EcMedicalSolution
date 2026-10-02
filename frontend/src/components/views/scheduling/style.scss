@@ -21,7 +21,7 @@
 
 .cp-header h1 {
   color: var(--primary-color) !important;
-  font-size: 2.1rem;
+  font-size: 33.6px;
   line-height: 1.2;
   letter-spacing: -0.01em;
   font-weight: 700;
@@ -43,7 +43,7 @@
   display: grid;
   place-items: center;
   color: var(--text);
-  font-size: 1rem;
+  font-size: 16px;
   cursor: pointer;
 }
 
@@ -61,7 +61,7 @@
 }
 
 .cp-user > span:first-child {
-  font-size: 1.02rem;
+  font-size: 16.32px;
   color: #2a2d34;
   font-weight: 600;
 }
@@ -75,7 +75,7 @@
   background: #f4f5f7;
   border: 1px solid rgba(146, 157, 168, 0.3);
   color: var(--primary-color);
-  font-size: 0.7rem;
+  font-size: 11.2px;
   font-weight: 800;
   flex-shrink: 0;
 }
@@ -91,7 +91,7 @@
     align-items: flex-end;
     margin-bottom: 24px;
 
-    h1 { font-size: 2rem; margin: 0; color: #1e293b; }
+    h1 { font-size: 32px; margin: 0; color: #1e293b; }
     .current-date-text { color: #64748b; margin: 0; }
 
     .actions-right {
@@ -169,7 +169,7 @@
     display: flex;
     justify-content: space-between;
     font-weight: 800;
-    font-size: 0.75rem;
+    font-size: 12px;
     margin-bottom: 12px;
     color: #475569;
   }
@@ -178,7 +178,7 @@
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     text-align: center;
-    font-size: 0.75rem;
+    font-size: 12px;
     
     .day-name { font-weight: 600; color: #94a3b8; margin-bottom: 8px; }
     .day-num {
@@ -191,13 +191,13 @@
   }
 
   .filters-card {
-    h3 { font-size: 0.9rem; font-weight: 700; margin-bottom: 16px; }
+    h3 { font-size: 14.4px; font-weight: 700; margin-bottom: 16px; }
     .filter-item {
       display: flex;
       align-items: center;
       gap: 12px;
       margin-bottom: 12px;
-      font-size: 0.9rem;
+      font-size: 14.4px;
       cursor: pointer;
       
       input { display: none; }
@@ -235,8 +235,8 @@
       gap: 4px;
       border-right: 1px solid #f1f5f9;
       
-      .day-label { font-size: 0.75rem; font-weight: 700; color: #64748b; }
-      .day-number { font-size: 1.5rem; font-weight: 800; color: #1e293b; }
+      .day-label { font-size: 12px; font-weight: 700; color: #64748b; }
+      .day-number { font-size: 24px; font-weight: 800; color: #1e293b; }
       
       &.active {
         background: #fdf2f2;
@@ -267,8 +267,8 @@
     flex-direction: column;
     box-shadow: 0 2px 4px rgba(0,0,0,0.02);
 
-    .app-time { font-size: 0.75rem; font-weight: 800; }
-    .app-patient { font-size: 0.9rem; font-weight: 700; color: #1e293b; margin: 4px 0; }
-    .app-type { font-size: 0.7rem; color: #64748b; font-weight: 500; }
+    .app-time { font-size: 12px; font-weight: 800; }
+    .app-patient { font-size: 14.4px; font-weight: 700; color: #1e293b; margin: 4px 0; }
+    .app-type { font-size: 11.2px; color: #64748b; font-weight: 500; }
   }
 }

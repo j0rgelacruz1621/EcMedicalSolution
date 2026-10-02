@@ -1,5 +1,5 @@
 import './style.scss';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import LeftSideBar from '../../left-sideBar';
 import ClinicalHistoryModal from '../../modals/clinical-history';
@@ -23,67 +23,53 @@ import {
   UserRound,
   Pill,
 } from 'lucide-react';
+import { getPatientById, getPatientVitalsHistory, type Patient, type PatientVitals } from '../../../services/patients/patient-services';
+import { getAppointments } from '../../../services/appointments/appointment-services';
 
-const patientData = {
-  1: {
-    name: 'Ricardo Mendoza',
-    age: '54 años',
-    id: '45.234.112-K',
-    origin: 'Mérida',
-    pa: '132/85 mmHg',
-    fc: '72 BPM',
-    weight: '84.5 Kg',
-    date: '16 Oct 2026',
-    time: '14:30 PM - Viernes 16',
-    specialty: 'Control Cardiología',
-    tabs: ['Información General', 'Historial Clínico', 'Récipes', 'Estudios', 'Paraclínicos', 'RX Tórax', 'Preoperatoria'],
-    timeline: [
-      { title: 'Seguimiento post-infarto (Estable)', date: '24 Sept, 2023', text: 'Paciente hemodinámicamente estable, sin dolor torácico ni cambios de signos vitales en la consulta. Se mantuvo tratamiento y control ambulatorio.' },
-      { title: 'Control de Presión Arterial', date: '10 Ago, 2023', text: 'Presión arterial controlada con mejoría progresiva. Ajuste de medicación posterior a seguimiento domiciliario.' },
-      { title: 'Egreso Hospitalario', date: '15 Jul, 2023', text: 'Alta médica tras manejo clínico. Recomendaciones para seguimiento y control de riesgo cardiovascular.' },
-    ],
-    medications: [
-      { name: 'Aspirina', dose: '100mg', frequency: '1 cada 24h' },
-      { name: 'Atorvastatina', dose: '40mg', frequency: '1 cada noche' },
-      { name: 'Losartán', dose: '50mg', frequency: '1 cada 12h' },
-    ],
-    alerts: [
-      'Alergia conocida a la Penicilina.',
-      'Antecedente familiar de muerte por infarto de madre.',
-      'Riesgo moderado de hipertensión no controlada.',
-    ],
-  },
-  2: {
-    name: 'Elena Gómez',
-    age: '62 años',
-    id: '32.889.001',
-    origin: 'Tovar',
-    pa: '128/80 mmHg',
-    fc: '74 BPM',
-    weight: '71.2 Kg',
-    date: '18 Oct 2026',
-    time: '09:15 AM - Domingo 18',
-    specialty: 'Control Endocrinología',
-    tabs: ['Información General', 'Historial Clínico', 'Récipes', 'Estudios', 'Paraclínicos', 'RX Tórax', 'Preoperatoria'],
-    timeline: [
-      { title: 'Seguimiento endocrino', date: '12 Sept, 2023', text: 'Paciente sin complicaciones, buena adherencia terapéutica y controles de glucosa estables.' },
-      { title: 'Control metabólico', date: '03 Ago, 2023', text: 'Se documenta mejoría en los valores de glicemia y tolerancia al tratamiento indicado.' },
-      { title: 'Evaluación inicial', date: '15 Jun, 2023', text: 'Se inicia protocolo de seguimiento y se establecen metas de control metabólico.' },
-    ],
-    medications: [
-      { name: 'Metformina', dose: '850mg', frequency: '1 cada 12h' },
-      { name: 'Lisinopril', dose: '10mg', frequency: '1 cada 24h' },
-    ],
-    alerts: [
-      'Alergia a sulfas.',
-      'Hipertensión familiar en línea materna.',
-    ],
-  },
-};
+function getAge(dateOfBirth: string) {
+  const birthDate = new Date(dateOfBirth);
+  const today = new Date();
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const birthdayHasPassed = today.getMonth() > birthDate.getMonth() ||
+    (today.getMonth() === birthDate.getMonth() && today.getDate() >= birthDate.getDate());
+
+  if (!birthdayHasPassed) age -= 1;
+  return age;
+}
+
+const tabs = ['Información General', 'Historial Clínico', 'Récipes', 'Estudios', 'Paraclínicos', 'RX Tórax', 'Preoperatoria'];
+
+function formatDate(value?: string | null) {
+  if (!value) return 'Sin registro';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return 'Sin registro';
+  return new Intl.DateTimeFormat('es-ES', { dateStyle: 'medium' }).format(date);
+}
+
+function formatTime(value?: string | null) {
+  if (!value) return '';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  return new Intl.DateTimeFormat('es-ES', { timeStyle: 'short' }).format(date);
+}
+
+function buildCalendarCells(monthDate: Date) {
+  const year = monthDate.getFullYear();
+  const month = monthDate.getMonth();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const firstWeekday = (new Date(year, month, 1).getDay() + 6) % 7;
+  const cells: (number | null)[] = [];
+  for (let i = 0; i < firstWeekday; i += 1) cells.push(null);
+  for (let day = 1; day <= daysInMonth; day += 1) cells.push(day);
+  while (cells.length % 7 !== 0) cells.push(null);
+  return cells;
+}
 
 export default function PatientFileView() {
   const { id } = useParams();
-  const patient = patientData[Number(id) as keyof typeof patientData] ?? patientData[1];
+  const [patient, setPatient] = useState<Patient | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [isAddHistoryOpen, setIsAddHistoryOpen] = useState(false);
   const [isPrescriptionHistoryOpen, setIsPrescriptionHistoryOpen] = useState(false);
@@ -93,8 +79,185 @@ export default function PatientFileView() {
   const [isClinicalStudiesOpen, setIsClinicalStudiesOpen] = useState(false);
   const [isSupplementaryTestsOpen, setIsSupplementaryTestsOpen] = useState(false);
   const [isNewSupplementaryTestsOpen, setIsNewSupplementaryTestsOpen] = useState(false);
+  const [vitalsHistory, setVitalsHistory] = useState<PatientVitals[]>([]);
+  const [appointments, setAppointments] = useState<{ date?: string; time?: string; reason?: string }[]>([]);
+  const [calendarMonth, setCalendarMonth] = useState(() => new Date());
+  const activeDoctorName = sessionStorage.getItem('active_doctor_name') || 'Administración';
 
-  const monthLabel = useMemo(() => 'Octubre 2026', []);
+  useEffect(() => {
+    let active = true;
+
+    async function loadPatient() {
+      if (!id) {
+        setLoading(false);
+        setError('Paciente no encontrado.');
+        return;
+      }
+
+      setLoading(true);
+      setError('');
+
+      try {
+        const selectedPatient = await getPatientById(Number(id));
+        if (!active) return;
+
+        if (!selectedPatient) {
+          setError('No se encontró el paciente seleccionado.');
+          setPatient(null);
+          return;
+        }
+
+        setPatient(selectedPatient);
+
+        const [vitalsResult, appointmentsResult] = await Promise.allSettled([
+          getPatientVitalsHistory(Number(id), { limit: 50 }),
+          getAppointments({ patientId: Number(id), limit: 100 }),
+        ]);
+
+        if (!active) return;
+
+        setVitalsHistory(vitalsResult.status === 'fulfilled' ? (vitalsResult.value.data ?? []) : []);
+        setAppointments(
+          appointmentsResult.status === 'fulfilled'
+            ? (appointmentsResult.value.data ?? [])
+                .filter((appointment) => appointment.appointmentDate)
+                .map((appointment) => ({
+                  date: appointment.appointmentDate,
+                  time: appointment.startTime,
+                  reason: appointment.reasonForVisit,
+                }))
+            : [],
+        );
+      } catch {
+        if (active) {
+          setError('No se pudo cargar la información del paciente.');
+          setPatient(null);
+        }
+      } finally {
+        if (active) {
+          setLoading(false);
+        }
+      }
+    }
+
+    void loadPatient();
+
+    return () => {
+      active = false;
+    };
+  }, [id]);
+
+  const monthLabel = useMemo(
+    () => new Intl.DateTimeFormat('es-ES', { month: 'long', year: 'numeric' }).format(calendarMonth),
+    [calendarMonth],
+  );
+  const patientName = patient ? `${patient.firstName} ${patient.lastName}` : 'Paciente';
+  const patientInitials = patient ? `${patient.firstName[0] ?? ''}${patient.lastName[0] ?? ''}`.toUpperCase() : 'P';
+  const patientAge = patient ? `${getAge(patient.dateOfBirth)} años` : 'Sin registro';
+  const patientDocument = patient?.nationalId ?? 'Sin registro';
+  const patientOrigin = patient?.phone?.trim() ? `Tel. ${patient.phone}` : 'Sin registro';
+  const patientPa = patient?.latestVitals
+    ? `${patient.latestVitals.blood_pressure_systolic ?? '--'}/${patient.latestVitals.blood_pressure_diastolic ?? '--'} mmHg`
+    : 'Sin registro';
+  const patientFc = patient?.latestVitals
+    ? `${patient.latestVitals.heart_rate_bpm ?? '--'} BPM`
+    : 'Sin registro';
+  const patientWeight = patient?.latestVitals
+    ? `${patient.latestVitals.weight_kg ?? '--'} Kg`
+    : 'Sin registro';
+
+  const calendarCells = useMemo(() => buildCalendarCells(calendarMonth), [calendarMonth]);
+
+  const selectedDay = useMemo(() => {
+    if (!appointments.length) return null;
+    const upcoming = [...appointments].sort(
+      (a, b) => new Date(a.date ?? 0).getTime() - new Date(b.date ?? 0).getTime(),
+    );
+    const next = upcoming.find((appointment) => {
+      const date = appointment.date ? new Date(appointment.date) : null;
+      return date instanceof Date && date.getTime() >= Date.now() - 24 * 60 * 60 * 1000;
+    }) ?? upcoming[0];
+    const date = next?.date ? new Date(next.date) : null;
+    if (!date || Number.isNaN(date.getTime())) return null;
+    return {
+      day: date.getDate(),
+      date: next?.date,
+      time: next?.time,
+      reason: next?.reason,
+    };
+  }, [appointments]);
+
+  const patientTimeline = useMemo(() => {
+    if (!patient) return [];
+    const events = [
+      {
+        title: 'Registro inicial del paciente',
+        date: formatDate(patient.createdAt),
+        text: patient.medicalHistoryNotes?.trim()
+          ? patient.medicalHistoryNotes
+          : 'Paciente registrado sin notas de historia clínica.',
+      },
+    ];
+
+    if (vitalsHistory.length) {
+      const latest = vitalsHistory[0];
+      events.push({
+        title: 'Signos vitales',
+        date: formatDate(latest.measured_at),
+        text: `P.A: ${latest.blood_pressure_systolic ?? '--'}/${latest.blood_pressure_diastolic ?? '--'} mmHg \u00b7 F.C: ${latest.heart_rate_bpm ?? '--'} BPM \u00b7 Peso: ${latest.weight_kg ?? '--'} Kg`,
+      });
+    } else {
+      events.push({
+        title: 'Signos vitales',
+        date: 'Sin registro',
+        text: 'Este paciente aún no tiene signos vitales registrados.',
+      });
+    }
+
+    return events;
+  }, [patient, vitalsHistory]);
+
+  const patientMedications = useMemo(() => {
+    if (!patient) return [];
+    const notes = patient.medicalHistoryNotes?.trim();
+    if (!notes) return [];
+    return [
+      {
+        name: 'Ver historia clínica',
+        dose: `Actualizado ${formatDate(patient.updatedAt)}`,
+        frequency: 'Registrado en notas médicas',
+      },
+    ];
+  }, [patient]);
+
+  const patientAlerts = useMemo(() => {
+    if (!patient) return [];
+    const notes = patient.medicalHistoryNotes?.trim();
+    if (!notes) return ['Sin alergias ni alertas registradas.'];
+    return [notes];
+  }, [patient]);
+
+  if (loading) {
+    return (
+      <div className="patient-file-root">
+        <LeftSideBar />
+        <main className="patient-file-main">
+          <div className="patient-file-empty-state">Cargando información del paciente...</div>
+        </main>
+      </div>
+    );
+  }
+
+  if (error || !patient) {
+    return (
+      <div className="patient-file-root">
+        <LeftSideBar />
+        <main className="patient-file-main">
+          <div className="patient-file-empty-state">{error || 'No existe información disponible para este paciente.'}</div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="patient-file-root">
@@ -110,7 +273,7 @@ export default function PatientFileView() {
               <CalendarDays size={18} />
             </button>
             <div className="doctor-badge">
-              <span>Dra. Josiana Piña</span>
+              <span>{activeDoctorName}</span>
               <div className="avatar-mini"><UserRound size={14} /></div>
             </div>
           </div>
@@ -119,52 +282,43 @@ export default function PatientFileView() {
         <div className="patient-file-body">
           <section className="patient-overview">
             <div className="patient-header-row">
-              <div className="patient-identity">
-                <div className="patient-avatar">RM</div>
-                <div>
-                  <p className="eyebrow">Paciente</p>
-                  <h1>{patient.name}</h1>
-                </div>
-              </div>
+              <h1 className="patient-name">{patientName}</h1>
+            </div>
 
-              <div className="header-actions-row">
-                <button className="primary-action" type="button">
-                  <Plus size={18} />
-                  Nueva Cita
-                </button>
-                <button className="secondary-action" type="button">Editar</button>
-                <button className="secondary-action" type="button">Informe</button>
+            <div className="patient-details-grid">
+              <div className="detail-item">
+                <span className="detail-label">Edad:</span>
+                <span className="detail-value">{patientAge}</span>
+              </div>
+              <div className="detail-item">
+                <span className="detail-label">Cédula:</span>
+                <span className="detail-value">{patientDocument}</span>
+              </div>
+              <div className="detail-item">
+                <span className="detail-label">Procedencia</span>
+                <span className="detail-value">{patientOrigin}</span>
+              </div>
+              <div className="detail-item">
+                <span className="detail-label">P.A:</span>
+                <span className="detail-value">{patientPa}</span>
+              </div>
+              <div className="detail-item">
+                <span className="detail-label">F.C:</span>
+                <span className="detail-value">{patientFc}</span>
+              </div>
+              <div className="detail-item">
+                <span className="detail-label">Peso:</span>
+                <span className="detail-value">{patientWeight}</span>
               </div>
             </div>
 
-            <div className="patient-meta-grid">
-              <div className="meta-item">
-                <span className="meta-label">Edad</span>
-                <strong>{patient.age}</strong>
-              </div>
-              <div className="meta-item">
-                <span className="meta-label">Cédula</span>
-                <strong>{patient.id}</strong>
-              </div>
-              <div className="meta-item">
-                <span className="meta-label">Procedencia</span>
-                <strong>{patient.origin}</strong>
-              </div>
-            </div>
-
-            <div className="vital-signs-row">
-              <div className="vital-card">
-                <span className="vital-label">P.A</span>
-                <strong>{patient.pa}</strong>
-              </div>
-              <div className="vital-card">
-                <span className="vital-label">F.C</span>
-                <strong>{patient.fc}</strong>
-              </div>
-              <div className="vital-card">
-                <span className="vital-label">Peso</span>
-                <strong>{patient.weight}</strong>
-              </div>
+            <div className="header-actions-row">
+              <button className="primary-action" type="button">
+                <Plus size={18} />
+                Nueva Cita
+              </button>
+              <button className="secondary-action" type="button">Editar</button>
+              <button className="secondary-action" type="button">Informe</button>
             </div>
           </section>
 
@@ -175,21 +329,19 @@ export default function PatientFileView() {
 
             <div className="calendar-panel">
               <div className="calendar-header">
-                <button type="button" aria-label="Mes anterior"><ChevronLeft size={16} /></button>
+                <button type="button" aria-label="Mes anterior" onClick={() => setCalendarMonth((current) => new Date(current.getFullYear(), current.getMonth() - 1, 1))}><ChevronLeft size={16} /></button>
                 <span>{monthLabel}</span>
-                <button type="button" aria-label="Mes siguiente"><ChevronRight size={16} /></button>
+                <button type="button" aria-label="Mes siguiente" onClick={() => setCalendarMonth((current) => new Date(current.getFullYear(), current.getMonth() + 1, 1))}><ChevronRight size={16} /></button>
               </div>
               <div className="calendar-grid">
-                {['Do','Lu','Ma','Mi','Ju','Vi','Sa'].map((d) => (
+                {['Lu','Ma','Mi','Ju','Vi','Sa','Do'].map((d) => (
                   <span key={d} className="weekday-name">{d}</span>
                 ))}
-                {Array.from({ length: 35 }, (_, index) => {
-                  const day = index - 1;
-                  const isSelected = day === 16;
-                  const isEmpty = day < 1 || day > 30;
+                {calendarCells.map((day, index) => {
+                  const isSelected = day !== null && day === selectedDay?.day;
                   return (
-                    <span key={index} className={`day-cell ${isSelected ? 'selected' : ''} ${isEmpty ? 'muted' : ''}`}>
-                      {!isEmpty ? day : ''}
+                    <span key={`${day ?? 'empty'}-${index}`} className={`day-cell ${isSelected ? 'selected' : ''} ${day === null ? 'muted' : ''}`}>
+                      {day ?? ''}
                     </span>
                   );
                 })}
@@ -199,7 +351,7 @@ export default function PatientFileView() {
             <div className="appointment-detail">
               <div className="appointment-time">
                 <Clock3 size={16} />
-                <span>{patient.time}</span>
+                <span>{selectedDay ? `${formatDate(selectedDay.date)}${selectedDay.time ? ` - ${formatTime(selectedDay.date)}` : ''}` : 'Sin cita programada'}</span>
               </div>
               <div className="appointment-reason">
                 <div className="reason-icon">
@@ -207,7 +359,7 @@ export default function PatientFileView() {
                 </div>
                 <div>
                   <span className="reason-label">Motivo</span>
-                  <strong>{patient.specialty}</strong>
+                  <strong>{selectedDay?.reason?.trim() || 'Sin motivo registrado'}</strong>
                 </div>
               </div>
             </div>
@@ -216,7 +368,7 @@ export default function PatientFileView() {
 
         <section className="patient-tabs-section">
           <nav className="tabs-bar" aria-label="Pestañas del expediente">
-            {patient.tabs.map((tab, index) => (
+            {tabs.map((tab, index) => (
               <button
                 key={tab}
                 type="button"
@@ -254,7 +406,7 @@ export default function PatientFileView() {
               </div>
 
               <div className="timeline-list">
-                {patient.timeline.map((event) => (
+                {patientTimeline.map((event) => (
                   <div key={event.title} className="timeline-item">
                     <div className="timeline-dot" />
                     <div className="timeline-body">
@@ -277,7 +429,7 @@ export default function PatientFileView() {
                 </div>
 
                 <ul className="medicine-list">
-                  {patient.medications.map((medication) => (
+                  {patientMedications.map((medication) => (
                     <li key={medication.name} className="medicine-item">
                       <div className="medicine-name">
                         <span>{medication.name}</span>
@@ -298,7 +450,7 @@ export default function PatientFileView() {
                 </div>
 
                 <ul className="alert-list">
-                  {patient.alerts.map((alert) => (
+                  {patientAlerts.map((alert) => (
                     <li key={alert}>{alert}</li>
                   ))}
                 </ul>
@@ -310,7 +462,9 @@ export default function PatientFileView() {
 
       <ClinicalHistoryModal
         isOpen={isHistoryOpen}
-        patientName={patient.name}
+        patientName={patientName}
+        patient={patient}
+        vitalsHistory={vitalsHistory}
         onClose={() => setIsHistoryOpen(false)}
         onAddHistory={() => {
           setIsHistoryOpen(false);
@@ -320,13 +474,14 @@ export default function PatientFileView() {
 
       <NewClinicalHistoryModal
         isOpen={isAddHistoryOpen}
-        patientName={patient.name}
+        patientName={patientName}
         onClose={() => setIsAddHistoryOpen(false)}
       />
 
       <PrescriptionHistoryModal
         isOpen={isPrescriptionHistoryOpen}
-        patientName={patient.name}
+        patientName={patientName}
+        patient={patient}
         onClose={() => setIsPrescriptionHistoryOpen(false)}
         onAddPrescription={() => {
           setIsPrescriptionHistoryOpen(false);
@@ -336,24 +491,26 @@ export default function PatientFileView() {
 
       <PrescriptionFormModal
         isOpen={isPrescriptionFormOpen}
-        patientName={patient.name}
+        patientName={patientName}
         onClose={() => setIsPrescriptionFormOpen(false)}
         onGenerate={() => setIsPrescriptionPreviewOpen(true)}
       />
 
       <PrescriptionPreviewModal
         isOpen={isPrescriptionPreviewOpen}
-        patientName={patient.name}
-        patientAge={patient.age}
-        patientWeight={patient.weight}
-        patientDoc={patient.id}
-        emissionDate="13 de Julio de 2026"
+        patientName={patientName}
+        patientAge={patientAge}
+        patientWeight={patientWeight}
+        patientDoc={patientDocument}
+        emissionDate={new Intl.DateTimeFormat('es-ES', { dateStyle: 'long' }).format(new Date())}
+        doctorName={activeDoctorName}
+        doctorSpecialty="CARDIÓLOGO CLÍNICO"
         onClose={() => setIsPrescriptionPreviewOpen(false)}
       />
 
       <ClinicalTimelineModal
         isOpen={isClinicalTimelineOpen}
-        patientName={patient.name}
+        patientName={patientName}
         onClose={() => setIsClinicalTimelineOpen(false)}
         onAddStudy={() => {
           setIsClinicalTimelineOpen(false);
@@ -363,13 +520,13 @@ export default function PatientFileView() {
 
       <ClinicalStudiesModal
         isOpen={isClinicalStudiesOpen}
-        patientName={patient.name}
+        patientName={patientName}
         onClose={() => setIsClinicalStudiesOpen(false)}
       />
 
       <SupplementaryTestsModal
         isOpen={isSupplementaryTestsOpen}
-        patientName={patient.name}
+        patientName={patientName}
         onClose={() => setIsSupplementaryTestsOpen(false)}
         onAddTest={() => {
           setIsSupplementaryTestsOpen(false);
@@ -377,7 +534,7 @@ export default function PatientFileView() {
         }}
       />
 
-      {isNewSupplementaryTestsOpen && <NewSupplementaryTests patientName={patient.name} onClose={() => setIsNewSupplementaryTestsOpen(false)} />}
+      {isNewSupplementaryTestsOpen && <NewSupplementaryTests patientName={patientName} onClose={() => setIsNewSupplementaryTestsOpen(false)} />}
     </div>
   );
 }

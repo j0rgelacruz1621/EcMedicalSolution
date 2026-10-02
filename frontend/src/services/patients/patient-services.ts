@@ -42,7 +42,7 @@ export interface CreatePatientRequest {
   phone: string;
   dateOfBirth: string;
   gender: PatientGender;
-  vitals: {
+  vitals?: {
     bloodPressure?: string;
     heartRateBpm?: number;
     weightKg?: number;
@@ -58,6 +58,30 @@ export async function getPatients(params: {
 } = {}): Promise<PatientListResponse> {
   const response = await apiClient.get<PatientListResponse>('/api/v1/patients', {
     params,
+  });
+
+  return response.data;
+}
+
+export async function getPatientById(id: number): Promise<Patient | null> {
+  const response = await getPatients({ page: 1, limit: 1000 });
+  return response.data.find((patient) => patient.id === id) ?? null;
+}
+
+export interface VitalsListResponse {
+  data: PatientVitals[];
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
+export async function getPatientVitalsHistory(
+  id: number,
+  params: { page?: number; limit?: number } = {},
+): Promise<VitalsListResponse> {
+  const response = await apiClient.get<VitalsListResponse>(`/api/v1/patients/${id}/vitals`, {
+    params: { page: 1, limit: 50, ...params },
   });
 
   return response.data;
