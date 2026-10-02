@@ -33,11 +33,86 @@ export default function NewPatientModal({ isOpen, onClose, onSuccess, doctorId }
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
 
+  const buildVitalsPayload = () => {
+    const vitals: {
+      bloodPressure?: string;
+      heartRateBpm?: number;
+      weightKg?: number;
+    } = {};
+
+    const paValue = formData.pa.trim();
+    if (paValue) {
+      const normalizedPa = paValue.replace(/\s+/g, '').replace(/mmhg/gi, '').toUpperCase();
+      const paMatch = normalizedPa.match(/^(\d{2,3})\/(\d{2,3})$/);
+
+      if (!paMatch) {
+        setError('La presión arterial debe tener el formato 120/80.');
+        return null;
+      }
+
+      const systolic = Number(paMatch[1]);
+      const diastolic = Number(paMatch[2]);
+
+      if (systolic < 60 || systolic > 220 || diastolic < 30 || diastolic > 140) {
+        setError('La presión arterial ingresada está fuera del rango válido.');
+        return null;
+      }
+
+      vitals.bloodPressure = `${systolic}/${diastolic}`;
+    }
+
+    const fcValue = formData.fc.trim();
+    if (fcValue) {
+      const heartRate = Number(fcValue.replace(/[^\d.]/g, ''));
+      if (!Number.isFinite(heartRate) || heartRate < 20 || heartRate > 250) {
+        setError('La frecuencia cardíaca debe estar entre 20 y 250 bpm.');
+        return null;
+      }
+
+      vitals.heartRateBpm = heartRate;
+    }
+
+    const weightValue = formData.weight.trim();
+    if (weightValue) {
+      const weight = Number(weightValue.replace(/[^\d.]/g, ''));
+      if (!Number.isFinite(weight) || weight <= 0 || weight > 500) {
+        setError('El peso debe estar entre 0 y 500 kg.');
+        return null;
+      }
+
+      vitals.weightKg = weight;
+    }
+
+    return Object.keys(vitals).length > 0 ? vitals : undefined;
+  };
+
   if (!isOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setError('Debes iniciar sesión para registrar un paciente.');
+      return;
+    }
+
+    const ageValue = Number(formData.age);
+    if (!formData.age || Number.isNaN(ageValue) || ageValue < 0 || ageValue > 120) {
+      setError('Ingresa una edad válida entre 0 y 120 años.');
+      return;
+    }
+
+    const computedDateOfBirth = new Date();
+    computedDateOfBirth.setFullYear(computedDateOfBirth.getFullYear() - ageValue);
+    const isoDate = computedDateOfBirth.toISOString().slice(0, 10);
+
+    const vitals = buildVitalsPayload();
+    if (vitals === null) {
+      return;
+    }
+
     setSaving(true);
 
     try {
@@ -52,15 +127,15 @@ export default function NewPatientModal({ isOpen, onClose, onSuccess, doctorId }
         address: formData.address || undefined,
         ...(doctorId ? { assignedDoctorId: doctorId } : {}),
         gender: formData.gender as PatientGender,
-        vitals: {
-          ...(formData.pa ? { bloodPressure: formData.pa.replace(/\s*mmHg\s*$/i, '') } : {}),
-          ...(formData.fc ? { heartRateBpm: Number(formData.fc.replace(/\s*bpm\s*$/i, '')) } : {}),
-          ...(formData.weight ? { weightKg: Number(formData.weight.replace(/\s*kg\s*$/i, '')) } : {}),
-        },
+        ...(vitals ? { vitals } : {}),
       });
       onSuccess(result.patient);
-    } catch {
-      setError('No se pudo guardar el paciente. Verifica los datos e inténtalo nuevamente.');
+    } catch (err: unknown) {
+      const apiMessage = (err as { response?: { data?: { message?: string; error?: string } } })?.response?.data?.message
+        ?? (err as { response?: { data?: { message?: string; error?: string } } })?.response?.data?.error
+        ?? 'No se pudo guardar el paciente. Verifica los datos e inténtalo nuevamente.';
+
+      setError(apiMessage);
     } finally {
       setSaving(false);
     }
