@@ -49,7 +49,7 @@ function HomeView() {
 
   return (
     <div className="theme-blue">
-      <div className="home-view d-flex flex-column min-vh-100 bg-white">
+      <div className="home-view d-flex flex-column bg-white">
         <Header />
         
         <main className="flex-grow-1 d-flex align-items-center py-5">

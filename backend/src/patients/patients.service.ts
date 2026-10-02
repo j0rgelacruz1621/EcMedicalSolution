@@ -198,6 +198,20 @@ export class PatientsService {
     );
   }
 
+  async findOne(id: number) {
+    const patient = await this.patientsRepository.findById(BigInt(id));
+
+    if (!patient) {
+      throw new NotFoundException('Patient not found.');
+    }
+
+    const latestVitals = await this.patientsRepository.findLatestVitals(
+      BigInt(id),
+    );
+
+    return toJsonSafe({ ...patient, latestVitals });
+  }
+
   async findVitalsHistory(id: number, query: QueryVitalsDto) {
     const patient = await this.patientsRepository.findById(BigInt(id));
 

@@ -31,6 +31,23 @@ const formatAppointmentType = (appointment: Appointment) => {
   return 'SCHEDULED';
 };
 
+/** Nombre a mostrar: paciente registrado o datos del guest (cita sin paciente). */
+const formatAppointmentPatientName = (appointment: Appointment) => {
+  const p = appointment.patient;
+  if (p?.firstName || p?.lastName) return `${p.firstName ?? ''} ${p.lastName ?? ''}`.trim();
+  const g = appointment as Appointment & { guestFirstName?: string; guestLastName?: string };
+  if (g.guestFirstName || g.guestLastName) return `${g.guestFirstName ?? ''} ${g.guestLastName ?? ''}`.trim();
+  return 'Pendiente de registro';
+};
+
+/** Clave de fecha local YYYY-MM-DD para comparar días sin problemas de zona horaria. */
+const toDayKey = (value?: string | null) => {
+  if (!value) return '';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+};
+
 export default function AgendaView() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -51,7 +68,11 @@ export default function AgendaView() {
     return Array.from({ length: 7 }, (_, index) => {
       const date = new Date(monday)
       date.setDate(monday.getDate() + index)
-      return { label: date.toLocaleDateString('es-ES', { weekday: 'short' }).replace('.', '').toUpperCase(), date: date.getDate() }
+      return {
+        label: date.toLocaleDateString('es-ES', { weekday: 'short' }).replace('.', '').toUpperCase(),
+        date: date.getDate(),
+        key: toDayKey(date.toISOString()),
+      }
     })
   }, [currentDate]);
   const monthLabel = currentDate.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' }).toUpperCase()
@@ -75,7 +96,7 @@ export default function AgendaView() {
   return (
     <div className="agenda-root">
       <LeftSideBar />
-      
+
       <div className="agenda-main">
         <header className="cp-header">
           <h1>Agenda</h1>
@@ -91,19 +112,19 @@ export default function AgendaView() {
 
         {/* CONTENIDO PRINCIPAL */}
         <div className="agenda-content">
-          
+
           {/* TÍTULO Y CONTROLES DE VISTA */}
           <section className="agenda-header-actions">
             <div>
               <h1>Agenda</h1>
               <p className="current-date-text">{currentDate.toLocaleDateString('es-ES', { dateStyle: 'full' })}</p>
             </div>
-            
+
             <div className="actions-right">
               <div className="view-selector">
                 {['Día', 'Semana', 'Mes'].map(mode => (
-                  <button 
-                    key={mode} 
+                  <button
+                    key={mode}
                     className={viewMode === mode ? 'active' : ''}
                     onClick={() => setViewMode(mode)}
                   >
@@ -111,7 +132,7 @@ export default function AgendaView() {
                   </button>
                 ))}
               </div>
-              
+
               <div className="date-nav">
                 <button onClick={() => setCurrentDate(date => new Date(date.getFullYear(), date.getMonth(), date.getDate() - 7))}><ChevronLeft size={20} /></button>
                 <button className="today-btn" onClick={() => setCurrentDate(new Date())}>Hoy</button>
@@ -167,7 +188,7 @@ export default function AgendaView() {
             <main className="weekly-grid">
               <div className="grid-header">
                 {weekDays.map(day => (
-                  <div key={day.label} className={`grid-col-header ${day.date === 12 ? 'active' : ''}`}>
+                  <div key={day.key} className={`grid-col-header ${day.key === toDayKey(new Date().toISOString()) ? 'active' : ''}`}>
                     <span className="day-label">{day.label}</span>
                     <span className="day-number">{day.date}</span>
                   </div>
@@ -176,16 +197,16 @@ export default function AgendaView() {
 
               <div className="grid-body">
                 {weekDays.map(day => (
-                  <div key={day.label} className="grid-column">
+                  <div key={day.key} className="grid-column">
                     {appointments
-                      .filter(app => new Date(app.appointmentDate ?? '').getDate() === day.date)
+                      .filter(app => toDayKey(app.appointmentDate) === day.key)
                       .map(app => {
                         const isFirstTime = formatAppointmentType(app).toLowerCase() === 'de primera';
                         const typeColor = isFirstTime ? 'rgb(0 107 95)' : 'var(--primary-color)';
                         return (
                           <div key={app.id} className="appointment-card" style={{ borderLeftColor: typeColor }}>
                             <span className="app-time" style={{ color: typeColor }}>{formatAppointmentTime(app.startTime)}</span>
-                            <span className="app-patient">{app.patient?.firstName} {app.patient?.lastName}</span>
+                            <span className="app-patient">{formatAppointmentPatientName(app)}</span>
                             <span className="app-type">{formatAppointmentType(app)}</span>
                           </div>
                         );

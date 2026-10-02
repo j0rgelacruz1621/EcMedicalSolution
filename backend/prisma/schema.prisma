@@ -92,7 +92,7 @@ model Patient {
 model Appointment {
   id              BigInt                   @id @default(autoincrement())
   appointmentCode String                   @unique @map("appointment_code") @db.VarChar(20)
-  patientId       BigInt                   @map("patient_id")
+  patientId       BigInt?                  @map("patient_id")
   doctorId        BigInt                   @map("doctor_id")
   medicalCenterId BigInt?                  @map("medical_center_id")
   officeId        BigInt?                  @map("office_id")
@@ -107,7 +107,14 @@ model Appointment {
   doctor          Doctor                   @relation(fields: [doctorId], references: [id], onDelete: Restrict, onUpdate: Cascade, map: "appointments_doctor_id_fkey")
   medicalCenter   MedicalCenter?           @relation(fields: [medicalCenterId], references: [id], onDelete: SetNull, onUpdate: Cascade, map: "appointments_medical_center_id_fkey")
   office          Office?                  @relation(fields: [officeId], references: [id], onDelete: SetNull, onUpdate: Cascade, map: "appointments_office_id_fkey")
-  patient         Patient                  @relation(fields: [patientId], references: [id], onUpdate: NoAction, map: "fk_appointments_patient")
+  patient         Patient?                 @relation(fields: [patientId], references: [id], onUpdate: NoAction, map: "fk_appointments_patient")
+  guestNationalId String?                  @map("guest_national_id") @db.VarChar(30)
+  guestFirstName  String?                  @map("guest_first_name") @db.VarChar(100)
+  guestLastName   String?                  @map("guest_last_name") @db.VarChar(100)
+  guestEmail      String?                  @map("guest_email") @db.VarChar(150)
+  guestPhone      String?                  @map("guest_phone") @db.VarChar(20)
+  guestAge        Int?                     @map("guest_age")
+  guestGender     gender_enum?             @map("guest_gender")
   patient_vitals  patient_vitals[]
   reports         reports[]
 

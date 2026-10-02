@@ -29,6 +29,7 @@ export interface AppointmentFilters {
   doctorId?: bigint;
   medicalCenterId?: bigint;
   patientId?: bigint;
+  guestNationalId?: string;
   status?: appointment_status_enum;
   appointmentDate?: string;
   startDate?: string;
@@ -127,33 +128,31 @@ export class AppointmentsRepository {
           );
         }
 
-        const patient = await transaction.patient.upsert({
+        // Separación de procesos: agendar una cita NO crea un paciente.
+        // Si la cédula ya existe en "patients" se vincula la cita a ese paciente;
+        // si no existe, la cita guarda los datos del solicitante como invitado (guest)
+        // y la conversión a paciente ocurre solo en el módulo de pacientes.
+        const existingPatient = await transaction.patient.findUnique({
           where: { nationalId: payload.patient.nationalId },
-          create: {
-            nationalId: payload.patient.nationalId,
-            firstName: payload.patient.firstName,
-            lastName: payload.patient.lastName,
-            email:
-              payload.patient.email ||
-              `${payload.patient.nationalId}@pending.local`,
-            phone: payload.patient.phone,
-            age: payload.patient.age ?? 0,
-            gender: GENDER_MAP[payload.patient.gender],
-            medicalHistoryNotes: payload.patient.medicalHistoryNotes,
-          },
-          update: {
-            firstName: payload.patient.firstName,
-            lastName: payload.patient.lastName,
-            email: payload.patient.email,
-            phone: payload.patient.phone,
-          },
+          select: { id: true },
         });
 
         return transaction.appointment.create({
           data: {
             appointmentCode: code,
             doctorId: doctor.id,
-            patientId: patient.id,
+            patientId: existingPatient?.id ?? null,
+            ...(!existingPatient && {
+              guestNationalId: payload.patient.nationalId,
+              guestFirstName: payload.patient.firstName,
+              guestLastName: payload.patient.lastName,
+              guestEmail:
+                payload.patient.email ||
+                `${payload.patient.nationalId}@pending.local`,
+              guestPhone: payload.patient.phone,
+              guestAge: payload.patient.age ?? 0,
+              guestGender: GENDER_MAP[payload.patient.gender],
+            }),
             appointmentDate,
             startTime,
             endTime,
@@ -312,6 +311,9 @@ export class AppointmentsRepository {
         ? { medicalCenterId: filters.medicalCenterId }
         : {}),
       ...(filters.patientId ? { patientId: filters.patientId } : {}),
+      ...(filters.guestNationalId
+        ? { guestNationalId: filters.guestNationalId }
+        : {}),
       ...(filters.status ? { status: filters.status } : {}),
     };
 
@@ -342,7 +344,6 @@ export class AppointmentsRepository {
   count(filters: AppointmentFilters) {
     return this.prisma.appointment.count({ where: this.buildWhere(filters) });
   }
-
   async findByPatientNationalId(nationalId: string) {
     const patient = await this.prisma.patient.findUnique({
       where: { nationalId },

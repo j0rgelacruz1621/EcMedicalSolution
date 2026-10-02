@@ -28,8 +28,13 @@ async function bootstrap() {
           protocol === 'http:';
         const isProductionOrigin =
           protocol === 'https:' &&
-          (hostname === 'smartmedicalcontrol.us' ||
+          (hostname === 'app.smartmedicalcontrol.us' ||
             hostname.endsWith('.smartmedicalcontrol.us'));
+
+        // Log temporal para diagnosticar CORS en producción
+        if (!isLocalOrigin && !isProductionOrigin) {
+          console.warn(`[CORS] Origen rechazado: ${origin}`);
+        }
 
         return callback(null, isLocalOrigin || isProductionOrigin);
       } catch {
