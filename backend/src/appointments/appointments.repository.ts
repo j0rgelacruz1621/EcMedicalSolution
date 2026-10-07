@@ -92,12 +92,12 @@ export class AppointmentsRepository {
         }
 
         // Un paciente desactivado debe reactivarse antes de poder agendar
-        const existingPatient = await transaction.patient.findUnique({
+        const patientStatus = await transaction.patient.findUnique({
           where: { nationalId: payload.patient.nationalId },
           select: { isActive: true },
         });
 
-        if (existingPatient?.isActive === false) {
+        if (patientStatus?.isActive === false) {
           throw new UnprocessableEntityException(
             'The patient is inactive and must be reactivated before scheduling an appointment.',
           );
