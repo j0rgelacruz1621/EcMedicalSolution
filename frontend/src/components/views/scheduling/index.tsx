@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import LeftSideBar from '../../left-sideBar'
+import DashboardHeader from '../../dashboard-header'
 import './style.scss'
 import { getAppointments, type Appointment } from '../../../services/appointments/appointment-services'
 import { getDoctor, type Doctor } from '../../../services/doctors/doctor-services'
@@ -98,17 +99,14 @@ export default function AgendaView() {
       <LeftSideBar />
 
       <div className="agenda-main">
-        <header className="cp-header">
-          <h1>Agenda</h1>
-          <div className="cp-header-right">
-            <button className="icon" aria-label="Notificaciones"><Bell size={18} /></button>
-            <button className="icon" aria-label="Ayuda"><CircleHelp size={18} /></button>
-            <div className="cp-user">
-              <span>{activeDoctorName}</span>
-              <span className="cp-user-badge">{activeDoctorInitials}</span>
-            </div>
+        <DashboardHeader title="Agenda">
+          <button className="dashboard-header__icon" aria-label="Notificaciones"><Bell size={22} /></button>
+          <button className="dashboard-header__icon" aria-label="Ayuda"><CircleHelp size={22} /></button>
+          <div className="dashboard-header__user">
+            <div className="dashboard-header__user-text"><span>{activeDoctorName}</span></div>
+            <span className="dashboard-header__avatar">{activeDoctorInitials}</span>
           </div>
-        </header>
+        </DashboardHeader>
 
         {/* CONTENIDO PRINCIPAL */}
         <div className="agenda-content">

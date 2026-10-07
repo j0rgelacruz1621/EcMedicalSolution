@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import LeftSideBar from '../../left-sideBar'
+import DashboardHeader from '../../dashboard-header'
 import './style.scss'
 import {
   CircleHelp,
@@ -222,9 +223,9 @@ export default function ControlPanel() {
     <div className="cp-root">
       <LeftSideBar />
       <div className="cp-main">
-        <header className="cp-header">
-          <h1>Panel de Control</h1>
-          {doctor && (
+        <DashboardHeader
+          title="Panel de Control"
+          centerContent={doctor && (
             <button
               type="button"
               className="cp-referral-pill"
@@ -235,17 +236,18 @@ export default function ControlPanel() {
               <span className="cp-referral-pill-url">{copied ? 'Enlace copiado' : bookingLink.replace(/^https?:\/\//, '')}</span>
             </button>
           )}
-            <div className="cp-header-right">
-              <button className="icon" aria-label="Notificaciones"><NotificationsNoneOutlinedIcon style={{ fontSize: 24 }} /></button>
-              <button className="icon" aria-label="Ayuda"><CircleHelp size={24} /></button>
-              <div className="cp-user">
-                <span>{doctor ? `${doctorTitle} ${doctor.firstName} ${doctor.lastName}` : activeDoctorName}</span>
-                {doctor?.photoUrl
-                  ? <img className="cp-user-badge cp-user-photo" src={doctor.photoUrl} alt="Foto de perfil" />
-                  : <span className="cp-user-badge">{doctorInitials}</span>}
-              </div>
+        >
+          <button className="dashboard-header__icon" aria-label="Notificaciones"><NotificationsNoneOutlinedIcon style={{ fontSize: 24 }} /></button>
+          <button className="dashboard-header__icon" aria-label="Ayuda"><CircleHelp size={22} /></button>
+          <div className="dashboard-header__user">
+            <div className="dashboard-header__user-text">
+              <span>{doctor ? `${doctorTitle} ${doctor.firstName} ${doctor.lastName}` : activeDoctorName}</span>
             </div>
-        </header>
+            {doctor?.photoUrl
+              ? <img className="dashboard-header__avatar dashboard-header__avatar--photo" src={doctor.photoUrl} alt="Foto de perfil" />
+              : <span className="dashboard-header__avatar">{doctorInitials}</span>}
+          </div>
+        </DashboardHeader>
 
         <section className="cp-kpis">
           <div className="kpi kpi-total">
