@@ -46,7 +46,7 @@ export class AppointmentsController {
     description:
       'Returns appointments filtered by doctor_id, medical_center_id, patient_id, status and a date range (start_date/end_date) or an exact appointment_date. ' +
       'Results are ordered by appointment_date DESC, start_time DESC by default. ' +
-      'Response follows this API\'s standard paginated shape, PaginatedResponseDto: { data, page, limit, total, totalPages }.',
+      "Response follows this API's standard paginated shape, PaginatedResponseDto: { data, page, limit, total, totalPages }.",
   })
   @ApiOkResponse({ type: PaginatedResponseDto })
   @ApiQuery({ name: 'doctor_id', type: Number, required: false })
@@ -61,10 +61,21 @@ export class AppointmentsController {
     name: 'appointment_date',
     type: String,
     required: false,
-    description: 'Exact date (YYYY-MM-DD). Takes precedence over start_date/end_date.',
+    description:
+      'Exact date (YYYY-MM-DD). Takes precedence over start_date/end_date.',
   })
-  @ApiQuery({ name: 'start_date', type: String, required: false, description: 'YYYY-MM-DD' })
-  @ApiQuery({ name: 'end_date', type: String, required: false, description: 'YYYY-MM-DD' })
+  @ApiQuery({
+    name: 'start_date',
+    type: String,
+    required: false,
+    description: 'YYYY-MM-DD',
+  })
+  @ApiQuery({
+    name: 'end_date',
+    type: String,
+    required: false,
+    description: 'YYYY-MM-DD',
+  })
   @ApiQuery({ name: 'page', type: Number, required: false, example: 1 })
   @ApiQuery({ name: 'limit', type: Number, required: false, example: 10 })
   findAll(@Query() query: QueryAppointmentsDto) {
@@ -75,6 +86,11 @@ export class AppointmentsController {
   @Get('patient/:nationalId')
   @ApiOperation({ summary: 'Get appointments by patient national id' })
   @ApiParam({ name: 'nationalId', type: String, example: '0102030405' })
+  @ApiOkResponse({
+    description:
+      'Appointments of the patient, ordered by appointment_date DESC, start_time DESC.',
+  })
+  @ApiResponse({ status: 404, description: 'Patient not found.' })
   findByPatientNationalId(@Param('nationalId') nationalId: string) {
     return this.appointmentsService.findByPatientNationalId(nationalId);
   }
@@ -82,7 +98,32 @@ export class AppointmentsController {
   @Public()
   @Post()
   @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
-  @ApiOperation({ summary: 'Create a new appointment' })
+  @ApiOperation({
+    summary: 'Create a new appointment',
+    description:
+      'Schedules an appointment and registers the patient if their nationalId is not in the system yet. ' +
+      'An inactive patient (is_active = false) cannot be scheduled until reactivated.',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'The created appointment, including its patient.',
+  })
+  @ApiResponse({
+    status: 400,
+    description:
+      'Missing or invalid fields, or startAt is not earlier than endAt.',
+  })
+  @ApiResponse({ status: 404, description: 'Doctor not found.' })
+  @ApiResponse({
+    status: 409,
+    description:
+      'The doctor or the office already has a SCHEDULED/CONFIRMED appointment overlapping the selected time.',
+  })
+  @ApiResponse({
+    status: 422,
+    description:
+      'The patient is inactive and must be reactivated before scheduling an appointment.',
+  })
   @ApiBody({
     schema: {
       type: 'object',
@@ -141,10 +182,27 @@ export class AppointmentsController {
     description:
       'Updates any combination of status, appointment_date, start_time, end_time and office_id on an existing appointment. ' +
       'Fields left out of the payload keep their current value. Validates end_time > start_time, and rejects the update ' +
-      'with 409 Conflict if the resulting schedule overlaps another SCHEDULED/CONFIRMED appointment for the same doctor or office.',
+      'with 409 Conflict if the resulting schedule overlaps another SCHEDULED/CONFIRMED appointment for the same doctor or office. ' +
+      'Setting status to CANCELLED is rejected with 422 if the appointment is already COMPLETED or NO_SHOW.',
   })
   @ApiParam({ name: 'id', type: Number, example: 1 })
   @ApiOkResponse({ description: 'The updated appointment.' })
+  @ApiResponse({
+    status: 400,
+    description:
+      'Invalid field format, a non-numeric id, or end_time is not greater than start_time.',
+  })
+  @ApiResponse({ status: 404, description: 'Appointment not found.' })
+  @ApiResponse({
+    status: 409,
+    description:
+      'The resulting schedule overlaps another SCHEDULED/CONFIRMED appointment for the same doctor or office.',
+  })
+  @ApiResponse({
+    status: 422,
+    description:
+      'The appointment is already COMPLETED or NO_SHOW and cannot be changed to CANCELLED.',
+  })
   @ApiBody({
     schema: {
       type: 'object',
@@ -192,7 +250,8 @@ export class AppointmentsController {
     name: 'id',
     type: String,
     example: '1',
-    description: 'Numeric appointment id or appointment_code (e.g. APT-20260810-A1B2).',
+    description:
+      'Numeric appointment id or appointment_code (e.g. APT-20260810-A1B2).',
   })
   @ApiOkResponse({ description: 'The cancelled appointment.' })
   @ApiResponse({

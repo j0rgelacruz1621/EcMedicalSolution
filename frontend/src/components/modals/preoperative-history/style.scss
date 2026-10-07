@@ -1,0 +1,332 @@
+// Todo va anidado bajo el overlay: otros modales declaran clases globales
+// (.close-button, .detail-button...) que de otro modo se pisarían entre sí.
+$wine: #85040f;
+$wine-dark: #6b030c;
+$wine-icon: #5c0006;
+$border-soft: #e1bfbb;
+$divider: #e1bfbb;
+$text-main: #1a1c1c;
+$text-muted: #8d706d;
+$text-secondary: #59413e;
+
+.preoperative-history-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(3px);
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+
+  .preoperative-history-modal {
+    display: flex;
+    flex-direction: column;
+    width: min(100%, 768px);
+    max-height: 90vh;
+    overflow: hidden;
+    background: #fff;
+    border-radius: 0.75rem;
+    box-shadow: 0 24px 60px rgba(17, 24, 39, 0.22);
+  }
+
+  .preoperative-history-header {
+    flex-shrink: 0;
+    padding: 2rem 2rem 1.5rem;
+    border-bottom: 1px solid $border-soft;
+    background: #fff;
+  }
+
+  .title-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+
+    h2 {
+      margin: 0;
+      color: $wine;
+      font-family: 'Arimo', Arial, Helvetica, sans-serif;
+      font-size: 1.5rem;
+      font-weight: 600;
+      line-height: 1.25;
+    }
+  }
+
+  .close-button {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 2.25rem;
+    height: 2.25rem;
+    position: relative;
+    top: 2px;
+    margin: -0.25rem -0.125rem 0 0;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: $text-secondary;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+
+    &:hover {
+      background: #f4e9eb;
+    }
+  }
+
+  .patient-context {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem 0.8rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid $border-soft;
+    border-radius: 0.5rem;
+    background: #f4f3f3;
+    color: $text-main;
+    font-size: 1rem;
+    line-height: 1.4;
+
+    strong {
+      font-weight: 600;
+    }
+  }
+
+  .context-icon {
+    flex-shrink: 0;
+    color: $wine-icon;
+  }
+
+  .context-divider {
+    width: 1px;
+    height: 1.25rem;
+    margin: 0 0.4rem;
+    background: $divider;
+  }
+
+  .preoperative-history-body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 1rem 2rem;
+  }
+
+  .records-count {
+    margin: 0 0 1.5rem;
+    color: $text-secondary;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .empty-state {
+    margin: 0;
+    padding: 2rem 1rem;
+    border: 1px dashed $border-soft;
+    border-radius: 0.6rem;
+    color: $text-muted;
+    text-align: center;
+  }
+
+  .evaluation-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .evaluation-card {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1.125rem 0.775rem 1.075rem 1rem;
+    border: 1px solid $border-soft;
+    border-radius: 0.5rem;
+    background: #fff;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+    &:hover {
+      border-color: $wine;
+      box-shadow: 0 2px 6px rgba(133, 4, 15, 0.12);
+    }
+  }
+
+  .evaluation-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    font-size: 1rem;
+    line-height: 1.35;
+    color: $text-main;
+
+    strong {
+      font-weight: 600;
+    }
+  }
+
+  .evaluation-date {
+    flex-shrink: 0;
+  }
+
+  .evaluation-intervention {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .field-label {
+    color: $text-muted;
+  }
+
+  .field-divider {
+    flex-shrink: 0;
+    width: 1px;
+    height: 2rem;
+    background: $divider;
+  }
+
+  .detail-link {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    gap: 0.3rem;
+    margin-top: -0.05rem;
+    padding: 0.4rem 0.25rem;
+    border: 0;
+    background: transparent;
+    color: $wine;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+
+    &:hover {
+      color: $wine-dark;
+      text-decoration: underline;
+    }
+  }
+
+  .preoperative-history-footer {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 1rem;
+    padding: 1.5rem 2rem;
+    border-top: 1px solid $border-soft;
+    background: #f4f3f3;
+  }
+
+  .secondary-button,
+  .primary-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    // App.css y otros modales declaran estas clases de forma global.
+    flex: 0 0 auto;
+    width: auto;
+    min-width: 0;
+    min-height: 0;
+    margin: 0;
+    gap: 0.5rem;
+    padding: 0.61rem 1.53rem;
+    border-radius: 0.5rem;
+    font: inherit;
+    font-weight: 600;
+    line-height: 1.5;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+  }
+
+  .secondary-button {
+    border: 1px solid $text-muted;
+    background: transparent;
+    color: $text-secondary;
+
+    &:hover {
+      background: #ebe6e5;
+    }
+  }
+
+  .primary-button {
+    border: 0;
+    background: $wine;
+    color: #fff;
+
+    &:hover {
+      background: $wine-dark;
+    }
+  }
+
+  .close-button,
+  .detail-link,
+  .secondary-button,
+  .primary-button {
+    &:focus-visible {
+      outline: 2px solid $wine;
+      outline-offset: 2px;
+    }
+  }
+}
+
+@media (max-width: 640px) {
+  .preoperative-history-overlay {
+    padding: 0.75rem;
+
+    .preoperative-history-header,
+    .preoperative-history-body {
+      padding: 1rem;
+    }
+
+    .title-row h2 {
+      font-size: 1.25rem;
+    }
+
+    .context-divider {
+      display: none;
+    }
+
+    .patient-context {
+      flex-direction: column;
+      align-items: flex-start;
+      position: relative;
+      padding-left: 2.6rem;
+    }
+
+    .context-icon {
+      position: absolute;
+      top: 0.75rem;
+      left: 0.9rem;
+    }
+
+    .evaluation-card {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.75rem;
+    }
+
+    .field-divider {
+      display: none;
+    }
+
+    .detail-link {
+      padding-left: 0;
+    }
+
+    .preoperative-history-footer {
+      flex-direction: column-reverse;
+      padding: 1rem;
+    }
+
+    .secondary-button,
+    .primary-button {
+      width: 100%;
+    }
+  }
+}

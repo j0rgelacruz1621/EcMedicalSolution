@@ -10,6 +10,7 @@ import PrescriptionPreviewModal from '../../modals/prescription-preview';
 import ClinicalTimelineModal from '../../modals/clinical-timeline';
 import ClinicalStudiesModal from '../../modals/Clinica-trials';
 import SupplementaryTestsModal from '../../modals/Supplementary-tests';
+import PreoperativeHistoryModal from '../../modals/preoperative-history';
 import NewSupplementaryTests from '../new-Supplementary-tests';
 import {
   CalendarDays,
@@ -75,6 +76,7 @@ export default function PatientFileView() {
   const [appointments, setAppointments] = useState<{ date?: string; time?: string; reason?: string }[]>([]);
   const [calendarMonth, setCalendarMonth] = useState(() => new Date());
   const activeDoctorName = sessionStorage.getItem('active_doctor_name') || 'Administración';
+  const [isPreoperativeHistoryOpen, setIsPreoperativeHistoryOpen] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -387,6 +389,10 @@ export default function PatientFileView() {
                   if (tab === 'Paraclínicos') {
                     setIsSupplementaryTestsOpen(true);
                   }
+
+                  if (tab === 'Preoperatoria') {
+                    setIsPreoperativeHistoryOpen(true);
+                  }
                 }}
               >
                 {tab}
@@ -534,6 +540,14 @@ export default function PatientFileView() {
           setIsSupplementaryTestsOpen(false);
           setIsNewSupplementaryTestsOpen(true);
         }}
+      />
+
+      <PreoperativeHistoryModal
+        isOpen={isPreoperativeHistoryOpen}
+        patientName={patientName}
+        patientDoc={String(patient?.id ?? '')}
+        onClose={() => setIsPreoperativeHistoryOpen(false)}
+        onAddEvaluation={() => setIsPreoperativeHistoryOpen(false)}
       />
 
       {isNewSupplementaryTestsOpen && <NewSupplementaryTests patientName={patientName} onClose={() => setIsNewSupplementaryTestsOpen(false)} />}
