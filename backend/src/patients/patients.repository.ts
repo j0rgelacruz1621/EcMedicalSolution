@@ -11,9 +11,11 @@ export const GENDER_MAP: Record<PatientGender, gender_enum> = {
 
 export interface PatientFilters {
   nationalId?: string;
+  search?: string;
   firstName?: string;
   lastName?: string;
   doctorId?: bigint;
+  isActive?: boolean;
 }
 
 export interface VitalsInput {
@@ -30,13 +32,28 @@ export interface PatientData {
   lastName: string;
   email: string;
   phone: string;
-  age: number;
+  age?: number;
   origin?: string;
   address?: string;
   assignedDoctorId?: bigint;
   gender: gender_enum;
   medicalHistoryNotes?: string;
+  isActive?: boolean;
 }
+
+/** Igual que PatientData, pero las columnas NULLABLE admiten null para borrar el valor. */
+export type PatientUpdateData = Partial<
+  Omit<
+    PatientData,
+    'age' | 'origin' | 'address' | 'assignedDoctorId' | 'medicalHistoryNotes'
+  >
+> & {
+  age?: number | null;
+  origin?: string | null;
+  address?: string | null;
+  assignedDoctorId?: bigint | null;
+  medicalHistoryNotes?: string | null;
+};
 
 function vitalsCreateData(patientId: bigint, vitals: VitalsInput) {
   return {
@@ -57,8 +74,13 @@ export class PatientsRepository {
     return this.prisma.patient.findUnique({ where: { nationalId } });
   }
 
-  findByEmail(email: string) {
-    return this.prisma.patient.findFirst({ where: { email } });
+  findByEmail(email: string, excludeId?: bigint) {
+    return this.prisma.patient.findFirst({
+      where: {
+        email: { equals: email, mode: 'insensitive' },
+        ...(excludeId !== undefined ? { id: { not: excludeId } } : {}),
+      },
+    });
   }
 
   findById(id: bigint) {
@@ -66,7 +88,10 @@ export class PatientsRepository {
   }
 
   findDoctorById(id: bigint) {
-    return this.prisma.doctor.findUnique({ where: { id } });
+    return this.prisma.doctor.findUnique({
+      where: { id },
+      select: { id: true },
+    });
   }
 
   /**
@@ -88,13 +113,13 @@ export class PatientsRepository {
     return this.prisma.patient.create({ data: patientData });
   }
 
-  updatePatientOnly(id: bigint, patientData: Partial<PatientData>) {
+  updatePatientOnly(id: bigint, patientData: PatientUpdateData) {
     return this.prisma.patient.update({ where: { id }, data: patientData });
   }
 
   updatePatientWithVitals(
     id: bigint,
-    patientData: Partial<PatientData>,
+    patientData: PatientUpdateData,
     vitals: VitalsInput,
   ) {
     return this.prisma.$transaction(async (transaction) => {
@@ -145,6 +170,30 @@ export class PatientsRepository {
   }
 
   private buildWhere(filters: PatientFilters): Prisma.PatientWhereInput {
+    // Cada palabra de "search" debe aparecer en el nombre o en el apellido,
+    // de modo que "juan perez" encuentre a Juan Pérez sin importar el orden.
+    const searchTerms = filters.search?.trim().split(/\s+/).filter(Boolean);
+    const and: Prisma.PatientWhereInput[] = [
+      ...(searchTerms ?? []).map(
+        (term): Prisma.PatientWhereInput => ({
+          OR: [
+            { firstName: { contains: term, mode: 'insensitive' } },
+            { lastName: { contains: term, mode: 'insensitive' } },
+          ],
+        }),
+      ),
+      ...(filters.doctorId
+        ? [
+            {
+              OR: [
+                { assignedDoctorId: filters.doctorId },
+                { appointments: { some: { doctorId: filters.doctorId } } },
+              ],
+            },
+          ]
+        : []),
+    ];
+
     return {
       ...(filters.nationalId
         ? { nationalId: { contains: filters.nationalId, mode: 'insensitive' } }
@@ -155,21 +204,16 @@ export class PatientsRepository {
       ...(filters.lastName
         ? { lastName: { contains: filters.lastName, mode: 'insensitive' } }
         : {}),
-      ...(filters.doctorId
-        ? {
-            OR: [
-              { assignedDoctorId: filters.doctorId },
-              { appointments: { some: { doctorId: filters.doctorId } } },
-            ],
-          }
-        : {}),
+      ...(filters.isActive !== undefined ? { isActive: filters.isActive } : {}),
+      ...(and.length > 0 ? { AND: and } : {}),
     };
   }
 
   findMany(filters: PatientFilters, skip: number, take: number) {
     return this.prisma.patient.findMany({
       where: this.buildWhere(filters),
-      orderBy: { id: 'desc' },
+      // id desempata registros con el mismo created_at para que la paginación sea estable
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
       skip,
       take,
     });

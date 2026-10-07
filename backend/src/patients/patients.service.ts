@@ -15,6 +15,7 @@ import {
   GENDER_MAP,
   PatientData,
   PatientsRepository,
+  PatientUpdateData,
   VitalsInput,
 } from './patients.repository';
 
@@ -84,38 +85,88 @@ export class PatientsService {
     };
   }
 
-  async create(payload: CreatePatientDto) {
-    const existingPatient = await this.patientsRepository.findByNationalId(
-      payload.nationalId,
-    );
-
-    if (existingPatient) {
-      throw new ConflictException(
-        `A patient with national ID "${payload.nationalId}" already exists.`,
-      );
-    }
-
-    const existingPatientByEmail = await this.patientsRepository.findByEmail(
-      payload.email,
-    );
-
-    if (existingPatientByEmail) {
-      throw new ConflictException(
-        `A patient with email "${payload.email}" already exists.`,
-      );
-    }
-
-    if (payload.assignedDoctorId) {
-      const doctor = await this.patientsRepository.findDoctorById(
-        BigInt(payload.assignedDoctorId),
+  private async assertUniqueIdentity(
+    identity: { nationalId?: string; email?: string },
+    currentId?: bigint,
+  ) {
+    if (identity.nationalId !== undefined) {
+      const existing = await this.patientsRepository.findByNationalId(
+        identity.nationalId,
       );
 
-      if (!doctor) {
-        throw new NotFoundException(
-          `Doctor with id "${payload.assignedDoctorId}" not found.`,
+      if (existing && existing.id !== currentId) {
+        throw new ConflictException(
+          `A patient with national ID "${identity.nationalId}" already exists.`,
         );
       }
     }
+
+    if (identity.email !== undefined) {
+      const existing = await this.patientsRepository.findByEmail(
+        identity.email,
+        currentId,
+      );
+
+      if (existing) {
+        throw new ConflictException(
+          `A patient with email "${identity.email}" already exists.`,
+        );
+      }
+    }
+  }
+
+  private async assertDoctorExists(assignedDoctorId?: number | null) {
+    if (!assignedDoctorId) {
+      return;
+    }
+
+    const doctor = await this.patientsRepository.findDoctorById(
+      BigInt(assignedDoctorId),
+    );
+
+    if (!doctor) {
+      throw new BadRequestException(
+        `assignedDoctorId "${assignedDoctorId}" does not match an existing doctor.`,
+      );
+    }
+  }
+
+  // Las validaciones previas no cubren dos peticiones simultáneas ni un
+  // registro eliminado entre la verificación y la escritura: la BD decide.
+  private translateDatabaseError(
+    error: unknown,
+    payload: {
+      nationalId?: string;
+      email?: string;
+      assignedDoctorId?: number | null;
+    },
+  ): never {
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error.code === 'P2002') {
+        throw new ConflictException(
+          JSON.stringify(error.meta?.target ?? '').includes('email')
+            ? `A patient with email "${payload.email}" already exists.`
+            : `A patient with national ID "${payload.nationalId}" already exists.`,
+        );
+      }
+
+      if (error.code === 'P2003') {
+        throw new BadRequestException(
+          `assignedDoctorId "${payload.assignedDoctorId}" does not match an existing doctor.`,
+        );
+      }
+
+      if (error.code === 'P2025') {
+        throw new NotFoundException('Patient not found.');
+      }
+    }
+
+    throw error;
+  }
+
+  async create(payload: CreatePatientDto) {
+    await this.assertUniqueIdentity(payload);
+    await this.assertDoctorExists(payload.assignedDoctorId);
 
     const patientData: PatientData = {
       nationalId: payload.nationalId,
@@ -131,6 +182,8 @@ export class PatientsService {
         : undefined,
       gender: GENDER_MAP[payload.gender],
       medicalHistoryNotes: payload.medicalHistoryNotes,
+      // undefined deja que la BD aplique su DEFAULT true
+      isActive: payload.isActive,
     };
 
     try {
@@ -149,16 +202,7 @@ export class PatientsService {
 
       return toJsonSafe(result);
     } catch (error: unknown) {
-      if (
-        error instanceof Prisma.PrismaClientKnownRequestError &&
-        error.code === 'P2002'
-      ) {
-        throw new ConflictException(
-          `A patient with national ID "${payload.nationalId}" already exists.`,
-        );
-      }
-
-      throw error;
+      this.translateDatabaseError(error, payload);
     }
   }
 
@@ -167,9 +211,11 @@ export class PatientsService {
     const limit = query.limit ?? 10;
     const filters = {
       nationalId: query.nationalId,
+      search: query.search,
       firstName: query.firstName,
       lastName: query.lastName,
       doctorId: query.doctorId ? BigInt(query.doctorId) : undefined,
+      isActive: query.isActive,
     };
 
     const [patients, total] = await Promise.all([
@@ -206,7 +252,7 @@ export class PatientsService {
     }
 
     const latestVitals = await this.patientsRepository.findLatestVitals(
-      BigInt(id),
+      patient.id,
     );
 
     return toJsonSafe({ ...patient, latestVitals });
@@ -239,42 +285,116 @@ export class PatientsService {
     );
   }
 
-  async update(id: number, payload: UpdatePatientDto) {
-    const patient = await this.patientsRepository.findById(BigInt(id));
-
-    if (!patient) {
-      throw new NotFoundException('Patient not found.');
-    }
-
-    const patientData: Partial<PatientData> = {
+  /** PATCH: solo se modifican los campos presentes en el payload. */
+  update(id: number, payload: UpdatePatientDto) {
+    return this.save(id, payload, {
+      nationalId: payload.nationalId,
       firstName: payload.firstName,
       lastName: payload.lastName,
       email: payload.email,
       phone: payload.phone,
       age: payload.age,
+      origin: payload.origin,
+      address: payload.address,
+      assignedDoctorId:
+        payload.assignedDoctorId === undefined ||
+        payload.assignedDoctorId === null
+          ? payload.assignedDoctorId
+          : BigInt(payload.assignedDoctorId),
       gender: payload.gender ? GENDER_MAP[payload.gender] : undefined,
       medicalHistoryNotes: payload.medicalHistoryNotes,
-    };
+      isActive: payload.isActive,
+    });
+  }
 
-    if (payload.vitals) {
-      const vitals = this.parseVitals(payload.vitals);
-      const result = await this.patientsRepository.updatePatientWithVitals(
-        BigInt(id),
-        patientData,
-        vitals,
-      );
+  /**
+   * PUT: reemplaza el recurso completo. Los campos opcionales que no se envían
+   * vuelven a su valor inicial (NULL, o true en el caso de isActive).
+   */
+  replace(id: number, payload: CreatePatientDto) {
+    return this.save(id, payload, {
+      nationalId: payload.nationalId,
+      firstName: payload.firstName,
+      lastName: payload.lastName,
+      email: payload.email,
+      phone: payload.phone,
+      age: payload.age ?? null,
+      origin: payload.origin ?? null,
+      address: payload.address ?? null,
+      assignedDoctorId: payload.assignedDoctorId
+        ? BigInt(payload.assignedDoctorId)
+        : null,
+      gender: GENDER_MAP[payload.gender],
+      medicalHistoryNotes: payload.medicalHistoryNotes ?? null,
+      isActive: payload.isActive ?? true,
+    });
+  }
 
-      return toJsonSafe(result);
+  /**
+   * Borrado lógico: el paciente queda inactivo y conserva sus citas, signos
+   * vitales y reportes. Repetir la operación no vuelve a escribir en la BD.
+   */
+  async remove(id: number) {
+    const patientId = BigInt(id);
+    const patient = await this.patientsRepository.findById(patientId);
+
+    if (!patient) {
+      throw new NotFoundException('Patient not found.');
     }
 
-    const updatedPatient = await this.patientsRepository.updatePatientOnly(
-      BigInt(id),
-      patientData,
-    );
-    const latestVitals = await this.patientsRepository.findLatestVitals(
-      BigInt(id),
-    );
+    if (patient.isActive === false) {
+      return toJsonSafe(patient);
+    }
 
-    return toJsonSafe({ patient: updatedPatient, vitals: latestVitals });
+    try {
+      const deactivatedPatient =
+        await this.patientsRepository.updatePatientOnly(patientId, {
+          isActive: false,
+        });
+
+      return toJsonSafe(deactivatedPatient);
+    } catch (error: unknown) {
+      this.translateDatabaseError(error, {});
+    }
+  }
+
+  private async save(
+    id: number,
+    payload: UpdatePatientDto,
+    patientData: PatientUpdateData,
+  ) {
+    const patientId = BigInt(id);
+    const patient = await this.patientsRepository.findById(patientId);
+
+    if (!patient) {
+      throw new NotFoundException('Patient not found.');
+    }
+
+    await this.assertUniqueIdentity(payload, patientId);
+    await this.assertDoctorExists(payload.assignedDoctorId);
+
+    try {
+      if (payload.vitals) {
+        const vitals = this.parseVitals(payload.vitals);
+        const result = await this.patientsRepository.updatePatientWithVitals(
+          patientId,
+          patientData,
+          vitals,
+        );
+
+        return toJsonSafe(result);
+      }
+
+      const updatedPatient = await this.patientsRepository.updatePatientOnly(
+        patientId,
+        patientData,
+      );
+      const latestVitals =
+        await this.patientsRepository.findLatestVitals(patientId);
+
+      return toJsonSafe({ patient: updatedPatient, vitals: latestVitals });
+    } catch (error: unknown) {
+      this.translateDatabaseError(error, payload);
+    }
   }
 }
