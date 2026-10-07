@@ -1,0 +1,122 @@
+.dashboard-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 16px;
+  padding: 10px 32px 12px;
+  border-bottom: 1px solid #c3c6d5;
+
+  h1 {
+    margin: 0;
+    color: var(--primary-color);
+    font-size: 28px;
+    line-height: 36px;
+    letter-spacing: -0.01em;
+    font-weight: 700;
+  }
+}
+
+.dashboard-header__center {
+  justify-self: center;
+  min-width: 0;
+}
+
+.dashboard-header__actions {
+  display: flex;
+  align-items: center;
+  justify-self: end;
+  gap: 18px;
+  min-width: 0;
+}
+
+.dashboard-header__icon {
+  width: 38px;
+  height: 38px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: #191c1e;
+  cursor: pointer;
+
+  &:hover {
+    background: rgba(128, 0, 32, 0.06);
+  }
+}
+
+.dashboard-header__user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-left: 24px;
+  border-left: 1px solid #c3c6d5;
+}
+
+.dashboard-header__user-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  min-height: 34px;
+  line-height: 1.2;
+  white-space: nowrap;
+
+  span {
+    color: #2a2d34;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  small {
+    color: #5c5f66;
+    font-size: 11px;
+  }
+}
+
+.dashboard-header__avatar {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(146, 157, 168, 0.3);
+  border-radius: 50%;
+  background: #f4f5f7;
+  color: var(--primary-color);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.dashboard-header__avatar--photo {
+  object-fit: cover;
+  border-color: var(--primary-color);
+}
+
+@media (max-width: 760px) {
+  .dashboard-header {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 10px 8px 14px;
+
+    h1 {
+      font-size: 22px;
+    }
+  }
+
+  .dashboard-header__center {
+    display: none;
+  }
+
+  .dashboard-header__actions {
+    width: 100%;
+    justify-self: stretch;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .dashboard-header__user {
+    padding-left: 12px;
+  }
+}

@@ -2,19 +2,17 @@ import './style.scss'
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import LeftSideBar from '../../left-sideBar'
+import DashboardHeader from '../../dashboard-header'
 import NewPatientModal from '../../modals/new-patient';
 import ConfirmNewPatientModal from '../../modals/confirm-new-patient';
-import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
-import PersonAddAlt1OutlinedIcon from '@mui/icons-material/PersonAddAlt1Outlined';
-import EventOutlinedIcon from '@mui/icons-material/EventOutlined';
-
 
 import {
   Plus, Bell, CircleHelp,
   ChevronLeft,
   ChevronRight, Eye, PencilLine,
-  MapPin,
-  UsersRound, UserRoundPlus, AlertCircle
+  UserRoundPlus,
+  CheckCircle,
+  CalendarDays,
 } from 'lucide-react'
 import { getPatients, type Patient } from '../../../services/patients/patient-services';
 import { getAppointments, type Appointment } from '../../../services/appointments/appointment-services';
@@ -99,7 +97,7 @@ export default function PatientsView() {
         }).length;
 
         const appointmentsThisWeek = appointmentsResult.data.filter(appointment => {
-          if (!appointment.appointmentDate) return new Date(appointment.appointmentDate) >= currentWeekStart;
+          if (!appointment.appointmentDate) return false;
           return new Date(appointment.appointmentDate) >= currentWeekStart;
         }).length;
 
@@ -191,7 +189,8 @@ export default function PatientsView() {
       label: 'Nuevos este mes',
       value: stats.newThisMonth,
       dark: true,
-      icon: PersonAddAlt1OutlinedIcon,
+      icon: UserRoundPlus,
+      color: undefined as string | undefined,
     },
     // Una tarjeta por cada consultorio del centro médico del doctor
     ...doctorOffices.map((office, index) => ({
@@ -199,15 +198,16 @@ export default function PatientsView() {
       label: `Pacientes ${office.officeNumber}`,
       value: officePatientCounts[office.id] ?? 0,
       dark: false,
-      icon: CheckCircleOutlineOutlinedIcon,
-      color: index === 0 ? 'success !important' : undefined,
+      icon: CheckCircle,
+      color: index === 0 ? 'success !important' : undefined as string | undefined,
     })),
     {
       key: 'appointmentsThisWeek',
       label: 'Citas esta semana',
       value: stats.appointmentsThisWeek,
       dark: false,
-      icon: EventOutlinedIcon,
+      icon: CalendarDays,
+      color: undefined as string | undefined,
     },
   ], [stats, doctorOffices, officePatientCounts]);
 
@@ -216,17 +216,14 @@ export default function PatientsView() {
       <LeftSideBar />
 
       <main className="patients-main">
-        <header className="cp-header">
-          <h1>Pacientes</h1>
-          <div className="cp-header-right">
-            <button className="icon" aria-label="Notificaciones"><Bell size={18} /></button>
-            <button className="icon" aria-label="Ayuda"><CircleHelp size={18} /></button>
-            <div className="cp-user">
-              <span>{activeDoctorName}</span>
-              <span className="cp-user-badge">{activeDoctorInitials}</span>
-            </div>
+        <DashboardHeader title="Pacientes">
+          <button className="dashboard-header__icon" aria-label="Notificaciones"><Bell size={22} /></button>
+          <button className="dashboard-header__icon" aria-label="Ayuda"><CircleHelp size={22} /></button>
+          <div className="dashboard-header__user">
+            <div className="dashboard-header__user-text"><span>{activeDoctorName}</span></div>
+            <span className="dashboard-header__avatar">{activeDoctorInitials}</span>
           </div>
-        </header>
+        </DashboardHeader>
 
         <section className="patients-content">
           <div className="content-header">
