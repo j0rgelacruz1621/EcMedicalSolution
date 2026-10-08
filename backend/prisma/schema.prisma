@@ -28,6 +28,9 @@ model Doctor {
   photoUrl      String?          @map("photo_url") @db.Text
   schedules     DoctorSchedule[]
   appointments  Appointment[]
+  recipes       Recipe[]
+  medicalReports MedicalReport[]
+  laboratoryOrders LaboratoryOrder[]
   assignedPatients Patient[]
   office        Office?          @relation(fields: [officeId], references: [id], onUpdate: NoAction, map: "fk_doctors_office")
   reports       reports[]
@@ -46,6 +49,9 @@ model MedicalCenter {
   updatedAt DateTime? @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
   offices      Office[]
   appointments Appointment[]
+  recipes      Recipe[]
+  medicalReports MedicalReport[]
+  laboratoryOrders LaboratoryOrder[]
 
   @@map("medical_centers")
 }
@@ -84,6 +90,9 @@ model Patient {
   appointments        Appointment[]
   patient_vitals      patient_vitals[]
   reports             reports[]
+  recipes             Recipe[]
+  medicalReports      MedicalReport[]
+  laboratoryOrders    LaboratoryOrder[]
 
   @@index([nationalId], map: "idx_patients_national_id")
   @@map("patients")
@@ -117,6 +126,9 @@ model Appointment {
   guestGender     gender_enum?             @map("guest_gender")
   patient_vitals  patient_vitals[]
   reports         reports[]
+  recipes         Recipe[]
+  medicalReports  MedicalReport[]
+  laboratoryOrders LaboratoryOrder[]
 
   @@index([appointmentDate, doctorId], map: "idx_appointments_date_doctor")
   @@map("appointments")
@@ -249,4 +261,185 @@ enum task_status_enum {
   IN_PROGRESS
   COMPLETED
   CANCELLED
+}
+
+enum recipe_status_enum {
+  ACTIVE
+  EDITED
+  CANCELLED
+}
+
+enum recipe_version_type_enum {
+  ORIGINAL
+  SUPERSEDED
+}
+
+model Recipe {
+  id                     BigInt                     @id @default(autoincrement())
+  patientId              BigInt                     @map("patient_id")
+  doctorId               BigInt                     @map("doctor_id")
+  medicalCenterId        BigInt?                    @map("medical_center_id")
+  appointmentId          BigInt?                    @map("appointment_id")
+  issueDate              DateTime                   @default(now()) @map("issue_date") @db.Date
+  headerImageUrl         String?                    @map("header_image_url") @db.Text
+  additionalInstructions String?                    @map("additional_instructions") @db.VarChar(500)
+  status                 recipe_status_enum         @default(ACTIVE)
+  versionType            recipe_version_type_enum   @default(ORIGINAL) @map("version_type")
+  supersedesRecipeId     BigInt?                    @map("supersedes_recipe_id")
+  createdAt              DateTime                   @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt              DateTime                   @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  patient                Patient                    @relation(fields: [patientId], references: [id], onDelete: Restrict, onUpdate: Cascade, map: "fk_recipes_patient")
+  doctor                 Doctor                     @relation(fields: [doctorId], references: [id], onDelete: Restrict, onUpdate: Cascade, map: "fk_recipes_doctor")
+  medicalCenter          MedicalCenter?             @relation(fields: [medicalCenterId], references: [id], onDelete: SetNull, onUpdate: Cascade, map: "fk_recipes_medical_center")
+  appointment            Appointment?               @relation(fields: [appointmentId], references: [id], onDelete: SetNull, onUpdate: Cascade, map: "fk_recipes_appointment")
+  supersedes             Recipe?                    @relation("RecipeVersions", fields: [supersedesRecipeId], references: [id], onDelete: SetNull, onUpdate: Cascade, map: "fk_recipes_supersedes")
+  supersededBy           Recipe[]                   @relation("RecipeVersions")
+  medications            RecipeMedication[]
+
+  @@index([patientId, issueDate], map: "recipes_patient_id_issue_date_idx")
+  @@index([doctorId, issueDate], map: "recipes_doctor_id_issue_date_idx")
+  @@index([status], map: "recipes_status_idx")
+  @@map("recipes")
+}
+
+model RecipeMedication {
+  id           BigInt   @id @default(autoincrement())
+  recipeId     BigInt   @map("recipe_id")
+  drugName     String   @map("drug_name") @db.VarChar(150)
+  presentation String?  @db.VarChar(100)
+  dose         String?  @db.VarChar(100)
+  frequency    String?  @db.VarChar(100)
+  duration     String?  @db.VarChar(100)
+  sortOrder    Int      @default(0) @map("sort_order")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  recipe       Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "fk_recipe_medications_recipe")
+
+  @@index([recipeId, sortOrder], map: "recipe_medications_recipe_id_sort_order_idx")
+  @@map("recipe_medications")
+}
+
+enum medical_report_type_enum {
+  REPOSO_MEDICO
+  CONSTANCIA_ASISTENCIA
+  INFORME_MEDICO
+}
+
+enum medical_report_status_enum {
+  ACTIVE
+  EDITED
+  SIGNED
+  CANCELLED
+}
+
+model MedicalReport {
+  id              BigInt                       @id @default(autoincrement())
+  patientId       BigInt                       @map("patient_id")
+  doctorId        BigInt                       @map("doctor_id")
+  medicalCenterId BigInt?                      @map("medical_center_id")
+  appointmentId   BigInt?                      @map("appointment_id")
+  title           String                       @db.VarChar(200)
+  type            medical_report_type_enum     @default(INFORME_MEDICO)
+  description     String?                      @db.VarChar(500)
+  content         String
+  issueDate       DateTime                     @default(now()) @map("issue_date") @db.Date
+  restStartDate   DateTime?                    @map("rest_start_date") @db.Date
+  restEndDate     DateTime?                    @map("rest_end_date") @db.Date
+  restDays        Int?                         @map("rest_days")
+  diagnosisCode   String?                      @map("diagnosis_code") @db.VarChar(20)
+  diagnosis       String?                      @db.VarChar(500)
+  headerImageUrl  String?                      @map("header_image_url") @db.Text
+  status          medical_report_status_enum   @default(ACTIVE)
+  createdAt       DateTime                     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime                     @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  patient         Patient                      @relation(fields: [patientId], references: [id], onDelete: Restrict, onUpdate: Cascade, map: "fk_medical_reports_patient")
+  doctor          Doctor                       @relation(fields: [doctorId], references: [id], onDelete: Restrict, onUpdate: Cascade, map: "fk_medical_reports_doctor")
+  medicalCenter   MedicalCenter?               @relation(fields: [medicalCenterId], references: [id], onDelete: SetNull, onUpdate: Cascade, map: "fk_medical_reports_medical_center")
+  appointment     Appointment?                 @relation(fields: [appointmentId], references: [id], onDelete: SetNull, onUpdate: Cascade, map: "fk_medical_reports_appointment")
+
+  @@index([patientId, issueDate], map: "medical_reports_patient_id_issue_date_idx")
+  @@index([doctorId, issueDate], map: "medical_reports_doctor_id_issue_date_idx")
+  @@index([type], map: "medical_reports_type_idx")
+  @@index([status], map: "medical_reports_status_idx")
+  @@map("medical_reports")
+}
+
+model LaboratoryCategory {
+  id          BigInt              @id @default(autoincrement())
+  name        String              @unique @db.VarChar(100)
+  description String?             @db.VarChar(500)
+  isActive    Boolean             @default(true) @map("is_active")
+  createdAt   DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime            @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  tests       LaboratoryTest[]
+
+  @@map("laboratory_categories")
+}
+
+model LaboratoryTest {
+  id          BigInt             @id @default(autoincrement())
+  categoryId  BigInt             @map("category_id")
+  internalCode String?           @map("internal_code") @db.VarChar(50)
+  name        String             @db.VarChar(150)
+  loincCode   String?            @map("loinc_code") @db.VarChar(20)
+  isActive    Boolean            @default(true) @map("is_active")
+  createdAt   DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime           @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  category    LaboratoryCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict, onUpdate: Cascade, map: "fk_laboratory_tests_category")
+  orderItems  LaboratoryOrderTest[]
+
+  @@index([categoryId], map: "laboratory_tests_category_id_idx")
+  @@map("laboratory_tests")
+}
+
+model LaboratoryOrder {
+  id              BigInt   @id @default(autoincrement())
+  patientId       BigInt   @map("patient_id")
+  doctorId        BigInt   @map("doctor_id")
+  medicalCenterId BigInt?  @map("medical_center_id")
+  appointmentId   BigInt?  @map("appointment_id")
+  issueDate       DateTime @default(now()) @map("issue_date") @db.Date
+  diagnosis       String?  @db.VarChar(500)
+  additionalNotes String?  @map("additional_notes")
+  headerImageUrl  String?  @map("header_image_url") @db.Text
+  status          String   @default("ACTIVE") @db.VarChar(20)
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  patient         Patient            @relation(fields: [patientId], references: [id], onDelete: Restrict, onUpdate: Cascade, map: "fk_laboratory_orders_patient")
+  doctor          Doctor             @relation(fields: [doctorId], references: [id], onDelete: Restrict, onUpdate: Cascade, map: "fk_laboratory_orders_doctor")
+  medicalCenter   MedicalCenter?     @relation(fields: [medicalCenterId], references: [id], onDelete: SetNull, onUpdate: Cascade, map: "fk_laboratory_orders_medical_center")
+  appointment     Appointment?       @relation(fields: [appointmentId], references: [id], onDelete: SetNull, onUpdate: Cascade, map: "fk_laboratory_orders_appointment")
+  catalogTests    LaboratoryOrderTest[]
+  customTests     LaboratoryOrderCustomTest[]
+
+  @@index([patientId, issueDate], map: "laboratory_orders_patient_id_issue_date_idx")
+  @@index([doctorId, issueDate], map: "laboratory_orders_doctor_id_issue_date_idx")
+  @@index([status], map: "laboratory_orders_status_idx")
+  @@map("laboratory_orders")
+}
+
+model LaboratoryOrderTest {
+  id        BigInt   @id @default(autoincrement())
+  orderId   BigInt   @map("order_id")
+  testId    BigInt   @map("test_id")
+  categoryId BigInt  @map("category_id")
+  sortOrder Int      @default(0) @map("sort_order")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  order     LaboratoryOrder @relation(fields: [orderId], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "fk_lot_order")
+  test      LaboratoryTest  @relation(fields: [testId], references: [id], onDelete: Restrict, onUpdate: Cascade, map: "fk_lot_test")
+
+  @@index([orderId, sortOrder], map: "laboratory_order_tests_order_id_idx")
+  @@map("laboratory_order_tests")
+}
+
+model LaboratoryOrderCustomTest {
+  id           BigInt   @id @default(autoincrement())
+  orderId      BigInt   @map("order_id")
+  categoryName String?  @map("category_name") @db.VarChar(100)
+  testName     String   @map("test_name") @db.VarChar(200)
+  sortOrder    Int      @default(0) @map("sort_order")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  order        LaboratoryOrder @relation(fields: [orderId], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "fk_loct_order")
+
+  @@index([orderId, sortOrder], map: "laboratory_order_custom_tests_order_id_idx")
+  @@map("laboratory_order_custom_tests")
 }
