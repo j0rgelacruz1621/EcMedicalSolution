@@ -71,6 +71,11 @@ export class DoctorsRepository {
         email: payload.email,
         phone: payload.phone,
         specialty: payload.specialty,
+        description: payload.description,
+        rif: payload.rif,
+        cmNumber: payload.cmNumber,
+        photoUrl: payload.photoUrl,
+        gender: payload.gender === 'MASCULINO' ? 'Male' : payload.gender === 'FEMENINO' ? 'Female' : payload.gender === 'OTRO' ? 'Other' : undefined,
         officeId: payload.officeId !== undefined ? BigInt(payload.officeId) : undefined,
       },
     });

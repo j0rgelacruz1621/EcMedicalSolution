@@ -1,59 +1,49 @@
 import './style.scss';
+import { useMemo } from 'react';
 import { CalendarDays, Eye, Filter, Plus, Pill, X } from 'lucide-react';
+import type { Patient } from '../../../services/patients/patient-services';
 
 interface PrescriptionHistoryModalProps {
   isOpen: boolean;
   patientName: string;
+  patient?: Patient | null;
   onClose: () => void;
   onAddPrescription: () => void;
 }
 
-const currentMedications = [
-  {
-    name: 'Enalapril',
-    dose: '20mg',
-    posology: '1 tableta cada 24 horas',
-    started: '12 Oct 2023',
-  },
-  {
-    name: 'Aspirina',
-    dose: '100mg',
-    posology: '1 tableta cada 24 horas',
-    started: '08 Sep 2023',
-  },
-  {
-    name: 'Atorvastatina',
-    dose: '40mg',
-    posology: '1 tableta cada noche',
-    started: '02 Aug 2023',
-  },
-  {
-    name: 'Losartán',
-    dose: '50mg',
-    posology: '1 tableta cada 12 horas',
-    started: '14 Jul 2023',
-  },
-];
+export default function PrescriptionHistoryModal({ isOpen, patientName, patient, onClose, onAddPrescription }: PrescriptionHistoryModalProps) {
+  const medications = useMemo(() => {
+    const notes = patient?.medicalHistoryNotes?.trim();
+    if (!notes) return [];
+    return [
+      {
+        name: 'Historia clínica registrada',
+        dose: patient?.updatedAt
+          ? `Actualizada ${new Intl.DateTimeFormat('es-ES', { dateStyle: 'medium' }).format(new Date(patient.updatedAt))}`
+          : '',
+        posology: notes,
+        started: '',
+      },
+    ];
+  }, [patient]);
 
-const previousPrescriptions = [
-  {
-    date: '15 SEP 2023',
-    medications: 'Enalapril 20mg + Atenolol 50mg',
-    description: 'Ajuste de dosis por control de PA.',
-  },
-  {
-    date: '22 JUN 2023',
-    medications: 'Aspirina 100mg + Simvastatina 20mg',
-    description: 'Tratamiento para prevención secundaria.',
-  },
-  {
-    date: '10 MAR 2023',
-    medications: 'Losartán 50mg',
-    description: 'Revisión por hipertensión y control de edema.',
-  },
-];
+  const previousPrescriptions = useMemo(() => {
+    const notes = patient?.medicalHistoryNotes?.trim();
+    if (!notes) return [];
+    return [
+      {
+        date: patient?.createdAt
+          ? new Intl.DateTimeFormat('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })
+              .format(new Date(patient.createdAt))
+              .replace('.', '')
+              .toUpperCase()
+          : 'SIN FECHA',
+        medications: 'Registro de historia clínica',
+        description: notes,
+      },
+    ];
+  }, [patient]);
 
-export default function PrescriptionHistoryModal({ isOpen, patientName, onClose, onAddPrescription }: PrescriptionHistoryModalProps) {
   if (!isOpen) return null;
 
   return (
@@ -79,7 +69,8 @@ export default function PrescriptionHistoryModal({ isOpen, patientName, onClose,
           <section className="medications-section">
             <h3>MEDICAMENTOS ACTUALES</h3>
             <div className="current-medications-grid">
-              {currentMedications.map((medication) => (
+              {medications.length === 0 && <p className="empty-message">Sin medicamentos registrados.</p>}
+              {medications.map((medication) => (
                 <div key={medication.name} className="medication-card">
                   <div className="medication-icon">
                     <Pill size={16} />
@@ -87,10 +78,12 @@ export default function PrescriptionHistoryModal({ isOpen, patientName, onClose,
                   <div className="medication-copy">
                     <strong>{medication.name} {medication.dose}</strong>
                     <span>{medication.posology}</span>
-                    <small>
-                      <CalendarDays size={13} />
-                      Iniciado: {medication.started}
-                    </small>
+                    {medication.started && (
+                      <small>
+                        <CalendarDays size={13} />
+                        {medication.started}
+                      </small>
+                    )}
                   </div>
                 </div>
               ))}
@@ -107,6 +100,7 @@ export default function PrescriptionHistoryModal({ isOpen, patientName, onClose,
             </div>
 
             <div className="prescription-list">
+              {previousPrescriptions.length === 0 && <p className="empty-message">Sin recetas anteriores registradas.</p>}
               {previousPrescriptions.map((item) => (
                 <article key={item.date} className="prescription-item">
                   <div className="date-block">

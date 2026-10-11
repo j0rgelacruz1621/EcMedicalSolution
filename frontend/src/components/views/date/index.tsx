@@ -107,6 +107,7 @@ export default function DateView() {
 
   const [offices, setOffices] = useState<Office[]>([])
   const [doctors, setDoctors] = useState<any[]>([])
+  const [linkedDoctor, setLinkedDoctor] = useState<any>(null)
   const [selectedDoctorId, setSelectedDoctorId] = useState('')
   const [selectedOfficeId, setSelectedOfficeId] = useState('')
   const [catalogError, setCatalogError] = useState('')
@@ -147,6 +148,7 @@ export default function DateView() {
         setDoctors(availableDoctors)
         setSelectedDoctorId(defaultDoctorId)
         setSelectedOfficeId(String(sortedOffices[0]?.id ?? ''))
+        if (selectedContextDoctorId && selectedDoctor) setLinkedDoctor(selectedDoctor)
       })
       .catch(() => setCatalogError('No se pudieron cargar médicos y consultorios.'))
   }, [activeRole, loggedDoctorId, selectedContextDoctorId])
@@ -266,9 +268,17 @@ export default function DateView() {
         <div className="container">
           <div className="date-view__header-box">
             <h1 className="date-view__main-title">Agendar Cita Médica</h1>
-            <p className="date-view__subtitle">
-              Complete el formulario a continuación para programar su consulta <br />de cardiología especializada.
-            </p>
+            {linkedDoctor ? (
+              <p className="date-view__subtitle">
+                Estás agendando una consulta con el <strong>{String(linkedDoctor.gender).toUpperCase() === 'FEMENINO' || String(linkedDoctor.gender).toUpperCase() === 'FEMALE' ? 'Dra.' : 'Dr.'} {linkedDoctor.firstName} {linkedDoctor.lastName}</strong>
+                {linkedDoctor.specialty ? <> — {linkedDoctor.specialty}</> : null}.<br />
+                Complete el formulario a continuación para programar su consulta.
+              </p>
+            ) : (
+              <p className="date-view__subtitle">
+                Complete el formulario a continuación para programar su consulta <br />de cardiología especializada.
+              </p>
+            )}
           </div>
 
           <div className="date-view__card">

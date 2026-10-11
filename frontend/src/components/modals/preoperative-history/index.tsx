@@ -12,12 +12,13 @@ interface PreoperativeHistoryModalProps {
   isOpen: boolean;
   patientName: string;
   patientDoc: string;
+  evaluations: PreoperativeEvaluation[];
   onClose: () => void;
   onAddEvaluation: () => void;
   onViewDetail?: (evaluation: PreoperativeEvaluation) => void;
 }
 
-const evaluations: PreoperativeEvaluation[] = [
+export const samplePreoperativeEvaluations: PreoperativeEvaluation[] = [
   { id: 4, date: '2026-10-16', intervention: 'Cirugía urológica y ginecológica mayor' },
   { id: 3, date: '2025-05-12', intervention: 'Cirugía intraperitoneal e intratorácica' },
   { id: 2, date: '2024-11-08', intervention: 'Cirugía ortopédica mayor' },
@@ -33,6 +34,7 @@ export default function PreoperativeHistoryModal({
   isOpen,
   patientName,
   patientDoc,
+  evaluations,
   onClose,
   onAddEvaluation,
   onViewDetail,

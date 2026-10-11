@@ -1,59 +1,117 @@
 import './style.scss';
 import { Activity, CalendarClock, HeartPulse, Plus, X } from 'lucide-react';
 
+import { useMemo } from 'react';
+import type { Patient, PatientVitals } from '../../../services/patients/patient-services';
+
 interface ClinicalHistoryModalProps {
   isOpen: boolean;
   patientName: string;
+  patient?: Patient | null;
+  vitalsHistory?: PatientVitals[];
   onClose: () => void;
   onAddHistory: () => void;
 }
 
-const metrics = [
-  {
-    label: 'Última PA',
-    value: '120/80',
-    status: 'Normal',
-    icon: HeartPulse,
-  },
-  {
-    label: 'Frecuencia Cardíaca',
-    value: '72 bpm',
-    status: 'Normal',
-    icon: Activity,
-  },
-  {
-    label: 'Último Control',
-    value: '14 Oct 2023',
-    status: 'Registrado',
-    icon: CalendarClock,
-  },
-];
+function formatDate(value?: string | null) {
+  if (!value) return 'Sin registro';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return 'Sin registro';
+  return new Intl.DateTimeFormat('es-ES', { dateStyle: 'medium' }).format(date);
+}
 
-const timelineEvents = [
-  {
-    category: 'CONSULTA DE SEGUIMIENTO',
-    date: '14 de Oct, 2023',
-    title: 'Monitoreo de Hipertensión de Rutina',
-    description:
-      'Se mantuvo el esquema de control de presión arterial con buena adherencia terapéutica. Se recomienda continuar monitoreo domiciliario y re-evaluación en 30 días.',
-  },
-  {
-    category: 'LABORATORIO DIAGNÓSTICO',
-    date: '22 de Ago, 2023',
-    title: 'Perfil Lipídico y ECG',
-    description:
-      'El perfil lipídico mostró leve aumento del colesterol LDL y el ECG no evidenció alteraciones eléctricas significativas. Se continuó tratamiento con ajuste dietético.',
-  },
-  {
-    category: 'DIAGNÓSTICO INICIAL',
-    date: '10 de May, 2023',
-    title: 'Hipertensión Estadio 1',
-    description:
-      'Se confirmó diagnóstico de hipertensión arterial leve-moderada. Se indicaron cambios en estilo de vida y tratamiento farmacológico inicial con control periódico.',
-  },
-];
+function formatLongDate(value?: string | null) {
+  if (!value) return 'Sin registro';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return 'Sin registro';
+  return new Intl.DateTimeFormat('es-ES', { day: 'numeric', month: 'short', year: 'numeric' })
+    .format(date)
+    .replace('.', '');
+}
 
-export default function ClinicalHistoryModal({ isOpen, patientName, onClose, onAddHistory }: ClinicalHistoryModalProps) {
+function bloodPressureStatus(value: number | null) {
+  if (value === null) return 'Sin registro';
+  if (value < 120) return 'Normal';
+  if (value < 130) return 'Borderline';
+  return 'Elevada';
+}
+
+function heartRateStatus(value: number | null) {
+  if (value === null) return 'Sin registro';
+  if (value < 60) return 'Baja';
+  if (value <= 100) return 'Normal';
+  return 'Alta';
+}
+
+export default function ClinicalHistoryModal({
+  isOpen,
+  patientName,
+  patient,
+  vitalsHistory = [],
+  onClose,
+  onAddHistory,
+}: ClinicalHistoryModalProps) {
+  const latestVitals = vitalsHistory[0] ?? patient?.latestVitals ?? null;
+
+  const metrics = useMemo(
+    () => [
+      {
+        label: 'Última PA',
+        value: latestVitals
+          ? `${latestVitals.blood_pressure_systolic ?? '--'}/${latestVitals.blood_pressure_diastolic ?? '--'} mmHg`
+          : 'Sin registro',
+        status: bloodPressureStatus(latestVitals?.blood_pressure_systolic ?? null),
+        icon: HeartPulse,
+      },
+      {
+        label: 'Frecuencia Cardíaca',
+        value: latestVitals?.heart_rate_bpm != null ? `${latestVitals.heart_rate_bpm} bpm` : 'Sin registro',
+        status: heartRateStatus(latestVitals?.heart_rate_bpm ?? null),
+        icon: Activity,
+      },
+      {
+        label: 'Último Control',
+        value: formatDate(latestVitals?.measured_at),
+        status: latestVitals ? 'Registrado' : 'Sin registro',
+        icon: CalendarClock,
+      },
+    ],
+    [latestVitals],
+  );
+
+  const timeline = useMemo(() => {
+    const events: { category: string; date: string; title: string; description: string }[] = [];
+
+    if (patient?.medicalHistoryNotes?.trim()) {
+      events.push({
+        category: 'HISTORIA CLÍNICA',
+        date: formatLongDate(patient.updatedAt),
+        title: 'Notas de historia clínica',
+        description: patient.medicalHistoryNotes,
+      });
+    }
+
+    vitalsHistory.forEach((vitals, index) => {
+      events.push({
+        category: index === 0 ? 'ÚLTIMA MEDICIÓN' : 'SEGUIMIENTO DE SIGNOS VITALES',
+        date: formatLongDate(vitals.measured_at),
+        title: `Registro de signos vitales #${vitalsHistory.length - index}`,
+        description: `Presión arterial: ${vitals.blood_pressure_systolic ?? '--'}/${vitals.blood_pressure_diastolic ?? '--'} mmHg. Frecuencia cardíaca: ${vitals.heart_rate_bpm ?? '--'} bpm. Peso: ${vitals.weight_kg ?? '--'} kg.`,
+      });
+    });
+
+    if (!events.length) {
+      events.push({
+        category: 'SIN REGISTROS',
+        date: 'Sin registro',
+        title: 'Sin historial clínico',
+        description: 'Este paciente aún no tiene registros clínicos ni signos vitales registrados.',
+      });
+    }
+
+    return events;
+  }, [patient, vitalsHistory]);
+
   if (!isOpen) return null;
 
   return (
@@ -95,8 +153,8 @@ export default function ClinicalHistoryModal({ isOpen, patientName, onClose, onA
             </div>
 
             <div className="timeline-list">
-              {timelineEvents.map((event) => (
-                <article key={event.title} className="timeline-item">
+              {timeline.map((event) => (
+                <article key={`${event.category}-${event.date}-${event.title}`} className="timeline-item">
                   <div className="timeline-marker" aria-hidden="true" />
                   <div className="timeline-content">
                     <div className="timeline-row">

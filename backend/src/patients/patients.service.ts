@@ -252,7 +252,11 @@ export class PatientsService {
     }
 
     const latestVitals = await this.patientsRepository.findLatestVitals(
+<<<<<<< HEAD
       patient.id,
+=======
+      BigInt(id),
+>>>>>>> 386f9f5934f8580d13e6e99744d8f15d78203c9d
     );
 
     return toJsonSafe({ ...patient, latestVitals });

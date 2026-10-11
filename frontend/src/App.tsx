@@ -18,7 +18,8 @@ function App() {
   return (
     <>
       <div className="app-shell">
-        <Routes>
+        <div className="app-content">
+          <Routes>
           <Route path="/" element={<HomeView />} />
           <Route path="/date" element={<DateView />} />
           <Route path="/specialist-register" element={<SpecialistRegister />} />
@@ -33,7 +34,8 @@ function App() {
             <Route path="/patients/:id" element={<PatientFileView />} />
             <Route path="/pending-tasks" element={<PendingTasksView />} />
           </Route>
-        </Routes>
+          </Routes>
+        </div>
         <Footer />
       </div>
     </>

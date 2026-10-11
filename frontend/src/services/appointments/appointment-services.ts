@@ -1,5 +1,5 @@
 import { apiClient } from '../api-client';
-import type { PatientGender } from '../patients/patient-services';
+import type { Patient, PatientGender } from '../patients/patient-services';
 
 export interface CreateAppointmentRequest {
   doctorId: number;
@@ -31,7 +31,9 @@ export interface Appointment {
   type?: string;
   officeId?: number;
   medicalCenterId?: number;
-  patient?: { id?: number; nationalId?: string; firstName?: string; lastName?: string };
+  patient?: { id?: number; nationalId?: string; firstName?: string; lastName?: string } | null;
+  guestFirstName?: string;
+  guestLastName?: string;
 }
 
 export interface AppointmentListResponse {
@@ -61,4 +63,28 @@ export async function getAppointments(params: Record<string, string | number | u
     },
   });
   return response.data;
+}
+
+/** Devuelve la próxima cita futura (o la última registrada si no hay) del paciente, sea registrado o invitado (guest). */
+export async function getNextAppointmentForPatient(
+  patient: Pick<Patient, 'id' | 'nationalId'>,
+): Promise<Appointment | null> {
+  const response = await getAppointments({ patientId: patient.id, limit: 50 });
+  const guestResponse = await getAppointments({ guestNationalId: patient.nationalId, limit: 50 });
+  const today = new Date().toISOString().slice(0, 10);
+  const candidates = [...response.data, ...guestResponse.data]
+    .filter((a) => a.status !== 'CANCELLED');
+  const upcoming = candidates
+    .filter((a) => (a.appointmentDate ?? '') >= today)
+    .sort((a, b) =>
+      (a.appointmentDate ?? '').localeCompare(b.appointmentDate ?? '') ||
+      (a.startTime ?? '').localeCompare(b.startTime ?? ''),
+    );
+  if (upcoming.length) return upcoming[0];
+  const last = candidates
+    .sort((a, b) =>
+      (b.appointmentDate ?? '').localeCompare(a.appointmentDate ?? '') ||
+      (b.startTime ?? '').localeCompare(a.startTime ?? ''),
+    );
+  return last[0] ?? null;
 }

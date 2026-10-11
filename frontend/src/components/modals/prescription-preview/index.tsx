@@ -1,5 +1,5 @@
 import './style.scss';
-import { CalendarDays, ClipboardList, Printer, Stethoscope, UserRound, X } from 'lucide-react';
+import { ClipboardList, Printer, Stethoscope, UserRound, X } from 'lucide-react';
 
 interface PrescriptionPreviewModalProps {
   isOpen: boolean;
@@ -8,6 +8,9 @@ interface PrescriptionPreviewModalProps {
   patientWeight: string;
   patientDoc: string;
   emissionDate: string;
+  doctorName?: string;
+  doctorSpecialty?: string;
+  medications?: { name: string; concentration: string; note: string; posology: string; duration: string }[];
   onClose: () => void;
 }
 
@@ -41,8 +44,13 @@ export default function PrescriptionPreviewModal({
   patientWeight,
   patientDoc,
   emissionDate,
+  doctorName,
+  doctorSpecialty,
+  medications,
   onClose,
 }: PrescriptionPreviewModalProps) {
+  const items = medications && medications.length ? medications : prescribedItems;
+
   if (!isOpen) return null;
 
   return (
@@ -70,10 +78,9 @@ export default function PrescriptionPreviewModal({
           <div className="doctor-membrete">
               <span className="brand-ornament" aria-hidden="true">&lt;&lt;&lt;</span>
               <div className="brand-copy">
-                <strong>Dra. Josiana Piña Martínez</strong>
-                <span>CARDIÓLOGO CLÍNICO</span>
-                <small>MPPS 107.17 • CM 7.778 • RIF V-19643464-6</small>
-            </div>
+                <strong>{doctorName || 'Médico tratante'}</strong>
+                <span>{doctorSpecialty || 'ESPECIALISTA'}</span>
+              </div>
               <span className="brand-ornament" aria-hidden="true">&gt;&gt;&gt;</span>
           </div>
 
@@ -109,7 +116,7 @@ export default function PrescriptionPreviewModal({
                 <span>POSOLOGÍA Y DURACIÓN</span>
               </div>
 
-              {prescribedItems.map((item) => (
+              {items.map((item) => (
                 <div key={item.name} className="table-row">
                   <div className="medicine-description">
                     <strong>{item.name} {item.concentration}</strong>
@@ -141,15 +148,11 @@ export default function PrescriptionPreviewModal({
             <div className="specialist-contact">
               <div className="contact-item">
                 <UserRound size={14} />
-                <span>@drajosianapina</span>
+                <span>{doctorName || 'Médico tratante'}</span>
               </div>
               <div className="contact-item">
                 <Stethoscope size={14} />
-                <span>+58 412-1234567</span>
-              </div>
-              <div className="contact-item">
-                <CalendarDays size={14} />
-                <span>Consultorio: C.C. La California</span>
+                <span>{doctorSpecialty || 'Especialista'}</span>
               </div>
             </div>
           </div>

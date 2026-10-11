@@ -105,6 +105,7 @@ export class AppointmentsService {
         ? BigInt(query.medical_center_id)
         : undefined,
       patientId: query.patient_id ? BigInt(query.patient_id) : undefined,
+      guestNationalId: query.guest_national_id,
       status: query.status,
       appointmentDate: query.appointment_date,
       startDate: query.start_date,

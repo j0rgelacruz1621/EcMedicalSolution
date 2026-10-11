@@ -6,6 +6,12 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // Aumenta el límite del body para aceptar fotos de perfil en base64 (~2 MB)
+  const httpAdapter = app.getHttpAdapter().getInstance();
+  const express = require('express');
+  httpAdapter.use(express.json({ limit: '3mb' }));
+  httpAdapter.use(express.urlencoded({ limit: '3mb', extended: true }));
+
   app.enableCors({
     origin: (
       origin: string | undefined,
@@ -22,8 +28,13 @@ async function bootstrap() {
           protocol === 'http:';
         const isProductionOrigin =
           protocol === 'https:' &&
-          (hostname === 'smartmedicalcontrol.us' ||
+          (hostname === 'app.smartmedicalcontrol.us' ||
             hostname.endsWith('.smartmedicalcontrol.us'));
+
+        // Log temporal para diagnosticar CORS en producción
+        if (!isLocalOrigin && !isProductionOrigin) {
+          console.warn(`[CORS] Origen rechazado: ${origin}`);
+        }
 
         return callback(null, isLocalOrigin || isProductionOrigin);
       } catch {
