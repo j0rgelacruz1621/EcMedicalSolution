@@ -8,6 +8,9 @@ import AgendaView from './components/views/scheduling'
 import PatientsView from './components/views/patients'
 import PatientFileView from './components/views/patient-file'
 import PendingTasksView from './components/views/pending-tasks'
+import ReportsView from './components/views/reports'
+import MedicalCertificateView from './components/views/medical-certificate'
+import LabOrderView from './components/views/lab-order'
 import ProtectedRoute from './components/protected-route'
 import AdminPanel from './components/views/admin-panel'
 import AdminRoute from './components/admin-route'
@@ -33,6 +36,9 @@ function App() {
             <Route path="/patients" element={<PatientsView />} />
             <Route path="/patients/:id" element={<PatientFileView />} />
             <Route path="/pending-tasks" element={<PendingTasksView />} />
+            <Route path="/reports" element={<ReportsView />} />
+            <Route path="/reports/medical-certificate" element={<MedicalCertificateView />} />
+            <Route path="/reports/lab-order" element={<LabOrderView />} />
           </Route>
           </Routes>
         </div>

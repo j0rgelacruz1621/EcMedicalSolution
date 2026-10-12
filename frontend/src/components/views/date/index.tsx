@@ -7,18 +7,16 @@ import ConfirmDate from '../../modals/confirm-date'
 import { createAppointment, type CreateAppointmentRequest } from '../../../services/appointments/appointment-services'
 import { getDoctors } from '../../../services/doctors/doctor-services'
 import { getOffices, type Office } from '../../../services/medical-center/medical-center-services'
-import BadgeOutlinedIcon from '@mui/icons-material/BadgeOutlined'
-import MedicalServicesOutlinedIcon from '@mui/icons-material/MedicalServicesOutlined'
-import HealthAndSafetyOutlinedIcon from '@mui/icons-material/HealthAndSafetyOutlined'
-import KeyboardArrowDownOutlinedIcon from '@mui/icons-material/KeyboardArrowDownOutlined'
 
 import {
   User,
+  UserRound,
   Fingerprint,
   ChevronDown,
   Cake,
   Phone,
   Hospital,
+  Stethoscope,
   ChevronLeft,
   ChevronRight,
   Calendar as CalendarIcon,
@@ -214,8 +212,6 @@ export default function DateView() {
       if (!office?.medicalCenterId) throw new Error('El consultorio no tiene centro médico asociado.')
 
       // El backend espera la edad directamente (campo age, entero 0-120)
-      const nationalIdDigits = cedula.replace(/\D/g, '') || 'paciente'
-
       let hour = Number(timeHour) % 12
       if (timeMeridiem === 'PM') hour += 12
       const startAt = new Date(selectedDate!.getFullYear(), selectedDate!.getMonth(), selectedDate!.getDate(), hour, Number(timeMinute))
@@ -301,7 +297,7 @@ export default function DateView() {
                 <div className="date-view__field">
                   <label className="form-label">Apellidos</label>
                   <div className="input-group">
-                    <span className="input-group-text"><BadgeOutlinedIcon sx={{ fontSize: 18 }} /></span>
+                    <span className="input-group-text"><UserRound size={18} strokeWidth={2.2} /></span>
                     <input
                       className="form-control"
                       type="text"
@@ -357,7 +353,7 @@ export default function DateView() {
                 <div className="date-view__field">
                   <label className="form-label">Consultorio</label>
                   <div className="input-group">
-                    <span className="input-group-text"><MedicalServicesOutlinedIcon sx={{ fontSize: 18 }} /></span>
+                    <span className="input-group-text"><Hospital size={18} strokeWidth={2.2} /></span>
                     <select className="form-select date-select-arrow" value={selectedOfficeId} onChange={e => setSelectedOfficeId(e.target.value)}>
                       <option value="">Seleccione ubicación</option>
                       {offices.map(office => (
@@ -366,7 +362,7 @@ export default function DateView() {
                         </option>
                       ))}
                     </select>
-                    <span className="select-chevron"><KeyboardArrowDownOutlinedIcon sx={{ fontSize: 18 }} /></span>
+                    <span className="select-chevron"><ChevronDown size={18} strokeWidth={2.2} /></span>
                   </div>
                 </div>
               </div>
@@ -454,13 +450,13 @@ export default function DateView() {
                   <div className="date-view__field">
                     <label className="form-label">Tipo de consulta</label>
                     <div className="input-group">
-                      <span className="input-group-text"><HealthAndSafetyOutlinedIcon sx={{ fontSize: 18 }} /></span>
+                      <span className="input-group-text"><Stethoscope size={18} strokeWidth={2.2} /></span>
                       <select className="form-select date-select-arrow" value={consultationType} onChange={e => setConsultationType(e.target.value)}>
                         <option value="">Seleccionar tipo de consulta</option>
                         <option value="De primera">De primera</option>
                         <option value="Control">Control</option>
                       </select>
-                      <span className="select-chevron"><KeyboardArrowDownOutlinedIcon sx={{ fontSize: 18 }} /></span>
+                      <span className="select-chevron"><ChevronDown size={18} strokeWidth={2.2} /></span>
                     </div>
                   </div>
 

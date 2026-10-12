@@ -9,78 +9,7 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: 22px 22px 24px 24px;
-}
-
-.cp-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 4px 4px 18px;
-}
-
-.cp-header h1 {
-  color: var(--primary-color) !important;
-  font-size: 33.6px;
-  line-height: 1.2;
-  letter-spacing: -0.01em;
-  font-weight: 700;
-  margin: 0;
-}
-
-.cp-header-right {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.icon {
-  width: 30px;
-  height: 30px;
-  border: none;
-  outline: none;
-  box-shadow: none;
-  padding: 0;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.55);
-  display: grid;
-  place-items: center;
-  color: var(--text);
-  font-size: 16px;
-  cursor: pointer;
-}
-
-.cp-user {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 10px;
-  padding: 0;
-  border: none;
-  background: transparent;
-  border-radius: 0;
-  font-weight: 500;
-  color: #434653;
-}
-
-.cp-user > span:first-child {
-  font-size: 16.32px;
-  color: #2a2d34;
-  font-weight: 600;
-}
-
-.cp-user-badge {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  background: #f4f5f7;
-  border: 1px solid rgba(146, 157, 168, 0.3);
-  color: var(--primary-color);
-  font-size: 11.2px;
-  font-weight: 800;
-  flex-shrink: 0;
+  padding: 14px 18px 16px;
 }
 
 // --- Contenido de la Agenda ---

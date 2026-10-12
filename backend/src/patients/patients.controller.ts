@@ -294,43 +294,17 @@ export class PatientsController {
 
   @Get(':id')
   @ApiOperation({
-<<<<<<< HEAD
-    summary: 'Consultar un paciente por su id',
-    description:
-      'Retorna la entidad completa del paciente junto con su último registro de signos vitales en "latestVitals".',
-=======
     summary: 'Obtener el detalle de un paciente',
     description:
-      'Retorna los datos demográficos del paciente junto con su último registro de signos vitales (latestVitals).',
->>>>>>> 386f9f5934f8580d13e6e99744d8f15d78203c9d
+      'Retorna la entidad completa del paciente junto con su último registro de signos vitales en "latestVitals".',
   })
   @ApiParam({ name: 'id', type: Number, example: 1 })
   @ApiResponse({
     status: 200,
-<<<<<<< HEAD
-    description: 'Paciente encontrado.',
+    description: 'Paciente encontrado con su último registro de signos vitales.',
     schema: {
       example: {
         ...PATIENT_RESPONSE_EXAMPLE.patient,
-=======
-    description: 'Detalle del paciente con su último registro de signos vitales.',
-    schema: {
-      example: {
-        id: 1,
-        nationalId: '0102030405',
-        firstName: 'Juan',
-        lastName: 'Perez',
-        email: 'juan@example.com',
-        phone: '0999999999',
-        age: 34,
-        origin: 'Mérida',
-        address: null,
-        gender: 'Male',
-        medicalHistoryNotes: null,
-        isActive: true,
-        createdAt: '2026-08-20T15:00:00.000Z',
-        updatedAt: '2026-08-20T15:00:00.000Z',
->>>>>>> 386f9f5934f8580d13e6e99744d8f15d78203c9d
         latestVitals: PATIENT_RESPONSE_EXAMPLE.vitals,
       },
     },
@@ -339,10 +313,7 @@ export class PatientsController {
     status: 404,
     description: 'No existe un paciente con el id indicado.',
   })
-<<<<<<< HEAD
   @ApiResponse({ status: 400, description: 'El id no es numérico.' })
-=======
->>>>>>> 386f9f5934f8580d13e6e99744d8f15d78203c9d
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.patientsService.findOne(id);
   }

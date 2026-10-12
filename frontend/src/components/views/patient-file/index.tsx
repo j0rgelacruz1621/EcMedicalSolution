@@ -10,8 +10,7 @@ import PrescriptionPreviewModal from '../../modals/prescription-preview';
 import ClinicalTimelineModal from '../../modals/clinical-timeline';
 import ClinicalStudiesModal from '../../modals/Clinica-trials';
 import SupplementaryTestsModal from '../../modals/Supplementary-tests';
-import PreoperativeHistoryModal, { samplePreoperativeEvaluations, type PreoperativeEvaluation } from '../../modals/preoperative-history';
-import PreoperativeEvaluationModal from '../../modals/preoperative-evaluation';
+import PreoperativeHistoryModal from '../../modals/preoperative-history';
 import NewSupplementaryTests from '../new-Supplementary-tests';
 import {
   CalendarDays,
@@ -73,13 +72,11 @@ export default function PatientFileView() {
   const [isClinicalStudiesOpen, setIsClinicalStudiesOpen] = useState(false);
   const [isSupplementaryTestsOpen, setIsSupplementaryTestsOpen] = useState(false);
   const [isNewSupplementaryTestsOpen, setIsNewSupplementaryTestsOpen] = useState(false);
-  const [isPreoperativeHistoryOpen, setIsPreoperativeHistoryOpen] = useState(false);
-  const [isPreoperativeEvaluationOpen, setIsPreoperativeEvaluationOpen] = useState(false);
-  const [preoperativeEvaluations, setPreoperativeEvaluations] = useState<PreoperativeEvaluation[]>(samplePreoperativeEvaluations);
   const [vitalsHistory, setVitalsHistory] = useState<PatientVitals[]>([]);
   const [appointments, setAppointments] = useState<{ date?: string; time?: string; reason?: string }[]>([]);
   const [calendarMonth, setCalendarMonth] = useState(() => new Date());
   const activeDoctorName = sessionStorage.getItem('active_doctor_name') || 'Administración';
+  const [isPreoperativeHistoryOpen, setIsPreoperativeHistoryOpen] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -548,27 +545,9 @@ export default function PatientFileView() {
       <PreoperativeHistoryModal
         isOpen={isPreoperativeHistoryOpen}
         patientName={patientName}
-        patientDoc={patientDocument}
-        evaluations={preoperativeEvaluations}
+        patientDoc={String(patient?.id ?? '')}
         onClose={() => setIsPreoperativeHistoryOpen(false)}
-        onAddEvaluation={() => {
-          setIsPreoperativeHistoryOpen(false);
-          setIsPreoperativeEvaluationOpen(true);
-        }}
-      />
-
-      <PreoperativeEvaluationModal
-        isOpen={isPreoperativeEvaluationOpen}
-        patient={patient}
-        onClose={() => setIsPreoperativeEvaluationOpen(false)}
-        onSave={(evaluation) => {
-          setPreoperativeEvaluations((current) => [
-            ...current,
-            { id: Math.max(0, ...current.map((item) => item.id)) + 1, date: evaluation.date, intervention: evaluation.intervention },
-          ]);
-          setIsPreoperativeEvaluationOpen(false);
-          setIsPreoperativeHistoryOpen(true);
-        }}
+        onAddEvaluation={() => setIsPreoperativeHistoryOpen(false)}
       />
 
       {isNewSupplementaryTestsOpen && <NewSupplementaryTests patientName={patientName} onClose={() => setIsNewSupplementaryTestsOpen(false)} />}

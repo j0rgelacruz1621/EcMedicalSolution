@@ -1,6 +1,5 @@
 import React from 'react';
-import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
-import { X, UserPlus, Activity } from 'lucide-react';
+import { X, UserPlus, Activity, CheckCircle } from 'lucide-react';
 import './style.scss';
 import { useState } from 'react';
 import { createPatient, type Patient, type PatientGender } from '../../../services/patients/patient-services';
@@ -127,7 +126,7 @@ export default function NewPatientModal({ isOpen, onClose, onSuccess, doctorId }
         address: formData.address || undefined,
         ...(doctorId ? { assignedDoctorId: doctorId } : {}),
         gender: formData.gender as PatientGender,
-        ...(vitals ? { vitals } : {}),
+        ...(vitals ? { vitals } : { vitals: {} }),
       });
       onSuccess(result.patient);
     } catch (err: unknown) {
@@ -309,7 +308,7 @@ export default function NewPatientModal({ isOpen, onClose, onSuccess, doctorId }
             Cancelar
           </button>
           <button type="submit" className="btn-save-large" form="new-patient-form" disabled={saving}>
-            <CheckCircleOutlineOutlinedIcon sx={{ fontSize: 20 }} />
+            <CheckCircle size={20} />
             {saving ? 'Guardando...' : 'Guardar Paciente'}
           </button>
         </footer>
