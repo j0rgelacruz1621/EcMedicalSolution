@@ -1,6 +1,6 @@
 import './style.scss';
 import { useEffect, useMemo, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import LeftSideBar from '../../left-sideBar';
 import ClinicalHistoryModal from '../../modals/clinical-history';
 import NewClinicalHistoryModal from '../../modals/new-clinical-history';
@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { getPatient, getPatientVitalsHistory, type Patient, type PatientVitals } from '../../../services/patients/patient-services';
 import { getAppointments } from '../../../services/appointments/appointment-services';
+import type { Recipe } from '../../../services/recipes/recipe-services';
 
 
 
@@ -76,6 +77,15 @@ export default function PatientFileView() {
   const [appointments, setAppointments] = useState<{ date?: string; time?: string; reason?: string }[]>([]);
   const [calendarMonth, setCalendarMonth] = useState(() => new Date());
   const activeDoctorName = sessionStorage.getItem('active_doctor_name') || 'Administración';
+  const [searchParams] = useSearchParams();
+  // Un médico firma con su propio token; una cuenta SA emite en nombre del médico activo.
+  const signingDoctorId =
+    localStorage.getItem('user_rol') === 'DOCTOR'
+      ? undefined
+      : Number(searchParams.get('doctorId') || sessionStorage.getItem('active_doctor_id')) || undefined;
+  const [recipeToEdit, setRecipeToEdit] = useState<Recipe | null>(null);
+  const [previewRecipeId, setPreviewRecipeId] = useState<number | null>(null);
+  const [recipesRefreshKey, setRecipesRefreshKey] = useState(0);
   const [isPreoperativeHistoryOpen, setIsPreoperativeHistoryOpen] = useState(false);
 
   useEffect(() => {
@@ -488,31 +498,49 @@ export default function PatientFileView() {
 
       <PrescriptionHistoryModal
         isOpen={isPrescriptionHistoryOpen}
+        patientId={patient ? patient.id : null}
         patientName={patientName}
-        patient={patient}
+        refreshKey={recipesRefreshKey}
         onClose={() => setIsPrescriptionHistoryOpen(false)}
         onAddPrescription={() => {
           setIsPrescriptionHistoryOpen(false);
+          setRecipeToEdit(null);
+          setIsPrescriptionFormOpen(true);
+        }}
+        onViewRecipe={(recipeId) => {
+          setPreviewRecipeId(recipeId);
+          setIsPrescriptionPreviewOpen(true);
+        }}
+        onEditRecipe={(recipe) => {
+          setIsPrescriptionHistoryOpen(false);
+          setRecipeToEdit(recipe);
           setIsPrescriptionFormOpen(true);
         }}
       />
 
       <PrescriptionFormModal
         isOpen={isPrescriptionFormOpen}
+        patientId={patient ? patient.id : null}
         patientName={patientName}
-        onClose={() => setIsPrescriptionFormOpen(false)}
-        onGenerate={() => setIsPrescriptionPreviewOpen(true)}
+        doctorId={signingDoctorId}
+        recipe={recipeToEdit}
+        onClose={() => {
+          setIsPrescriptionFormOpen(false);
+          setRecipeToEdit(null);
+        }}
+        onSaved={(recipe) => {
+          setIsPrescriptionFormOpen(false);
+          setRecipeToEdit(null);
+          setRecipesRefreshKey((key) => key + 1);
+          setPreviewRecipeId(recipe.recipe_id);
+          setIsPrescriptionPreviewOpen(true);
+        }}
       />
 
       <PrescriptionPreviewModal
         isOpen={isPrescriptionPreviewOpen}
-        patientName={patientName}
-        patientAge={patientAge}
+        recipeId={previewRecipeId}
         patientWeight={patientWeight}
-        patientDoc={patientDocument}
-        emissionDate={new Intl.DateTimeFormat('es-ES', { dateStyle: 'long' }).format(new Date())}
-        doctorName={activeDoctorName}
-        doctorSpecialty="CARDIÓLOGO CLÍNICO"
         onClose={() => setIsPrescriptionPreviewOpen(false)}
       />
 

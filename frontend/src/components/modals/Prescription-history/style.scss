@@ -285,3 +285,33 @@
     justify-self: flex-start;
   }
 }
+
+.filter-button select {
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  outline: none;
+}
+
+.prescription-detail p {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+}
+
+.recipe-medication-breakdown {
+  margin: 6px 0 0;
+  padding-left: 18px;
+  color: #3f4349;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.prescription-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
