@@ -15,7 +15,7 @@
   max-height: 90vh;
   overflow: hidden;
   background: #fff;
-  border: 1px solid rgba(128, 0, 32, 0.14);
+  border: 1px solid #c3c6d5;
   border-radius: 22.4px;
   box-shadow: 0 28px 70px rgba(17, 24, 39, 0.18);
   display: flex;
@@ -31,7 +31,7 @@
   gap: 16px;
   padding: 19.2px 24px 16px;
   background: #fff;
-  border-bottom: 1px solid #f1e7ea;
+  border-bottom: 1px solid #c3c6d5;
 }
 
 .header-title-wrap {
@@ -46,7 +46,7 @@
   display: grid;
   place-items: center;
   border-radius: 13.6px;
-  background: #fbe8ec;
+  background: #f3f4f6;
   color: #800020;
 }
 
@@ -69,12 +69,17 @@
   width: 40px;
   height: 40px;
   border: 0;
-  background: #f9eef1;
+  background: transparent;
   color: #800020;
   border-radius: 12.8px;
   display: grid;
   place-items: center;
   cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    background: #e5e7eb;
+  }
 }
 
 .clinical-timeline-body {
@@ -87,7 +92,7 @@
 
 .recent-study-section,
 .history-section {
-  border: 1px solid #f0e4e7;
+  border: 1px solid #c3c6d5;
   border-radius: 16px;
   background: #fff;
   padding: 16px;
@@ -105,8 +110,8 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
-  background: linear-gradient(180deg, #fffafc 0%, #fff 100%);
-  border: 1px solid rgba(128, 0, 32, 0.12);
+  background: linear-gradient(180deg, #f3f4f6 0%, #fff 100%);
+  border: 1px solid #c3c6d5;
   border-radius: 16px;
   padding: 16px;
 }
@@ -168,7 +173,7 @@
   display: flex;
   flex-direction: column;
   gap: 3.2px;
-  border: 1px solid #f1e7ea;
+  border: 1px solid #c3c6d5;
   background: #fff;
   border-radius: 14.4px;
   padding: 12.8px;
@@ -215,7 +220,7 @@
   top: 8px;
   bottom: 8px;
   width: 2px;
-  background: #f0d7dc;
+  background: #c3c6d5;
 }
 
 .timeline-item {
@@ -235,12 +240,12 @@
   color: #800020;
   display: grid;
   place-items: center;
-  box-shadow: 0 0 0 4px #fffafc;
+  box-shadow: 0 0 0 4px #f3f4f6;
 }
 
 .timeline-content {
-  background: #fcfcfd;
-  border: 1px solid #f1e7ea;
+  background: #f8f9fb;
+  border: 1px solid #c3c6d5;
   border-radius: 16px;
   padding: 14.4px 16px;
 }
@@ -292,7 +297,7 @@
   justify-content: center;
   padding: 6.08px 10.4px;
   border-radius: 999px;
-  background: rgba(128, 0, 32, 0.08);
+  background: #f3f4f6;
   color: #800020;
   font-size: 10.88px;
   font-weight: 800;
@@ -304,7 +309,7 @@
   display: flex;
   justify-content: flex-end;
   padding: 16px 24px 24px;
-  border-top: 1px solid #f1e7ea;
+  border-top: 1px solid #c3c6d5;
   background: #fff;
 }
 

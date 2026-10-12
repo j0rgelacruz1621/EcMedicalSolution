@@ -483,7 +483,19 @@ export default function PatientFileView() {
       <NewClinicalHistoryModal
         isOpen={isAddHistoryOpen}
         patientName={patientName}
+        patientId={patient.id}
+        existingNotes={patient.medicalHistoryNotes}
         onClose={() => setIsAddHistoryOpen(false)}
+        onSaved={({ patient: updatedPatient, vitals }) => {
+          setPatient({
+            ...updatedPatient,
+            latestVitals: vitals ?? updatedPatient.latestVitals,
+          })
+          if (vitals) {
+            setVitalsHistory(current => [vitals, ...current])
+          }
+          setIsAddHistoryOpen(false)
+        }}
       />
 
       <PrescriptionHistoryModal

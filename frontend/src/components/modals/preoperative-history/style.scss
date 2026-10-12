@@ -3,8 +3,8 @@
 $wine: #85040f;
 $wine-dark: #6b030c;
 $wine-icon: #5c0006;
-$border-soft: #e1bfbb;
-$divider: #e1bfbb;
+$border-soft: #c3c6d5;
+$divider: #c3c6d5;
 $text-main: #1a1c1c;
 $text-muted: #8d706d;
 $text-secondary: #59413e;
@@ -74,7 +74,7 @@ $text-secondary: #59413e;
     transition: background-color 0.15s ease;
 
     &:hover {
-      background: #f4e9eb;
+      background: #e5e7eb;
     }
   }
 
@@ -86,7 +86,7 @@ $text-secondary: #59413e;
     padding: 0.75rem 1rem;
     border: 1px solid $border-soft;
     border-radius: 0.5rem;
-    background: #f4f3f3;
+    background: #f3f4f6;
     color: $text-main;
     font-size: 1rem;
     line-height: 1.4;
@@ -250,7 +250,7 @@ $text-secondary: #59413e;
     color: $text-secondary;
 
     &:hover {
-      background: #ebe6e5;
+      background: #e5e7eb;
     }
   }
 
