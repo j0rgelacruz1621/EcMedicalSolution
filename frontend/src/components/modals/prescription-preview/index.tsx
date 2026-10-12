@@ -1,57 +1,58 @@
 import './style.scss';
-import { ClipboardList, Printer, Stethoscope, UserRound, X } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { ClipboardList, Mail, MapPin, Phone, Printer, X } from 'lucide-react';
+import {
+  formatIssueDate,
+  getRecipeDocument,
+  type RecipeDocument,
+} from '../../../services/recipes/recipe-services';
 
 interface PrescriptionPreviewModalProps {
   isOpen: boolean;
-  patientName: string;
-  patientAge: string;
-  patientWeight: string;
-  patientDoc: string;
-  emissionDate: string;
-  doctorName?: string;
-  doctorSpecialty?: string;
-  medications?: { name: string; concentration: string; note: string; posology: string; duration: string }[];
+  recipeId: number | null;
+  patientWeight?: string;
   onClose: () => void;
 }
 
-const prescribedItems = [
-  {
-    name: 'Enalapril',
-    concentration: '10mg',
-    note: 'Tabletas (VO)',
-    posology: '1 tableta cada 12 horas',
-    duration: 'Durante 30 días',
-  },
-  {
-    name: 'Aspirina',
-    concentration: '100mg',
-    note: 'Protectora gástrica recomendada',
-    posology: '1 tableta diaria',
-    duration: 'Después del almuerzo',
-  },
-];
+export default function PrescriptionPreviewModal({ isOpen, recipeId, patientWeight, onClose }: PrescriptionPreviewModalProps) {
+  const [recipeDocument, setRecipeDocument] = useState<RecipeDocument | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-const additionalNotes = [
-  'Mantener dieta baja en sodio y controlar la ingesta de líquidos.',
-  'Evitar esfuerzo físico intenso durante los próximos 7 días.',
-  'Revisar presión arterial dos veces al día y mantener hidratación adecuada.',
-];
+  useEffect(() => {
+    if (!isOpen || !recipeId) return;
+    let active = true;
 
-export default function PrescriptionPreviewModal({
-  isOpen,
-  patientName,
-  patientAge,
-  patientWeight,
-  patientDoc,
-  emissionDate,
-  doctorName,
-  doctorSpecialty,
-  medications,
-  onClose,
-}: PrescriptionPreviewModalProps) {
-  const items = medications && medications.length ? medications : prescribedItems;
+    setLoading(true);
+    setError('');
+    setRecipeDocument(null);
+
+    getRecipeDocument(recipeId)
+      .then((result) => {
+        if (active) setRecipeDocument(result);
+      })
+      .catch(() => {
+        if (active) setError('No se pudo cargar el documento del récipe.');
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [isOpen, recipeId]);
 
   if (!isOpen) return null;
+
+  // Al imprimir solo sale el récipe (ver @media print en style.scss).
+  const handlePrint = () => {
+    document.body.classList.add('printing-recipe');
+    window.print();
+    document.body.classList.remove('printing-recipe');
+  };
+
+  const recipe = recipeDocument?.recipe;
 
   return (
     <div className="prescription-preview-overlay" onClick={onClose} role="presentation">
@@ -64,7 +65,7 @@ export default function PrescriptionPreviewModal({
           </div>
 
           <div className="header-actions">
-            <button type="button" className="print-button" onClick={() => window.print()}>
+            <button type="button" className="print-button" onClick={handlePrint} disabled={!recipeDocument}>
               <Printer size={18} />
               Imprimir Receta
             </button>
@@ -74,89 +75,121 @@ export default function PrescriptionPreviewModal({
           </div>
         </header>
 
-        <div className="prescription-document">
-          <div className="doctor-membrete">
-              <span className="brand-ornament" aria-hidden="true">&lt;&lt;&lt;</span>
-              <div className="brand-copy">
-                <strong>{doctorName || 'Médico tratante'}</strong>
-                <span>{doctorSpecialty || 'ESPECIALISTA'}</span>
-              </div>
-              <span className="brand-ornament" aria-hidden="true">&gt;&gt;&gt;</span>
-          </div>
+        {loading && <p className="preview-status">Cargando documento...</p>}
+        {error && <p className="preview-status error">{error}</p>}
 
-          <section className="patient-data-panel">
-            <div className="info-field">
-              <span>PACIENTE</span>
-              <strong>{patientName}</strong>
-            </div>
-            <div className="info-field">
-              <span>FECHA</span>
-              <strong>{emissionDate}</strong>
-            </div>
-            <div className="info-field">
-              <span>EDAD</span>
-              <strong>{patientAge}</strong>
-            </div>
-            <div className="info-field">
-              <span>PESO</span>
-              <strong>{patientWeight}</strong>
-            </div>
-            <div className="info-field">
-              <span>ID / CI</span>
-              <strong>{patientDoc}</strong>
-            </div>
-          </section>
-
-          <section className="prescription-body">
-            <div className="rp-title">Rp.</div>
-
-            <div className="medicine-table">
-              <div className="table-header">
-                <span>MEDICAMENTO Y CONCENTRACIÓN</span>
-                <span>POSOLOGÍA Y DURACIÓN</span>
-              </div>
-
-              {items.map((item) => (
-                <div key={item.name} className="table-row">
-                  <div className="medicine-description">
-                    <strong>{item.name} {item.concentration}</strong>
-                    <small>{item.note}</small>
-                  </div>
-                  <div className="medicine-posology">
-                    <span>{item.posology}</span>
-                    <em>{item.duration}</em>
-                  </div>
+        {recipeDocument && recipe && (
+          <div className="prescription-document printable-recipe">
+            {recipeDocument.header.image_url ? (
+              <img className="recipe-letterhead" src={recipeDocument.header.image_url} alt="Membrete del consultorio" />
+            ) : (
+              <div className="doctor-membrete">
+                <span className="brand-ornament" aria-hidden="true">&lt;&lt;&lt;</span>
+                <div className="brand-copy">
+                  <strong>{recipeDocument.header.doctor_name}</strong>
+                  <span>{recipeDocument.header.specialty || 'ESPECIALISTA'}</span>
+                  {recipeDocument.header.medical_center_name && <small>{recipeDocument.header.medical_center_name}</small>}
                 </div>
-              ))}
-            </div>
-          </section>
-
-          <section className="notes-panel">
-            <div className="notes-header">
-              <ClipboardList size={16} />
-              <span>INDICACIONES ADICIONALES</span>
-            </div>
-            <p>{additionalNotes.join(' ')}</p>
-          </section>
-
-          <div className="document-footer">
-            <div className="signature-block">
-              <span className="signature-line" />
-              <small>FIRMA Y SELLO</small>
-            </div>
-
-            <div className="specialist-contact">
-              <div className="contact-item">
-                <UserRound size={14} />
-                <span>{doctorName || 'Médico tratante'}</span>
+                <span className="brand-ornament" aria-hidden="true">&gt;&gt;&gt;</span>
               </div>
-              <div className="contact-item">
-                <Stethoscope size={14} />
-                <span>{doctorSpecialty || 'Especialista'}</span>
+            )}
+
+            <section className="patient-data-panel">
+              <div className="info-field">
+                <span>PACIENTE</span>
+                <strong>{recipe.patient.full_name}</strong>
+              </div>
+              <div className="info-field">
+                <span>FECHA</span>
+                <strong>{formatIssueDate(recipe.issue_date)}</strong>
+              </div>
+              <div className="info-field">
+                <span>EDAD</span>
+                <strong>{recipe.patient.age != null ? `${recipe.patient.age} años` : 'Sin registro'}</strong>
+              </div>
+              <div className="info-field">
+                <span>PESO</span>
+                <strong>{patientWeight || 'Sin registro'}</strong>
+              </div>
+              <div className="info-field">
+                <span>ID / CI</span>
+                <strong>{recipe.patient.national_id}</strong>
+              </div>
+            </section>
+
+            <section className="prescription-body">
+              <div className="rp-title">Rp.</div>
+
+              <table className="recipe-medications-table">
+                <thead>
+                  <tr>
+                    <th>Fármaco</th>
+                    <th>Presentación</th>
+                    <th>Dosis</th>
+                    <th>Frecuencia</th>
+                    <th>Duración</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {recipe.medications.map((medication, index) => (
+                    <tr key={`${medication.drug_name}-${index}`}>
+                      <td>
+                        <strong>{medication.drug_name}</strong>
+                      </td>
+                      <td>{medication.presentation || '—'}</td>
+                      <td>{medication.dose || '—'}</td>
+                      <td>{medication.frequency || '—'}</td>
+                      <td>{medication.duration || '—'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </section>
+
+            {recipe.additional_instructions && (
+              <section className="notes-panel">
+                <div className="notes-header">
+                  <ClipboardList size={16} />
+                  <span>INDICACIONES ADICIONALES</span>
+                </div>
+                <p className="multiline">{recipe.additional_instructions}</p>
+              </section>
+            )}
+
+            <div className="document-footer">
+              <div className="signature-block">
+                <span className="signature-line" />
+                <small>FIRMA Y SELLO</small>
+                <small>{recipeDocument.header.doctor_name}</small>
+              </div>
+
+              <div className="specialist-contact">
+                <div className="contact-item">
+                  <span>
+                    Reg. médico {recipeDocument.footer.license_number}
+                    {recipeDocument.footer.cm_number ? ` · C.M. ${recipeDocument.footer.cm_number}` : ''}
+                  </span>
+                </div>
+                {recipeDocument.footer.address && (
+                  <div className="contact-item">
+                    <MapPin size={14} />
+                    <span>{recipeDocument.footer.address}</span>
+                  </div>
+                )}
+                {recipeDocument.footer.phones.length > 0 && (
+                  <div className="contact-item">
+                    <Phone size={14} />
+                    <span>{recipeDocument.footer.phones.join(' / ')}</span>
+                  </div>
+                )}
+                <div className="contact-item">
+                  <Mail size={14} />
+                  <span>{recipeDocument.footer.email}</span>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

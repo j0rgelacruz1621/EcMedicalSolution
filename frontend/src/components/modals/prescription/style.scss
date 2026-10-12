@@ -337,3 +337,23 @@
     max-height: 94vh;
   }
 }
+
+.char-counter.limit {
+  color: #b42318;
+  font-weight: 600;
+}
+
+.form-error {
+  margin: 0 auto 0 0;
+  align-self: center;
+  color: #b42318;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.secondary-button:disabled,
+.primary-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}

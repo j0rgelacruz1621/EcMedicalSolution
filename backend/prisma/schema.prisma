@@ -26,6 +26,7 @@ model Doctor {
   rif           String?          @map("rif") @db.VarChar(20)
   cmNumber      String?          @map("cm_number") @db.VarChar(50)
   photoUrl      String?          @map("photo_url") @db.Text
+  headerImageUrl String?         @map("header_image_url") @db.Text
   schedules     DoctorSchedule[]
   appointments  Appointment[]
   recipes       Recipe[]
@@ -44,6 +45,7 @@ model MedicalCenter {
   name      String    @db.VarChar(150)
   address   String?
   phone     String?   @db.VarChar(20)
+  headerImageUrl String? @map("header_image_url") @db.Text
   isActive  Boolean?  @default(true) @map("is_active")
   createdAt DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt DateTime? @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
@@ -299,6 +301,7 @@ model Recipe {
   @@index([patientId, issueDate], map: "recipes_patient_id_issue_date_idx")
   @@index([doctorId, issueDate], map: "recipes_doctor_id_issue_date_idx")
   @@index([status], map: "recipes_status_idx")
+  @@index([supersedesRecipeId], map: "recipes_supersedes_recipe_id_idx")
   @@map("recipes")
 }
 

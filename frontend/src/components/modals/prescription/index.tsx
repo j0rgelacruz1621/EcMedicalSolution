@@ -1,5 +1,5 @@
 import './style.scss';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   CalendarDays,
   Droplets,
@@ -10,12 +10,25 @@ import {
   UserRound,
   X,
 } from 'lucide-react';
+import {
+  createRecipe,
+  formatIssueDate,
+  todayLocalIsoDate,
+  updateRecipe,
+  type Recipe,
+} from '../../../services/recipes/recipe-services';
+
+const MAX_NOTES_LENGTH = 500;
 
 interface PrescriptionFormModalProps {
   isOpen: boolean;
+  patientId: number | null;
   patientName: string;
+  doctorId?: number;
+  // Si se recibe, el modal edita ese récipe (se guarda como nueva versión).
+  recipe?: Recipe | null;
   onClose: () => void;
-  onGenerate: () => void;
+  onSaved: (recipe: Recipe) => void;
 }
 
 interface PrescriptionRow {
@@ -26,9 +39,22 @@ interface PrescriptionRow {
   duration: string;
 }
 
-const initialRows: PrescriptionRow[] = [
-  { name: '', presentation: '', dose: '', frequency: '', duration: '' },
-];
+const emptyRow = (): PrescriptionRow => ({ name: '', presentation: '', dose: '', frequency: '', duration: '' });
+
+function rowsFromRecipe(recipe?: Recipe | null): PrescriptionRow[] {
+  if (!recipe?.medications.length) return [emptyRow()];
+  return recipe.medications.map((medication) => ({
+    name: medication.drug_name,
+    presentation: medication.presentation ?? '',
+    dose: medication.dose ?? '',
+    frequency: medication.frequency ?? '',
+    duration: medication.duration ?? '',
+  }));
+}
+
+const isBlankRow = (row: PrescriptionRow) => Object.values(row).every((value) => !value.trim());
+
+const frequencyOptions = ['Cada 4 h', 'Cada 6 h', 'Cada 8 h', 'Cada 12 h', 'Cada 24 h', 'Antes de dormir', 'En caso de dolor'];
 
 const quickRecommendations = [
   { label: 'Dieta baja en sodio', icon: Soup },
@@ -36,16 +62,37 @@ const quickRecommendations = [
   { label: 'Hidratación abundante', icon: Droplets },
 ];
 
-export default function PrescriptionFormModal({ isOpen, patientName, onClose, onGenerate }: PrescriptionFormModalProps) {
-  const [rows, setRows] = useState<PrescriptionRow[]>(initialRows);
+export default function PrescriptionFormModal({
+  isOpen,
+  patientId,
+  patientName,
+  doctorId,
+  recipe,
+  onClose,
+  onSaved,
+}: PrescriptionFormModalProps) {
+  const [rows, setRows] = useState<PrescriptionRow[]>(() => rowsFromRecipe(recipe));
   const [notes, setNotes] = useState('');
+  const [error, setError] = useState('');
+  const [saving, setSaving] = useState(false);
 
-  const dateLabel = useMemo(() => '13 de Julio de 2026', []);
+  const isEditing = Boolean(recipe);
+  const issueDate = recipe?.issue_date ?? todayLocalIsoDate();
+  const dateLabel = useMemo(() => formatIssueDate(issueDate), [issueDate]);
+
+  // Cada apertura parte de un estado limpio (o del récipe a editar).
+  useEffect(() => {
+    if (!isOpen) return;
+    setRows(rowsFromRecipe(recipe));
+    setNotes(recipe?.additional_instructions ?? '');
+    setError('');
+    setSaving(false);
+  }, [isOpen, recipe]);
 
   if (!isOpen) return null;
 
   const addRow = () => {
-    setRows((current) => [...current, { name: '', presentation: '', dose: '', frequency: '', duration: '' }]);
+    setRows((current) => [...current, emptyRow()]);
   };
 
   const removeRow = (index: number) => {
@@ -59,9 +106,57 @@ export default function PrescriptionFormModal({ isOpen, patientName, onClose, on
   const appendQuickNote = (text: string) => {
     setNotes((current) => {
       const trimmed = current.trim();
-      if (!trimmed) return text;
-      return `${trimmed}\n${text}`;
+      const next = trimmed ? `${trimmed}\n${text}` : text;
+      return next.length > MAX_NOTES_LENGTH ? current : next;
     });
+  };
+
+  const handleSubmit = async () => {
+    const filledRows = rows.filter((row) => !isBlankRow(row));
+
+    if (filledRows.length === 0) {
+      setError('Agregue al menos un medicamento.');
+      return;
+    }
+
+    if (filledRows.some((row) => !row.name.trim())) {
+      setError('Cada medicamento debe tener el nombre del fármaco.');
+      return;
+    }
+
+    if (!patientId) {
+      setError('No se pudo identificar al paciente.');
+      return;
+    }
+
+    const medications = filledRows.map((row) => ({
+      drug_name: row.name.trim(),
+      presentation: row.presentation.trim() || undefined,
+      dose: row.dose.trim() || undefined,
+      frequency: row.frequency.trim() || undefined,
+      duration: row.duration.trim() || undefined,
+    }));
+    const additionalInstructions = notes.trim() || undefined;
+
+    setSaving(true);
+    setError('');
+
+    try {
+      const saved = recipe
+        ? await updateRecipe(recipe.recipe_id, { medications, additional_instructions: additionalInstructions })
+        : await createRecipe({
+            patient_id: patientId,
+            doctor_id: doctorId,
+            issue_date: issueDate,
+            medications,
+            additional_instructions: additionalInstructions,
+          });
+      onSaved(saved);
+    } catch (saveError) {
+      setError(saveError instanceof Error ? saveError.message : 'No se pudo guardar el récipe.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -69,7 +164,7 @@ export default function PrescriptionFormModal({ isOpen, patientName, onClose, on
       <div className="prescription-form-modal" onClick={(event) => event.stopPropagation()} role="dialog" aria-modal="true">
         <header className="prescription-form-header">
           <div className="header-text-block">
-            <h2>Emitir Récipe</h2>
+            <h2>{isEditing ? 'Editar Récipe' : 'Emitir Récipe'}</h2>
             <div className="context-badges">
               <span className="context-badge">
                 <UserRound size={14} />
@@ -103,13 +198,15 @@ export default function PrescriptionFormModal({ isOpen, patientName, onClose, on
                     </button>
                   )}
                   <div className="input-field">
-                    <label htmlFor={`med-name-${index}`}>Nombre del fármaco</label>
+                    <label htmlFor={`med-name-${index}`}>Nombre del fármaco *</label>
                     <input
                       id={`med-name-${index}`}
                       type="text"
                       value={row.name}
                       onChange={(event) => updateRow(index, 'name', event.target.value)}
                       placeholder="Ej: Enalapril"
+                      maxLength={150}
+                      required
                     />
                   </div>
 
@@ -120,6 +217,7 @@ export default function PrescriptionFormModal({ isOpen, patientName, onClose, on
                       type="text"
                       value={row.presentation}
                       onChange={(event) => updateRow(index, 'presentation', event.target.value)}
+                      maxLength={100}
                       placeholder="mg / ml"
                     />
                   </div>
@@ -131,6 +229,7 @@ export default function PrescriptionFormModal({ isOpen, patientName, onClose, on
                       type="text"
                       value={row.dose}
                       onChange={(event) => updateRow(index, 'dose', event.target.value)}
+                      maxLength={100}
                       placeholder="Cant."
                     />
                   </div>
@@ -142,7 +241,9 @@ export default function PrescriptionFormModal({ isOpen, patientName, onClose, on
                       type="text"
                       value={row.frequency}
                       onChange={(event) => updateRow(index, 'frequency', event.target.value)}
+                      maxLength={100}
                       placeholder="Cada 8 h"
+                      list="frequency-options"
                     />
                   </div>
 
@@ -153,12 +254,19 @@ export default function PrescriptionFormModal({ isOpen, patientName, onClose, on
                       type="text"
                       value={row.duration}
                       onChange={(event) => updateRow(index, 'duration', event.target.value)}
+                      maxLength={100}
                       placeholder="7 días"
                     />
                   </div>
                 </div>
               ))}
             </div>
+
+            <datalist id="frequency-options">
+              {frequencyOptions.map((option) => (
+                <option key={option} value={option} />
+              ))}
+            </datalist>
 
             <button type="button" className="add-drug-button" onClick={addRow}>
               <Plus size={16} />
@@ -174,7 +282,7 @@ export default function PrescriptionFormModal({ isOpen, patientName, onClose, on
               id="additional-indications"
               value={notes}
               onChange={(event) => setNotes(event.target.value)}
-              maxLength={500}
+              maxLength={MAX_NOTES_LENGTH}
               rows={6}
               placeholder="Escriba recomendaciones de dieta, reposo u otras observaciones clínicas..."
             />
@@ -187,21 +295,25 @@ export default function PrescriptionFormModal({ isOpen, patientName, onClose, on
                   </button>
                 ))}
               </div>
-              <span className="char-counter">Máx. 500 caracteres</span>
+              <span className={notes.length >= MAX_NOTES_LENGTH ? 'char-counter limit' : 'char-counter'} aria-live="polite">
+                {notes.length}/{MAX_NOTES_LENGTH} caracteres
+              </span>
             </div>
           </section>
         </div>
 
         <footer className="prescription-form-footer">
-          <button type="button" className="secondary-button" onClick={onClose}>
+          {error && (
+            <p className="form-error" role="alert">
+              {error}
+            </p>
+          )}
+          <button type="button" className="secondary-button" onClick={onClose} disabled={saving}>
             Cancelar
           </button>
-          <button type="button" className="primary-button" onClick={() => {
-            onClose();
-            onGenerate();
-          }}>
+          <button type="button" className="primary-button" onClick={() => void handleSubmit()} disabled={saving}>
             <Printer size={18} />
-            Generar Récipe
+            {saving ? 'Guardando...' : isEditing ? 'Guardar cambios' : 'Generar Récipe'}
           </button>
         </footer>
       </div>

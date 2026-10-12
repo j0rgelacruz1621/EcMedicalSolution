@@ -412,3 +412,88 @@
     justify-content: flex-start;
   }
 }
+
+.preview-status {
+  margin: 24px;
+  color: #6b7280;
+  font-size: 14px;
+
+  &.error {
+    color: #b42318;
+    font-weight: 600;
+  }
+}
+
+.print-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.recipe-letterhead {
+  display: block;
+  width: 100%;
+  max-height: 160px;
+  object-fit: contain;
+  margin-bottom: 24px;
+}
+
+.recipe-medications-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.16px;
+  color: #3f4349;
+
+  th {
+    padding: 8px 10px;
+    border-bottom: 1px solid #e5dadd;
+    color: #800020;
+    font-size: 9.92px;
+    font-weight: 800;
+    letter-spacing: 0.07em;
+    text-align: left;
+    text-transform: uppercase;
+  }
+
+  td {
+    padding: 10px;
+    border-bottom: 1px solid #f1e7ea;
+    vertical-align: top;
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+}
+
+.notes-panel p.multiline {
+  white-space: pre-line;
+}
+
+// Al imprimir solo sale el récipe, sin el resto de la aplicación.
+@media print {
+  body.printing-recipe {
+    * {
+      visibility: hidden;
+    }
+
+    .printable-recipe,
+    .printable-recipe * {
+      visibility: visible;
+    }
+
+    .printable-recipe {
+      position: absolute;
+      inset: 0 auto auto 0;
+      width: 100%;
+      overflow: visible;
+      padding: 0;
+      box-shadow: none;
+    }
+
+    .recipe-medications-table tr,
+    .notes-panel,
+    .document-footer {
+      break-inside: avoid;
+    }
+  }
+}
