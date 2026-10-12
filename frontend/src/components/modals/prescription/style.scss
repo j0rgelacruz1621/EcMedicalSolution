@@ -15,7 +15,7 @@
   max-height: 90vh;
   overflow: hidden;
   background: #fff;
-  border: 1px solid rgba(128, 0, 32, 0.14);
+  border: 1px solid #c3c6d5;
   border-radius: 22.4px;
   box-shadow: 0 28px 70px rgba(17, 24, 39, 0.18);
   display: flex;
@@ -32,7 +32,7 @@
   gap: 16px;
   padding: 20px 24px 16px;
   background: #fff;
-  border-bottom: 1px solid #f1e7ea;
+  border-bottom: 1px solid #c3c6d5;
 }
 
 .header-text-block {
@@ -69,7 +69,7 @@
   width: 40px;
   height: 40px;
   border: 0;
-  background: #f9eef1;
+  background: transparent;
   color: #800020;
   border-radius: 12.8px;
   display: grid;
@@ -81,7 +81,7 @@
 .close-button:hover,
 .close-button:focus-visible {
   transform: translateY(-2px);
-  background: #f5e1e6;
+  background: #e5e7eb;
 }
 
 .prescription-form-body {
@@ -94,7 +94,7 @@
 
 .prescription-drugs-section,
 .prescription-notes-section {
-  border: 1px solid #f0e4e7;
+  border: 1px solid #c3c6d5;
   border-radius: 16px;
   background: #fff;
   padding: 16px;
@@ -112,9 +112,9 @@
   grid-template-columns: minmax(180px, 1.7fr) minmax(120px, 0.8fr) minmax(110px, 0.8fr) minmax(150px, 1.2fr) minmax(100px, 0.8fr);
   gap: 12.8px;
   padding: 12.8px;
-  border: 1px solid #f1e7ea;
+  border: 1px solid #c3c6d5;
   border-radius: 14.4px;
-  background: #fff9fa;
+  background: #f8f9fb;
 }
 
 .remove-drug-button {
@@ -126,7 +126,7 @@
   display: grid;
   place-items: center;
   padding: 0;
-  border: 1px solid #f0d5dc;
+  border: 1px solid #c3c6d5;
   border-radius: 50%;
   background: #fff;
   color: #800020;
@@ -147,7 +147,7 @@
 
 .remove-drug-button:hover,
 .remove-drug-button:focus-visible {
-  background: #fbe8ec;
+  background: #e5e7eb;
   transform: translateY(0) scale(1.08);
 }
 
@@ -245,7 +245,7 @@
 .quick-chip:hover,
 .quick-chip:focus-visible {
   transform: translateY(-2px);
-  border-color: #e2c3cb;
+  border-color: #c3c6d5;
   background: #fff;
   box-shadow: 0 4px 10px rgba(128, 0, 32, 0.1);
 }
@@ -260,7 +260,7 @@
   justify-content: flex-end;
   gap: 12px;
   padding: 16px 24px 24px;
-  border-top: 1px solid #f1e7ea;
+  border-top: 1px solid #c3c6d5;
   background: #fff;
 }
 
@@ -287,14 +287,14 @@
 
 .secondary-button {
   background: #fff;
-  border: 1px solid #e8dfe3;
+  border: 1px solid #c3c6d5;
   color: #3a3d42;
 }
 
 .secondary-button:hover,
 .secondary-button:focus-visible {
-  border-color: #d8bbc4;
-  background: #fff9fa;
+  border-color: #c3c6d5;
+  background: #f8f9fb;
 }
 
 .primary-button {

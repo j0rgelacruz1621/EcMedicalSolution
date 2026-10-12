@@ -15,7 +15,7 @@
   max-height: 90vh;
   overflow: hidden;
   background: #fff;
-  border: 1px solid rgba(128, 0, 32, 0.14);
+  border: 1px solid #c3c6d5;
   border-radius: 22.4px;
   box-shadow: 0 24px 60px rgba(17, 24, 39, 0.18);
   display: flex;
@@ -31,7 +31,7 @@
   gap: 16px;
   padding: 19.2px 24px 16px;
   background: #fff;
-  border-bottom: 1px solid #f1e7ea;
+  border-bottom: 1px solid #c3c6d5;
 }
 
 .header-title-wrap {
@@ -44,7 +44,7 @@
   width: 41.6px;
   height: 41.6px;
   border-radius: 12.8px;
-  background: #fbe8ec;
+  background: #f3f4f6;
   color: #800020;
   display: grid;
   place-items: center;
@@ -66,7 +66,7 @@
   width: 40px;
   height: 40px;
   border: 0;
-  background: #f9eef1;
+  background: #e5e7eb;
   color: #800020;
   border-radius: 12.8px;
   display: grid;
@@ -84,7 +84,7 @@
 
 .medications-section,
 .previous-prescriptions-section {
-  border: 1px solid #f0e4e7;
+  border: 1px solid #c3c6d5;
   border-radius: 17.6px;
   background: #fff;
   padding: 16px 16px 17.6px;
@@ -118,7 +118,7 @@
   width: 38.4px;
   height: 38.4px;
   border-radius: 12.8px;
-  background: #fceef1;
+  background: #f3f4f6;
   color: #800020;
   display: grid;
   place-items: center;
@@ -163,7 +163,7 @@
   align-items: center;
   gap: 7.2px;
   background: #fff;
-  border: 1px solid rgba(128, 0, 32, 0.2);
+  border: 1px solid #c3c6d5;
   color: #800020;
   padding: 9.6px 12.8px;
   border-radius: 12px;
@@ -182,8 +182,8 @@
   grid-template-columns: 120px minmax(0, 1fr) auto;
   gap: 16px;
   align-items: center;
-  background: #fff9fa;
-  border: 1px solid #f1e7ea;
+  background: #f8f9fb;
+  border: 1px solid #c3c6d5;
   border-radius: 16px;
   padding: 13.6px 12.8px;
 }
@@ -196,7 +196,7 @@
   min-height: 74px;
   border-radius: 12.8px;
   background: #fff;
-  border: 1px solid rgba(128, 0, 32, 0.12);
+  border: 1px solid #c3c6d5;
   color: #800020;
 }
 
@@ -236,7 +236,7 @@
   justify-content: center;
   gap: 7.2px;
   background: #fff;
-  border: 1px solid rgba(128, 0, 32, 0.2);
+  border: 1px solid #c3c6d5;
   color: #800020;
   padding: 9.92px 14.4px;
   border-radius: 12px;
@@ -248,7 +248,7 @@
   display: flex;
   justify-content: flex-end;
   padding: 16px 24px 24px;
-  border-top: 1px solid #f1e7ea;
+  border-top: 1px solid #c3c6d5;
   background: #fff;
 }
 

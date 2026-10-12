@@ -54,6 +54,15 @@ export interface CreatePatientRequest {
   };
 }
 
+export interface UpdatePatientRequest {
+  medicalHistoryNotes?: string;
+  vitals?: {
+    bloodPressure?: string;
+    heartRateBpm?: number;
+    weightKg?: number;
+  };
+}
+
 export async function getPatients(params: {
   page?: number;
   limit?: number;
@@ -93,5 +102,16 @@ export async function createPatient(payload: CreatePatientRequest): Promise<{
   vitals: PatientVitals | null;
 }> {
   const response = await apiClient.post('/api/v1/patients', payload);
+  return response.data;
+}
+
+export async function updatePatient(
+  id: number,
+  payload: UpdatePatientRequest,
+): Promise<{ patient: Patient; vitals: PatientVitals | null }> {
+  const response = await apiClient.patch<{ patient: Patient; vitals: PatientVitals | null }>(
+    `/api/v1/patients/${id}`,
+    payload,
+  );
   return response.data;
 }

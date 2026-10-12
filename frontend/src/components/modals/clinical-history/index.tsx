@@ -120,7 +120,7 @@ export default function ClinicalHistoryModal({
         <header className="clinical-history-header">
           <div>
             <h2>{patientName}</h2>
-            <p>Historial Clínico Histórico</p>
+            <p>Historial Clínico</p>
           </div>
 
           <button type="button" className="close-button" aria-label="Cerrar historial clínico" onClick={onClose}>
@@ -145,13 +145,6 @@ export default function ClinicalHistoryModal({
           </div>
 
           <div className="timeline-section">
-            <div className="timeline-header">
-              <div className="timeline-title-wrap">
-                <HeartPulse size={18} />
-                <h3>Evolución médica</h3>
-              </div>
-            </div>
-
             <div className="timeline-list">
               {timeline.map((event) => (
                 <article key={`${event.category}-${event.date}-${event.title}`} className="timeline-item">
