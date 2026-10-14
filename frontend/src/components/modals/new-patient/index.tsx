@@ -1,18 +1,22 @@
 import React from 'react';
-import { X, UserPlus, Activity, CheckCircle } from 'lucide-react';
+import { X, UserPlus, CheckCircle, PencilLine } from 'lucide-react';
 import './style.scss';
+import { useEffect } from 'react';
 import { useState } from 'react';
-import { createPatient, type Patient, type PatientGender } from '../../../services/patients/patient-services';
+import { createPatient, updatePatient, type Patient, type PatientGender } from '../../../services/patients/patient-services';
+import type { Office } from '../../../services/medical-center/medical-center-services';
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: (patient: Patient) => void;
   doctorId?: number;
+  offices?: Office[];
+  patientToEdit?: Patient | null;
 }
 
 
-export default function NewPatientModal({ isOpen, onClose, onSuccess, doctorId }: Props) {
+export default function NewPatientModal({ isOpen, onClose, onSuccess, doctorId, offices = [], patientToEdit = null }: Props) {
   // Estado interno para el formulario
   const [formData, setFormData] = useState({
     name: '',
@@ -23,67 +27,28 @@ export default function NewPatientModal({ isOpen, onClose, onSuccess, doctorId }
     origin: '',
     address: '',
     gender: '' as PatientGender | '',
-    phone: '',
-    pa: '',
-    fc: '',
-    weight: ''
+    phone: ''
   });
 
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
+  const isEditing = Boolean(patientToEdit);
 
-  const buildVitalsPayload = () => {
-    const vitals: {
-      bloodPressure?: string;
-      heartRateBpm?: number;
-      weightKg?: number;
-    } = {};
-
-    const paValue = formData.pa.trim();
-    if (paValue) {
-      const normalizedPa = paValue.replace(/\s+/g, '').replace(/mmhg/gi, '').toUpperCase();
-      const paMatch = normalizedPa.match(/^(\d{2,3})\/(\d{2,3})$/);
-
-      if (!paMatch) {
-        setError('La presión arterial debe tener el formato 120/80.');
-        return null;
-      }
-
-      const systolic = Number(paMatch[1]);
-      const diastolic = Number(paMatch[2]);
-
-      if (systolic < 60 || systolic > 220 || diastolic < 30 || diastolic > 140) {
-        setError('La presión arterial ingresada está fuera del rango válido.');
-        return null;
-      }
-
-      vitals.bloodPressure = `${systolic}/${diastolic}`;
-    }
-
-    const fcValue = formData.fc.trim();
-    if (fcValue) {
-      const heartRate = Number(fcValue.replace(/[^\d.]/g, ''));
-      if (!Number.isFinite(heartRate) || heartRate < 20 || heartRate > 250) {
-        setError('La frecuencia cardíaca debe estar entre 20 y 250 bpm.');
-        return null;
-      }
-
-      vitals.heartRateBpm = heartRate;
-    }
-
-    const weightValue = formData.weight.trim();
-    if (weightValue) {
-      const weight = Number(weightValue.replace(/[^\d.]/g, ''));
-      if (!Number.isFinite(weight) || weight <= 0 || weight > 500) {
-        setError('El peso debe estar entre 0 y 500 kg.');
-        return null;
-      }
-
-      vitals.weightKg = weight;
-    }
-
-    return Object.keys(vitals).length > 0 ? vitals : undefined;
-  };
+  // Al abrir en modo edición, precargar los datos del paciente
+  useEffect(() => {
+    if (!isOpen || !patientToEdit) return;
+    setFormData({
+      name: patientToEdit.firstName,
+      lastName: patientToEdit.lastName,
+      ci: patientToEdit.nationalId,
+      email: patientToEdit.email,
+      age: String(patientToEdit.age ?? ''),
+      origin: patientToEdit.origin ?? '',
+      address: patientToEdit.address ?? '',
+      gender: (patientToEdit.gender as PatientGender) ?? '',
+      phone: patientToEdit.phone ?? '',
+    });
+  }, [isOpen, patientToEdit]);
 
   if (!isOpen) return null;
 
@@ -93,7 +58,7 @@ export default function NewPatientModal({ isOpen, onClose, onSuccess, doctorId }
 
     const token = localStorage.getItem('token');
     if (!token) {
-      setError('Debes iniciar sesión para registrar un paciente.');
+      setError('Debes iniciar sesión para guardar un paciente.');
       return;
     }
 
@@ -103,32 +68,38 @@ export default function NewPatientModal({ isOpen, onClose, onSuccess, doctorId }
       return;
     }
 
-    const computedDateOfBirth = new Date();
-    computedDateOfBirth.setFullYear(computedDateOfBirth.getFullYear() - ageValue);
-    const isoDate = computedDateOfBirth.toISOString().slice(0, 10);
-
-    const vitals = buildVitalsPayload();
-    if (vitals === null) {
-      return;
-    }
-
     setSaving(true);
 
     try {
-      const result = await createPatient({
-        nationalId: formData.ci,
-        firstName: formData.name,
-        lastName: formData.lastName,
-        email: formData.email,
-        phone: formData.phone,
-        age: Number(formData.age),
-        origin: formData.origin || undefined,
-        address: formData.address || undefined,
-        ...(doctorId ? { assignedDoctorId: doctorId } : {}),
-        gender: formData.gender as PatientGender,
-        ...(vitals ? { vitals } : { vitals: {} }),
-      });
-      onSuccess(result.patient);
+      if (isEditing && patientToEdit) {
+        const result = await updatePatient(patientToEdit.id, {
+          nationalId: formData.ci,
+          firstName: formData.name,
+          lastName: formData.lastName,
+          email: formData.email,
+          phone: formData.phone,
+          age: Number(formData.age),
+          origin: formData.origin || null,
+          address: formData.address || null,
+          gender: formData.gender as PatientGender,
+        });
+        onSuccess(result.patient);
+      } else {
+        const result = await createPatient({
+          nationalId: formData.ci,
+          firstName: formData.name,
+          lastName: formData.lastName,
+          email: formData.email,
+          phone: formData.phone,
+          age: Number(formData.age),
+          origin: formData.origin || undefined,
+          address: formData.address || undefined,
+          ...(doctorId ? { assignedDoctorId: doctorId } : {}),
+          gender: formData.gender as PatientGender,
+          vitals: {},
+        });
+      }
+      onClose();
     } catch (err: unknown) {
       const apiMessage = (err as { response?: { data?: { message?: string; error?: string } } })?.response?.data?.message
         ?? (err as { response?: { data?: { message?: string; error?: string } } })?.response?.data?.error
@@ -146,14 +117,14 @@ export default function NewPatientModal({ isOpen, onClose, onSuccess, doctorId }
         <header className="modal-header">
           <div className="header-title-group">
             <div className="icon-circle">
-              <UserPlus size={24} />
+              {isEditing ? <PencilLine size={24} /> : <UserPlus size={24} />}
             </div>
             <div>
-              <h2 className="title-vinotinto">Agregar Paciente</h2>
-              <p>Ingrese los datos clínicos del nuevo ingreso</p>
+              <h2 className="title-vinotinto">{isEditing ? 'Editar Paciente' : 'Agregar Paciente'}</h2>
+              <p>{isEditing ? 'Actualice los datos del paciente' : 'Ingrese los datos clínicos del nuevo ingreso'}</p>
             </div>
           </div>
-          <button className="close-btn" onClick={onClose}>
+          <button className="close-btn" onClick={() => { onClose(); }}>
             <X size={24} />
           </button>
         </header>
@@ -234,11 +205,12 @@ export default function NewPatientModal({ isOpen, onClose, onSuccess, doctorId }
                 onChange={(e) => setFormData({...formData, origin: e.target.value})}
               >
                 <option value="">Seleccione una opción</option>
-                <option value="Mérida">Mérida</option>
-                <option value="Tovar">Tovar</option>
-                <option value="El Vigía">El Vigía</option>
-                <option value="Ejido">Ejido</option>
-                <option value="Otra">Otra</option>
+                {offices.map((office) => (
+                  <option key={office.id} value={office.officeNumber}>
+                    {`Consultorio ${office.officeNumber}${office.medicalCenter?.name ? ` · ${office.medicalCenter.name}` : ''}`}
+                  </option>
+                ))}
+                {offices.length === 0 && <option value="Otra">Otra</option>}
               </select>
             </div>
             <div className="form-group">
@@ -252,41 +224,7 @@ export default function NewPatientModal({ isOpen, onClose, onSuccess, doctorId }
               />
             </div>
 
-            {/* SECCIÓN DE SIGNOS VITALES EN UNA LÍNEA */}
-            <div className="form-section-title">
-              <Activity size={18} />
-              <span>Triaje Inicial</span>
-            </div>
-
-            <div className="vitals-row">
-              <div className="form-group">
-                <label>P.A (Presión Arterial)</label>
-                <input
-                  type="text"
-                  placeholder="Ej. 120/80 mmHg"
-                  value={formData.pa}
-                  onChange={(e) => setFormData({...formData, pa: e.target.value})}
-                />
-              </div>
-              <div className="form-group">
-                <label>F.C (Frecuencia Cardíaca)</label>
-                <input
-                  type="text"
-                  placeholder="Ej. 72 bpm"
-                  value={formData.fc}
-                  onChange={(e) => setFormData({...formData, fc: e.target.value})}
-                />
-              </div>
-              <div className="form-group">
-                <label>Peso</label>
-                <input
-                  type="text"
-                  placeholder="Ej. 75 kg"
-                  value={formData.weight}
-                  onChange={(e) => setFormData({...formData, weight: e.target.value})}
-                />
-              </div>
-            </div>
+            {/* SECCIÓN DE SIGNOS VITALES ELIMINADA: el médico registra el triaje luego en otra parte del flujo */}
 
             <div className="form-group full-width">
               <label>Dirección detallada</label>
@@ -309,7 +247,7 @@ export default function NewPatientModal({ isOpen, onClose, onSuccess, doctorId }
           </button>
           <button type="submit" className="btn-save-large" form="new-patient-form" disabled={saving}>
             <CheckCircle size={20} />
-            {saving ? 'Guardando...' : 'Guardar Paciente'}
+            {saving ? 'Guardando...' : isEditing ? 'Guardar Cambios' : 'Guardar Paciente'}
           </button>
         </footer>
       </div>

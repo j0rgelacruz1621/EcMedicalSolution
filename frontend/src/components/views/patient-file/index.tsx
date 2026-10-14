@@ -1,6 +1,7 @@
 import './style.scss';
 import { useEffect, useMemo, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import LeftSideBar from '../../left-sideBar';
 import ClinicalHistoryModal from '../../modals/clinical-history';
 import NewClinicalHistoryModal from '../../modals/new-clinical-history';
@@ -12,6 +13,7 @@ import ClinicalStudiesModal from '../../modals/Clinica-trials';
 import SupplementaryTestsModal from '../../modals/Supplementary-tests';
 import PreoperativeHistoryModal from '../../modals/preoperative-history';
 import NewSupplementaryTests from '../new-Supplementary-tests';
+import NewPatientModal from '../../modals/new-patient';
 import {
   CalendarDays,
   ChevronLeft,
@@ -60,6 +62,7 @@ function buildCalendarCells(monthDate: Date) {
 
 export default function PatientFileView() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [patient, setPatient] = useState<Patient | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -87,6 +90,7 @@ export default function PatientFileView() {
   const [previewRecipeId, setPreviewRecipeId] = useState<number | null>(null);
   const [recipesRefreshKey, setRecipesRefreshKey] = useState(0);
   const [isPreoperativeHistoryOpen, setIsPreoperativeHistoryOpen] = useState(false);
+  const [isEditPatientOpen, setIsEditPatientOpen] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -320,12 +324,28 @@ export default function PatientFileView() {
             </div>
 
             <div className="header-actions-row">
-              <button className="primary-action" type="button">
+              <button className="primary-action" type="button" onClick={() => {
+                // Contexto del médico activo para el flujo de agendado
+                const role = localStorage.getItem('user_rol');
+                const doctorId = role === 'DOCTOR'
+                  ? localStorage.getItem('doctor_id')
+                  : searchParams.get('doctorId') || sessionStorage.getItem('active_doctor_id');
+                navigate(doctorId ? `/date?doctorId=${doctorId}` : '/date');
+              }}>
                 <Plus size={18} />
                 Nueva Cita
               </button>
-              <button className="secondary-action" type="button">Editar</button>
-              <button className="secondary-action" type="button">Informe</button>
+              <button className="secondary-action" type="button" onClick={() => setIsEditPatientOpen(true)}>Editar</button>
+              <button className="secondary-action" type="button" onClick={() => {
+                const role = localStorage.getItem('user_rol');
+                const doctorId = role === 'DOCTOR'
+                  ? localStorage.getItem('doctor_id')
+                  : searchParams.get('doctorId') || sessionStorage.getItem('active_doctor_id');
+                const params = new URLSearchParams();
+                if (doctorId) params.set('doctorId', String(doctorId));
+                if (patient) params.set('patient_id', String(patient.id));
+                navigate(`/reports/medical-certificate${params.toString() ? `?${params.toString()}` : ''}`);
+              }}>Informe</button>
             </div>
           </section>
 
@@ -591,6 +611,16 @@ export default function PatientFileView() {
       />
 
       {isNewSupplementaryTestsOpen && <NewSupplementaryTests patientName={patientName} onClose={() => setIsNewSupplementaryTestsOpen(false)} />}
+
+      <NewPatientModal
+        isOpen={isEditPatientOpen}
+        onClose={() => setIsEditPatientOpen(false)}
+        onSuccess={(updatedPatient) => {
+          setPatient(updatedPatient);
+          setIsEditPatientOpen(false);
+        }}
+        patientToEdit={patient}
+      />
     </div>
   );
 }

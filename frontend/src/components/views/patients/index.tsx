@@ -34,6 +34,7 @@ export default function PatientsView() {
   const doctorId = role === 'DOCTOR' ? Number(localStorage.getItem('doctor_id')) : Number(searchParams.get('doctorId') || sessionStorage.getItem('active_doctor_id')) || undefined;
   const controlPanelPath = doctorId ? `/control-panel?doctorId=${doctorId}` : '/control-panel';
   const [showModal, setShowModal] = useState(false);
+  const [patientToEdit, setPatientToEdit] = useState<Patient | null>(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [lastAddedName, setLastAddedName] = useState('');
   const [lastAddedId, setLastAddedId] = useState<number | null>(null);
@@ -170,12 +171,17 @@ export default function PatientsView() {
   }, [doctorId, doctorOffices]);
 
   const handlePatientCreated = (patient: Patient) => {
+    setShowConfirmModal(true);
     setLastAddedName(`${patient.firstName} ${patient.lastName}`);
     setLastAddedId(patient.id);
+    if (patientToEdit) {
+      // Modo edición: actualizar la fila existente sin mostrar la confirmación
+      setPatients((current) => current.map(item => item.id === patient.id ? patient : item));
+      setShowConfirmModal(false);
+      return;
+    }
     setPatients((current) => [patient, ...current]);
     setTotalPatients((current) => current + 1);
-    setShowModal(false);
-    setShowConfirmModal(true);
   };
 
   const handleViewPatientFile = () => {
@@ -234,7 +240,7 @@ export default function PatientsView() {
 
             <button
                 className="btn-new-patient"
-                onClick={() => setShowModal(true)}
+                onClick={() => { setPatientToEdit(null); setShowModal(true); }}
             >
                 <Plus size={18} /> Nuevo Paciente
             </button>
@@ -287,7 +293,7 @@ export default function PatientsView() {
                         <button type="button" title="Ver historia" onClick={() => navigate(`/patients/${p.id}`)} aria-label="Ver historia del paciente">
                           <Eye size={16} />
                         </button>
-                        <button type="button" title="Editar paciente" aria-label="Editar paciente">
+                        <button type="button" title="Editar paciente" aria-label="Editar paciente" onClick={() => { setPatientToEdit(p); setShowModal(true); }}>
                           <PencilLine size={16} />
                         </button>
                       </div>
@@ -329,7 +335,9 @@ export default function PatientsView() {
         isOpen={showModal}
         onClose={() => setShowModal(false)}
         onSuccess={handlePatientCreated}
+        patientToEdit={patientToEdit}
         doctorId={doctorId}
+        offices={doctorOffices}
       />
 
       <ConfirmNewPatientModal
