@@ -28,7 +28,9 @@ export default function MedicalCertificateView() {
   const [error, setError] = useState('')
   const [search, setSearch] = useState('')
 
-  const [patientId, setPatientId] = useState<number | null>(null)
+  const [patientId, setPatientId] = useState<number | null>(
+    searchParams.get('patient_id') ? Number(searchParams.get('patient_id')) : null,
+  )
   const [documentType, setDocumentType] = useState(documentTypes[0])
   const [restDays, setRestDays] = useState('3')
   const [startDate, setStartDate] = useState(() => new Date().toISOString().slice(0, 10))

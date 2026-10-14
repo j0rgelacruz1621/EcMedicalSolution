@@ -62,6 +62,7 @@ export default function AgendaView() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [currentDate, setCurrentDate] = useState(() => new Date());
+  const todayKey = toDayKey(new Date().toISOString());
   const weekDays = useMemo(() => {
     const monday = new Date(currentDate)
     const day = monday.getDay() || 7
@@ -78,6 +79,30 @@ export default function AgendaView() {
   }, [currentDate]);
   const monthLabel = currentDate.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' }).toUpperCase()
   const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate()
+
+  /** Filas de semanas del mes actual (para la vista "Mes"). */
+  const monthWeeks = useMemo(() => {
+    const firstDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+    const offset = (firstDay.getDay() || 7) - 1; // lunes = 0
+    const cells: Array<{ key: string; date: number; inMonth: boolean; label: string; weekday: string }> = [];
+    for (let i = 0; i < offset; i++) cells.push({ key: `blank-${i}`, date: 0, inMonth: false, label: '', weekday: '' });
+    for (let d = 1; d <= daysInMonth; d++) {
+      const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), d);
+      cells.push({
+        key: `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`,
+        date: d,
+        inMonth: true,
+        label: d.toString(),
+        weekday: date.toLocaleDateString('es-ES', { weekday: 'short' }).replace('.', '').toUpperCase(),
+      });
+    }
+    const weeks: typeof cells[] = [];
+    for (let i = 0; i < cells.length; i += 7) weeks.push(cells.slice(i, i + 7));
+    return weeks;
+  }, [currentDate, daysInMonth]);
+
+  /** Desplazamiento de la navegación < Hoy > según la vista activa. */
+  const navStep = viewMode === 'Día' ? 1 : viewMode === 'Mes' ? 30 : 7;
 
   useEffect(() => {
     if (doctorId) {
@@ -132,9 +157,9 @@ export default function AgendaView() {
               </div>
 
               <div className="date-nav">
-                <button onClick={() => setCurrentDate(date => new Date(date.getFullYear(), date.getMonth(), date.getDate() - 7))}><ChevronLeft size={20} /></button>
+                <button onClick={() => setCurrentDate(date => new Date(date.getFullYear(), date.getMonth(), date.getDate() - navStep))}><ChevronLeft size={20} /></button>
                 <button className="today-btn" onClick={() => setCurrentDate(new Date())}>Hoy</button>
-                <button onClick={() => setCurrentDate(date => new Date(date.getFullYear(), date.getMonth(), date.getDate() + 7))}><ChevronRight size={20} /></button>
+                <button onClick={() => setCurrentDate(date => new Date(date.getFullYear(), date.getMonth(), date.getDate() + navStep))}><ChevronRight size={20} /></button>
               </div>
 
               <button className="btn-add-appointment" type="button" onClick={() => navigate(doctorId ? `/date?doctorId=${doctorId}` : '/date')}>
@@ -182,11 +207,49 @@ export default function AgendaView() {
               </div>
             </aside>
 
-            {/* GRILLA SEMANAL */}
+            {/* GRILLA SEGÚN VISTA ACTIVA */}
+            {viewMode === 'Mes' ? (
+              <main className="month-grid">
+                <div className="grid-header">
+                  {['LUN', 'MAR', 'MIÉ', 'JUE', 'VIE', 'SÁB', 'DOM'].map(d => (
+                    <div key={d} className="grid-col-header"><span className="day-label">{d}</span></div>
+                  ))}
+                </div>
+                <div className="month-body">
+                  {monthWeeks.map((week, weekIndex) => (
+                    <div key={weekIndex} className="month-row">
+                      {week.map(cell => (
+                        <div
+                          key={cell.key}
+                          className={`month-cell ${cell.inMonth ? '' : 'blank'} ${cell.key === todayKey ? 'today' : ''}`}
+                        >
+                          {cell.inMonth && <span className="month-day-num">{cell.date}</span>}
+                          {cell.inMonth && appointments
+                            .filter(app => toDayKey(app.appointmentDate) === cell.key)
+                            .map(app => {
+                              const isFirstTime = formatAppointmentType(app).toLowerCase() === 'de primera';
+                              const typeColor = isFirstTime ? 'rgb(0 107 95)' : 'var(--primary-color)';
+                              return (
+                                <div key={app.id} className="appointment-card compact" style={{ borderLeftColor: typeColor }}>
+                                  <span className="app-time" style={{ color: typeColor }}>{formatAppointmentTime(app.startTime)}</span>
+                                  <span className="app-patient">{formatAppointmentPatientName(app)}</span>
+                                </div>
+                              );
+                            })}
+                        </div>
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              </main>
+            ) : (
             <main className="weekly-grid">
               <div className="grid-header">
-                {weekDays.map(day => (
-                  <div key={day.key} className={`grid-col-header ${day.key === toDayKey(new Date().toISOString()) ? 'active' : ''}`}>
+                {(viewMode === 'Día'
+                  ? weekDays.filter(day => day.key === toDayKey(currentDate.toISOString()))
+                  : weekDays
+                ).map(day => (
+                  <div key={day.key} className={`grid-col-header ${day.key === todayKey ? 'active' : ''}`}>
                     <span className="day-label">{day.label}</span>
                     <span className="day-number">{day.date}</span>
                   </div>
@@ -194,7 +257,10 @@ export default function AgendaView() {
               </div>
 
               <div className="grid-body">
-                {weekDays.map(day => (
+                {(viewMode === 'Día'
+                  ? weekDays.filter(day => day.key === toDayKey(currentDate.toISOString()))
+                  : weekDays
+                ).map(day => (
                   <div key={day.key} className="grid-column">
                     {appointments
                       .filter(app => toDayKey(app.appointmentDate) === day.key)
@@ -213,6 +279,7 @@ export default function AgendaView() {
                 ))}
               </div>
             </main>
+            )}
           </div>
         </div>
       </div>

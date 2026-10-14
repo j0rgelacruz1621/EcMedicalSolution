@@ -85,6 +85,8 @@
 }
 
 .prescription-form-body {
+  flex: 1;
+  min-height: 0;
   overflow-y: auto;
   padding: 20px 24px 0;
   display: flex;
@@ -256,6 +258,7 @@
 }
 
 .prescription-form-footer {
+  flex-shrink: 0;
   display: flex;
   justify-content: flex-end;
   gap: 12px;

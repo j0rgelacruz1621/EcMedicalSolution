@@ -55,7 +55,16 @@ export interface CreatePatientRequest {
 }
 
 export interface UpdatePatientRequest {
-  medicalHistoryNotes?: string;
+  nationalId?: string;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  phone?: string;
+  age?: number;
+  origin?: string | null;
+  address?: string | null;
+  gender?: PatientGender;
+  medicalHistoryNotes?: string | null;
   vitals?: {
     bloodPressure?: string;
     heartRateBpm?: number;
