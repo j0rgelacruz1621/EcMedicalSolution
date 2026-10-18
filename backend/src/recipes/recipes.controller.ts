@@ -31,10 +31,14 @@ import {
 } from './dto/recipe-response.dto';
 import { UpdateRecipeDto } from './dto/update-recipe.dto';
 import { RecipesService } from './recipes.service';
+import { ErrorResponseDto } from '../common/dto/error-response.dto';
 
 @ApiTags('recipes')
 @ApiBearerAuth('access-token')
-@ApiUnauthorizedResponse({ description: 'Token ausente, inválido o expirado.' })
+@ApiUnauthorizedResponse({
+  type: ErrorResponseDto,
+  description: 'Token ausente, inválido o expirado.',
+})
 @Controller('api/v1/recipes')
 export class RecipesController {
   constructor(private readonly recipesService: RecipesService) {}
@@ -60,11 +64,13 @@ export class RecipesController {
     type: RecipeResponseDto,
   })
   @ApiBadRequestResponse({
+    type: ErrorResponseDto,
     description:
       'Datos inválidos: sin medicamentos, fármaco sin nombre, indicaciones de más de 500 caracteres, ' +
       'paciente/médico/centro/cita inexistente, cita de otro paciente, o cuenta SA sin doctor_id.',
   })
   @ApiForbiddenResponse({
+    type: ErrorResponseDto,
     description:
       'El usuario no es médico ni SA, o un médico intenta emitir con otro doctor_id.',
   })
@@ -79,8 +85,18 @@ export class RecipesController {
       'Devuelve cualquier versión del récipe, incluidas las reemplazadas por una edición.',
   })
   @ApiParam({ name: 'id', type: Number, example: 1, description: 'recipe_id' })
-  @ApiOkResponse({ type: RecipeResponseDto })
-  @ApiNotFoundResponse({ description: 'El récipe no existe.' })
+  @ApiOkResponse({
+    description: 'Detalle del récipe con sus medicamentos.',
+    type: RecipeResponseDto,
+  })
+  @ApiBadRequestResponse({
+    type: ErrorResponseDto,
+    description: 'El id no es un número entero válido.',
+  })
+  @ApiNotFoundResponse({
+    type: ErrorResponseDto,
+    description: 'El récipe no existe.',
+  })
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.recipesService.findOne(id);
   }
@@ -112,12 +128,20 @@ export class RecipesController {
     type: RecipeResponseDto,
   })
   @ApiBadRequestResponse({
+    type: ErrorResponseDto,
     description:
-      'Datos inválidos: sin medicamentos, fármaco sin nombre o indicaciones de más de 500 caracteres.',
+      'id inválido o datos inválidos: sin medicamentos, fármaco sin nombre o indicaciones de más de 500 caracteres.',
   })
-  @ApiForbiddenResponse({ description: 'El récipe pertenece a otro médico.' })
-  @ApiNotFoundResponse({ description: 'El récipe no existe.' })
+  @ApiForbiddenResponse({
+    type: ErrorResponseDto,
+    description: 'El récipe pertenece a otro médico.',
+  })
+  @ApiNotFoundResponse({
+    type: ErrorResponseDto,
+    description: 'El récipe no existe.',
+  })
   @ApiConflictResponse({
+    type: ErrorResponseDto,
     description:
       'La versión ya fue reemplazada o anulada, o hubo una edición simultánea. Recargar y reintentar sobre la versión vigente.',
   })
@@ -137,8 +161,19 @@ export class RecipesController {
       'paciente, fecha, medicamentos e indicaciones, y footer (dirección, teléfonos, registro médico y C.M.).',
   })
   @ApiParam({ name: 'id', type: Number, example: 1, description: 'recipe_id' })
-  @ApiOkResponse({ type: RecipeDocumentResponseDto })
-  @ApiNotFoundResponse({ description: 'El récipe no existe.' })
+  @ApiOkResponse({
+    description:
+      'Datos del documento: header (membrete), recipe (cuerpo) y footer (contacto, registro y firma).',
+    type: RecipeDocumentResponseDto,
+  })
+  @ApiBadRequestResponse({
+    type: ErrorResponseDto,
+    description: 'El id no es un número entero válido.',
+  })
+  @ApiNotFoundResponse({
+    type: ErrorResponseDto,
+    description: 'El récipe no existe.',
+  })
   getDocument(@Param('id', ParseIntPipe) id: number) {
     return this.recipesService.getPrintableDocument(id);
   }

@@ -1,67 +1,82 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { recipe_status_enum, recipe_version_type_enum } from '@prisma/client';
+import {
+  DocumentDoctorSummaryDto,
+  DocumentFooterDto,
+  DocumentHeaderDto,
+  DocumentPatientSummaryDto,
+} from '../../common/documents/document-response.dto';
 
 // Clases solo para documentar en Swagger la forma de las respuestas del módulo.
 
 export class RecipeMedicationResponseDto {
-  @ApiProperty({ example: 'Enalapril' })
+  @ApiProperty({ description: 'Nombre del fármaco.', example: 'Enalapril' })
   drug_name: string;
 
-  @ApiProperty({ type: String, nullable: true, example: '10 mg' })
+  @ApiProperty({
+    description: 'Presentación o concentración.',
+    type: String,
+    nullable: true,
+    example: '10 mg',
+  })
   presentation: string | null;
 
-  @ApiProperty({ type: String, nullable: true, example: '1 tableta' })
+  @ApiProperty({
+    description: 'Dosis por toma.',
+    type: String,
+    nullable: true,
+    example: '1 tableta',
+  })
   dose: string | null;
 
-  @ApiProperty({ type: String, nullable: true, example: 'Cada 12 horas' })
+  @ApiProperty({
+    description: 'Frecuencia de administración.',
+    type: String,
+    nullable: true,
+    example: 'Cada 12 horas',
+  })
   frequency: string | null;
 
-  @ApiProperty({ type: String, nullable: true, example: '7 días' })
+  @ApiProperty({
+    description: 'Duración del tratamiento.',
+    type: String,
+    nullable: true,
+    example: '7 días',
+  })
   duration: string | null;
 }
 
-export class RecipePatientSummaryDto {
-  @ApiProperty({ example: 1 })
-  id: number;
-
-  @ApiProperty({ example: 'Ricardo Mendoza' })
-  full_name: string;
-
-  @ApiProperty({ example: 'V-12345678' })
-  national_id: string;
-
-  @ApiProperty({ type: Number, nullable: true, example: 54 })
-  age: number | null;
-}
-
-export class RecipeDoctorSummaryDto {
-  @ApiProperty({ example: 1 })
-  id: number;
-
-  @ApiProperty({ example: 'Ana Pérez' })
-  full_name: string;
-
-  @ApiProperty({ type: String, nullable: true, example: 'Cardiología' })
-  specialty: string | null;
-}
-
 export class RecipeResponseDto {
-  @ApiProperty({ example: 20 })
+  @ApiProperty({ description: 'id del récipe (de esta versión).', example: 20 })
   recipe_id: number;
 
-  @ApiProperty({ example: 1 })
+  @ApiProperty({ description: 'id del paciente.', example: 1 })
   patient_id: number;
 
-  @ApiProperty({ example: 1 })
+  @ApiProperty({ description: 'id del médico firmante.', example: 1 })
   doctor_id: number;
 
-  @ApiProperty({ type: Number, nullable: true, example: 1 })
+  @ApiProperty({
+    description: 'id del centro médico.',
+    type: Number,
+    nullable: true,
+    example: 1,
+  })
   medical_center_id: number | null;
 
-  @ApiProperty({ type: Number, nullable: true, example: null })
+  @ApiProperty({
+    description: 'id de la cita asociada, si la hay.',
+    type: Number,
+    nullable: true,
+    example: null,
+  })
   appointment_id: number | null;
 
-  @ApiProperty({ format: 'date', example: '2026-07-13' })
+  @ApiProperty({
+    description: 'Fecha de emisión (YYYY-MM-DD).',
+    format: 'date',
+    example: '2026-07-13',
+  })
   issue_date: string;
 
   @ApiProperty({
@@ -72,10 +87,14 @@ export class RecipeResponseDto {
   })
   header_image_url: string | null;
 
-  @ApiProperty({ type: [RecipeMedicationResponseDto] })
+  @ApiProperty({
+    description: 'Medicamentos prescritos, en orden de impresión.',
+    type: [RecipeMedicationResponseDto],
+  })
   medications: RecipeMedicationResponseDto[];
 
   @ApiProperty({
+    description: 'Indicaciones adicionales (máx. 500 caracteres).',
     type: String,
     nullable: true,
     example: 'Tomar abundante agua y mantener reposo relativo.',
@@ -108,101 +127,74 @@ export class RecipeResponseDto {
   })
   supersedes_recipe_id: number | null;
 
-  @ApiProperty({ format: 'date-time', example: '2026-07-13T14:30:00.000Z' })
+  @ApiProperty({
+    description: 'Fecha y hora de creación de esta versión.',
+    format: 'date-time',
+    example: '2026-07-13T14:30:00.000Z',
+  })
   created_at: string;
 
-  @ApiProperty({ format: 'date-time', example: '2026-07-13T14:30:00.000Z' })
+  @ApiProperty({
+    description: 'Fecha y hora de la última modificación.',
+    format: 'date-time',
+    example: '2026-07-13T14:30:00.000Z',
+  })
   updated_at: string;
 
-  @ApiProperty({ type: RecipePatientSummaryDto })
-  patient: RecipePatientSummaryDto;
+  @ApiProperty({
+    description: 'Resumen del paciente.',
+    type: DocumentPatientSummaryDto,
+  })
+  patient: DocumentPatientSummaryDto;
 
-  @ApiProperty({ type: RecipeDoctorSummaryDto })
-  doctor: RecipeDoctorSummaryDto;
+  @ApiProperty({
+    description: 'Resumen del médico firmante.',
+    type: DocumentDoctorSummaryDto,
+  })
+  doctor: DocumentDoctorSummaryDto;
 }
 
 export class PaginatedRecipesResponseDto {
-  @ApiProperty({ type: [RecipeResponseDto] })
+  @ApiProperty({
+    description: 'Registros de la página actual.',
+    type: [RecipeResponseDto],
+  })
   data: RecipeResponseDto[];
 
-  @ApiProperty({ example: 1 })
+  @ApiProperty({ description: 'Página actual.', example: 1 })
   page: number;
 
-  @ApiProperty({ example: 10 })
+  @ApiProperty({ description: 'Registros por página.', example: 10 })
   limit: number;
 
-  @ApiProperty({ example: 1 })
+  @ApiProperty({
+    description: 'Total de registros que cumplen los filtros.',
+    example: 1,
+  })
   total: number;
 
-  @ApiProperty({ example: 1 })
+  @ApiProperty({ description: 'Total de páginas.', example: 1 })
   totalPages: number;
 }
 
-export class RecipeDocumentHeaderDto {
-  @ApiProperty({
-    type: String,
-    nullable: true,
-    description:
-      'Imagen del membrete: la guardada en el récipe, si no la del médico, si no la del centro médico. Si es null, el cliente muestra nombre y especialidad.',
-    example: 'https://storage.provider.com/headers/doctor_123_header.png',
-  })
-  image_url: string | null;
-
-  @ApiProperty({ example: 'Ana Pérez' })
-  doctor_name: string;
-
-  @ApiProperty({ type: String, nullable: true, example: 'Cardiología' })
-  specialty: string | null;
-
-  @ApiProperty({
-    type: String,
-    nullable: true,
-    example: 'Centro Médico Caracas',
-  })
-  medical_center_name: string | null;
-}
-
-export class RecipeDocumentFooterDto {
-  @ApiProperty({
-    type: String,
-    nullable: true,
-    description: 'Consultorio y dirección del centro médico.',
-    example: 'Consultorio 12, Piso 2 · Av. Principal de Las Mercedes',
-  })
-  address: string | null;
-
-  @ApiProperty({
-    type: [String],
-    description: 'Teléfono del médico y del centro médico (los que existan).',
-    example: ['0412-0000000', '0212-0000000'],
-  })
-  phones: string[];
-
-  @ApiProperty({ example: 'dra.perez@example.com' })
-  email: string;
-
-  @ApiProperty({
-    description: 'Número de registro médico.',
-    example: 'MPPS-12345',
-  })
-  license_number: string;
-
-  @ApiProperty({
-    type: String,
-    nullable: true,
-    description: 'Número de colegiatura (C.M.).',
-    example: 'CM-6789',
-  })
-  cm_number: string | null;
-}
-
 export class RecipeDocumentResponseDto {
-  @ApiProperty({ type: RecipeResponseDto })
+  @ApiProperty({
+    description:
+      'Cuerpo del documento: el récipe con paciente, fecha, medicamentos e indicaciones.',
+    type: RecipeResponseDto,
+  })
   recipe: RecipeResponseDto;
 
-  @ApiProperty({ type: RecipeDocumentHeaderDto })
-  header: RecipeDocumentHeaderDto;
+  @ApiProperty({
+    description: 'Encabezado: membrete del médico o del centro médico.',
+    type: DocumentHeaderDto,
+  })
+  header: DocumentHeaderDto;
 
-  @ApiProperty({ type: RecipeDocumentFooterDto })
-  footer: RecipeDocumentFooterDto;
+  @ApiProperty({
+    description:
+      'Pie: dirección, teléfonos, correo, registro médico y colegiatura para el bloque de firma y sello.',
+    type: DocumentFooterDto,
+  })
+  footer: DocumentFooterDto;
 }
