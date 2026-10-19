@@ -94,9 +94,8 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    margin: 0 0 10px;
     color: #1f2937;
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 500;
 
     svg {
@@ -110,6 +109,7 @@
   h3.accent-heading {
     color: #800020;
     text-transform: uppercase;
+    font-size: 16px !important;
   }
 
   > textarea,
@@ -228,7 +228,8 @@
 
 .family-history-section {
   h3 {
-    margin-bottom: 10px;
+    gap: 0.5rem;
+    font-size: 16px;
   }
 }
 
@@ -257,6 +258,7 @@
 .habits-section {
   h3 {
     margin-left: 2px;
+    font-size: 16px !important;
   }
 
   > input {
