@@ -10,6 +10,7 @@ import {
   Pill,
   Save,
   Stethoscope,
+  UserRound,
   UsersRound,
   X,
 } from 'lucide-react'
@@ -239,7 +240,7 @@ export default function NewClinicalHistoryModal({
                   <h3><UsersRound aria-hidden="true" /> Antecedentes familiares</h3>
                   {familyHistory.map(({ key, label, placeholder }) => (
                     <label className="family-history-field" key={key}>
-                      <span><UsersRound aria-hidden="true" /> {label}</span>
+                      <span><UserRound aria-hidden="true" /> {label}</span>
                       <textarea name={`family_${key}`} rows={3} placeholder={placeholder} />
                     </label>
                   ))}
@@ -275,40 +276,42 @@ export default function NewClinicalHistoryModal({
               </div>
             </section>
 
-            <section className="history-section findings-section">
-              <h3><FileText aria-hidden="true" /> Hallazgos detallados</h3>
-              <textarea name="findings" rows={7} placeholder="Escriba los hallazgos de la consulta..." />
-            </section>
-
-            <section className="history-section ecg-section">
-              <h3><Activity aria-hidden="true" /> Electrocardiograma</h3>
-              <div className="ecg-upload-placeholder" aria-disabled="true">
-                <FileText aria-hidden="true" />
-                <strong>Adjuntar trazo de ECG o imagen de hallazgos</strong>
-                <span>La carga de archivos no está habilitada</span>
+            <section className="clinical-findings-ecg-container">
+              <div className="history-section findings-section">
+                <h3><ClipboardList aria-hidden="true" /> Hallazgos detallados</h3>
+                <textarea name="findings" rows={7} placeholder="Escriba los hallazgos de la consulta..." />
               </div>
-              <textarea name="ecg_notes" rows={3} placeholder="Observaciones del EKG y descripción de hallazgos relevantes..." />
-              <div className="ecg-entry">
-                <h4><HeartPulse aria-hidden="true" /> ECG ingreso</h4>
-                <div className="ecg-entry-row">
-                  <span>R /</span>
-                  <input name="ecg_rate" type="number" min="1" max="300" aria-label="Frecuencia cardíaca ECG" inputMode="numeric" />
-                  <span>lpm</span>
-                  {ecgMeasurements.map(({ key, label }) => (
-                    <span className="ecg-entry-measurement" key={key}>
-                      <span aria-hidden="true">/</span>
-                      <input name={`ecg_${key}`} aria-label={label} inputMode="decimal" />
-                    </span>
-                  ))}
-                  <span>°</span>
+
+              <div className="history-section ecg-section">
+                <h3><Activity aria-hidden="true" /> Electrocardiograma</h3>
+                <div className="ecg-upload-placeholder" aria-disabled="true">
+                  <FileText aria-hidden="true" />
+                  <strong>Adjuntar trazo de ECG o imagen de hallazgos</strong>
+                  <span>La carga de archivos no está habilitada</span>
                 </div>
-                <label className="ecg-trace-field">Trazo:
-                  <select name="ecg_trace" defaultValue="">
-                    <option value="">Seleccionar</option>
-                    <option value="Normal">Normal</option>
-                    <option value="Anormal">Anormal</option>
-                  </select>
-                </label>
+                <textarea name="ecg_notes" rows={3} placeholder="Observaciones del EKG y descripción de hallazgos relevantes..." />
+                <div className="ecg-entry">
+                  <h4><HeartPulse aria-hidden="true" /> ECG ingreso</h4>
+                  <div className="ecg-entry-row">
+                    <span>R /</span>
+                    <input name="ecg_rate" type="number" min="1" max="300" aria-label="Frecuencia cardíaca ECG" inputMode="numeric" />
+                    <span>lpm</span>
+                    {ecgMeasurements.map(({ key, label }) => (
+                      <span className="ecg-entry-measurement" key={key}>
+                        <span aria-hidden="true">/</span>
+                        <input name={`ecg_${key}`} aria-label={label} inputMode="decimal" />
+                      </span>
+                    ))}
+                    <span>°</span>
+                  </div>
+                  <label className="ecg-trace-field">Trazo:
+                    <select name="ecg_trace" defaultValue="">
+                      <option value="">Seleccionar</option>
+                      <option value="Normal">Normal</option>
+                      <option value="Anormal">Anormal</option>
+                    </select>
+                  </label>
+                </div>
               </div>
             </section>
 

@@ -22,7 +22,7 @@
 .site-header__logo-img { width: 44px; height: 44px; display: block; object-fit: contain }
 
 .site-header__brand {
-  color: #8d0a2d;
+  color: var(--primary-color, #8d0a2d);
   font-size: 16.8px;
   font-weight: 700;
   letter-spacing: -0.01em;

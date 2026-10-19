@@ -308,13 +308,17 @@
 .appointment-detail {
   margin-top: 20px;
   padding-top: 20px;
-  border-top: 1px solid #f2e4e8;
+  overflow: hidden;
+  border: 1px solid #f4dfe4;
+  border-radius: 14px;
+  background: #dcdcdc;
 }
 
 .appointment-time {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 9px;
+  padding: 0 16px;
   color: #8b0022;
   font-weight: 600;
   font-size: 14.5px;
@@ -325,9 +329,6 @@
   display: flex;
   align-items: center;
   gap: 14px;
-  background: #dcdcdc;
-  border: 1px solid #f4dfe4;
-  border-radius: 14px;
   padding: 16px 18px;
 }
 
