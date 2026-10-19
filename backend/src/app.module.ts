@@ -17,6 +17,7 @@ import { ReportsModule } from './reports/reports.module';
 import { PatientsModule } from './patients/patients.module';
 import { RecipesModule } from './recipes/recipes.module';
 import { MedicalReportsModule } from './medical-reports/medical-reports.module';
+import { LaboratoryModule } from './laboratory/laboratory.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { MedicalReportsModule } from './medical-reports/medical-reports.module';
     PatientsModule,
     RecipesModule,
     MedicalReportsModule,
+    LaboratoryModule,
   ],
   controllers: [AppController],
   providers: [

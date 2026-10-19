@@ -374,6 +374,7 @@ model LaboratoryCategory {
   createdAt   DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt   DateTime            @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
   tests       LaboratoryTest[]
+  orderTests  LaboratoryOrderTest[]
 
   @@map("laboratory_categories")
 }
@@ -429,6 +430,7 @@ model LaboratoryOrderTest {
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   order     LaboratoryOrder @relation(fields: [orderId], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "fk_lot_order")
   test      LaboratoryTest  @relation(fields: [testId], references: [id], onDelete: Restrict, onUpdate: Cascade, map: "fk_lot_test")
+  category  LaboratoryCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict, onUpdate: Cascade, map: "fk_lot_category")
 
   @@index([orderId, sortOrder], map: "laboratory_order_tests_order_id_idx")
   @@map("laboratory_order_tests")
