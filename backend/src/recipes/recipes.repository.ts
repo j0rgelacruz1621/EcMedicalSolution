@@ -1,47 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import {
+  documentDoctorSelect,
+  documentMedicalCenterSelect,
+  documentPatientSelect,
+} from '../common/documents/printable-document';
 import { PrismaService } from '../prisma/prisma.service';
 import { RecipeMedicationDto } from './dto/recipe-medication.dto';
 
 export const recipeInclude = {
   medications: { orderBy: { sortOrder: 'asc' } },
-  patient: {
-    select: {
-      id: true,
-      firstName: true,
-      lastName: true,
-      nationalId: true,
-      age: true,
-    },
-  },
-  doctor: {
-    select: {
-      id: true,
-      firstName: true,
-      lastName: true,
-      specialty: true,
-      licenseNumber: true,
-      cmNumber: true,
-      phone: true,
-      email: true,
-      headerImageUrl: true,
-      office: {
-        select: {
-          officeNumber: true,
-          locationDetails: true,
-        },
-      },
-    },
-  },
-  medicalCenter: {
-    select: {
-      id: true,
-      name: true,
-      address: true,
-      phone: true,
-      headerImageUrl: true,
-    },
-  },
+  patient: { select: documentPatientSelect },
+  doctor: { select: documentDoctorSelect },
+  medicalCenter: { select: documentMedicalCenterSelect },
 } satisfies Prisma.RecipeInclude;
 
 export type RecipeWithRelations = Prisma.RecipeGetPayload<{

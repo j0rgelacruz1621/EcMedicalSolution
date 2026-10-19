@@ -6,19 +6,20 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { RequestUser } from '../auth/current-user.decorator';
+import {
+  buildDocumentFooter,
+  buildDocumentHeader,
+  parseDateOnly,
+  resolveLetterhead,
+  toDateOnly,
+  toDoctorSummary,
+  toPatientSummary,
+} from '../common/documents/printable-document';
 import { PaginatedResponseDto } from '../common/dto/paginated-response.dto';
 import { CreateRecipeDto } from './dto/create-recipe.dto';
 import { QueryRecipesDto } from './dto/query-recipes.dto';
 import { UpdateRecipeDto } from './dto/update-recipe.dto';
 import { RecipesRepository, RecipeWithRelations } from './recipes.repository';
-
-function toDateOnly(value: Date) {
-  return value.toISOString().slice(0, 10);
-}
-
-function fullName(person: { firstName: string; lastName: string }) {
-  return `${person.firstName} ${person.lastName}`.trim();
-}
 
 function toRecipeResponse(recipe: RecipeWithRelations) {
   return {
@@ -46,17 +47,8 @@ function toRecipeResponse(recipe: RecipeWithRelations) {
       : null,
     created_at: recipe.createdAt.toISOString(),
     updated_at: recipe.updatedAt.toISOString(),
-    patient: {
-      id: Number(recipe.patient.id),
-      full_name: fullName(recipe.patient),
-      national_id: recipe.patient.nationalId,
-      age: recipe.patient.age,
-    },
-    doctor: {
-      id: Number(recipe.doctor.id),
-      full_name: fullName(recipe.doctor),
-      specialty: recipe.doctor.specialty,
-    },
+    patient: toPatientSummary(recipe.patient),
+    doctor: toDoctorSummary(recipe.doctor),
   };
 }
 
@@ -149,8 +141,7 @@ export class RecipesService {
 
     // Se guarda una copia del membrete vigente para que el récipe impreso
     // más adelante conserve la identidad gráfica con la que fue emitido.
-    const headerImageUrl =
-      doctor.headerImageUrl ?? medicalCenter?.headerImageUrl ?? null;
+    const headerImageUrl = resolveLetterhead(doctor, medicalCenter);
 
     const recipe = await this.recipesRepository.create({
       patientId: patient.id,
@@ -158,7 +149,7 @@ export class RecipesService {
       medicalCenterId: medicalCenter?.id ?? null,
       appointmentId: appointment?.id ?? null,
       issueDate: payload.issue_date
-        ? new Date(`${payload.issue_date}T00:00:00.000Z`)
+        ? parseDateOnly(payload.issue_date)
         : new Date(),
       headerImageUrl,
       additionalInstructions: payload.additional_instructions || null,
@@ -233,40 +224,15 @@ export class RecipesService {
   // Datos listos para el layout imprimible (header con membrete, cuerpo y footer).
   async getPrintableDocument(id: number) {
     const recipe = await this.getRecipeOrFail(id);
-    const { doctor, medicalCenter } = recipe;
-
-    const officeLabel = doctor.office
-      ? [
-          `Consultorio ${doctor.office.officeNumber}`,
-          doctor.office.locationDetails,
-        ]
-          .filter(Boolean)
-          .join(', ')
-      : null;
 
     return {
       recipe: toRecipeResponse(recipe),
-      header: {
-        image_url:
-          recipe.headerImageUrl ??
-          doctor.headerImageUrl ??
-          medicalCenter?.headerImageUrl ??
-          null,
-        doctor_name: fullName(doctor),
-        specialty: doctor.specialty,
-        medical_center_name: medicalCenter?.name ?? null,
-      },
-      footer: {
-        address:
-          [officeLabel, medicalCenter?.address].filter(Boolean).join(' · ') ||
-          null,
-        phones: [doctor.phone, medicalCenter?.phone].filter(
-          (phone): phone is string => Boolean(phone),
-        ),
-        email: doctor.email,
-        license_number: doctor.licenseNumber,
-        cm_number: doctor.cmNumber,
-      },
+      header: buildDocumentHeader(
+        recipe.headerImageUrl,
+        recipe.doctor,
+        recipe.medicalCenter,
+      ),
+      footer: buildDocumentFooter(recipe.doctor, recipe.medicalCenter),
     };
   }
 }
