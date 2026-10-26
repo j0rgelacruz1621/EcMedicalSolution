@@ -171,7 +171,7 @@
       .day-number { font-size: 24px; font-weight: 800; color: #1e293b; }
       
       &.active {
-        background: #fdf2f2;
+        background: #dcdcdc;
         .day-number { color: var(--primary-color); }
       }
     }
