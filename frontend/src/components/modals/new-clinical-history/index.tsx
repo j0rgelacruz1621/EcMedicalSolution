@@ -1,3 +1,8 @@
+import ManOutlinedIcon from '@mui/icons-material/ManOutlined'
+import LineStyleOutlinedIcon from '@mui/icons-material/LineStyleOutlined'
+import MedicationOutlinedIcon from '@mui/icons-material/MedicationOutlined'
+import PortraitOutlinedIcon from '@mui/icons-material/PortraitOutlined'
+import Woman2OutlinedIcon from '@mui/icons-material/Woman2Outlined'
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import {
@@ -7,10 +12,8 @@ import {
   ClipboardList,
   FileText,
   HeartPulse,
-  Pill,
   Save,
   Stethoscope,
-  UserRound,
   UsersRound,
   X,
 } from 'lucide-react'
@@ -38,7 +41,20 @@ const personalHistory = [
 const familyHistory = [
   { key: 'father', label: 'Padre', placeholder: 'Antecedentes paternos...' },
   { key: 'mother', label: 'Madre', placeholder: 'Antecedentes maternos...' },
-]
+] as const
+
+type FamilyIcon = typeof familyHistory[number]['key']
+
+// Ambos iconos son de MUI; aceptan sx y las props comunes que pasa el render.
+type FamilyIconProps = {
+  className?: string
+  'aria-hidden'?: boolean | 'true' | 'false'
+}
+
+const familyIcons: Record<FamilyIcon, React.ComponentType<FamilyIconProps>> = {
+  father: (props) => <ManOutlinedIcon {...props} />,
+  mother: (props) => <Woman2OutlinedIcon {...props} />,
+}
 
 const habits = [
   { key: 'tobacco', label: 'Tabáquicos' },
@@ -48,12 +64,24 @@ const habits = [
   { key: 'chagas', label: 'Contacto con vector del Chagas' },
 ]
 
+const DEFAULT_FINDINGS =
+  'ADECUADA COLORACIÓN DE PIEL Y MUCOSAS, TOLERA EL DECÚBITO SUPINO, PULSO VENOSO '
+  + 'YUGULAR NO INGURGITADO, SIN SOPLOS CAROTÍDEOS. TÓRAX SIMÉTRICO, NORMOEXPANSIBLE, '
+  + 'MURMULLO VESICULAR AUDIBLE EN AMBOS CAMPOS PULMONARES, SIN AGREGADOS. RUIDOS '
+  + 'CARDÍACOS RÍTMICOS, SIN SOPLOS, SIN FROTE PERICÁRDICO, SIN S3 NI S4. ABDOMEN: BLANDO, SIN '
+  + 'VISCEROMEGALIAS, NO DOLOROSO A LA PALPACIÓN. EXTREMIDADES: SIMÉTRICAS, SIN EDEMA. PULSOS '
+  + 'DISTALES DE ADECUADA AMPLITUD. NEUROLÓGICO: VIGIL, ORIENTADO EN TIEMPO, ESPACIO Y '
+  + 'PERSONA, SIN FOCALIDAD NEUROLÓGICA.'
+
+// Cada medida lleva su símbolo de unidad dentro del recuadro: tenue y
+// centrado cuando está vacío, y pegado a la derecha del número al escribir
+// (" = segundos, ° = grados). El campo R/ usa "--" como placeholder.
 const ecgMeasurements = [
-  { key: 'pr', label: 'PR' },
-  { key: 'qrs', label: 'QRS' },
-  { key: 'qt', label: 'QT' },
-  { key: 'qtc', label: 'QTc' },
-  { key: 'axis', label: 'Eje' },
+  { key: 'pr', label: 'PR', unit: '"' },
+  { key: 'qrs', label: 'QRS', unit: '"' },
+  { key: 'qt', label: 'QT', unit: '"' },
+  { key: 'qtc', label: 'QTc', unit: '"' },
+  { key: 'axis', label: 'Eje', unit: '°' },
 ]
 
 function formatCurrentDate(): string {
@@ -147,9 +175,9 @@ export default function NewClinicalHistoryModal({
         'Electrocardiograma',
         [
           readField(data, 'ecg_rate') ? `Frecuencia: ${readField(data, 'ecg_rate')} lpm` : '',
-          ...ecgMeasurements.map(({ key, label }) => {
+          ...ecgMeasurements.map(({ key, label, unit }) => {
             const value = readField(data, `ecg_${key}`)
-            return value ? `${label}: ${value}` : ''
+            return value ? `${label}: ${value}${unit}` : ''
           }),
           readField(data, 'ecg_trace') ? `Trazo: ${readField(data, 'ecg_trace')}` : '',
           readField(data, 'ecg_notes'),
@@ -220,7 +248,7 @@ export default function NewClinicalHistoryModal({
                     <textarea name="reason" rows={4} placeholder="Escriba los síntomas principales o razón de la visita..." />
                   </div>
                   <div className="history-top-block personal-history-section">
-                    <h3><ClipboardList aria-hidden="true" /> Antecedentes personales</h3>
+                    <h3><PortraitOutlinedIcon aria-hidden="true" /> Antecedentes personales</h3>
                     <div className="personal-history-scroll">
                       <div className="radio-matrix">
                         {personalHistory.map(({ key, label }) => (
@@ -238,22 +266,25 @@ export default function NewClinicalHistoryModal({
               <div className="history-top-column">
                 <section className="history-top-block family-history-section">
                   <h3><UsersRound aria-hidden="true" /> Antecedentes familiares</h3>
-                  {familyHistory.map(({ key, label, placeholder }) => (
-                    <label className="family-history-field" key={key}>
-                      <span><UserRound aria-hidden="true" /> {label}</span>
+                  {familyHistory.map(({ key, label, placeholder }) => {
+                    const Icon = familyIcons[key]
+                    return (
+                      <label className="family-history-field" key={key}>
+                        <span><Icon aria-hidden="true" /> {label}</span>
                       <textarea name={`family_${key}`} rows={3} placeholder={placeholder} />
-                    </label>
-                  ))}
+                      </label>
+                    )
+                  })}
                 </section>
                 <section className="history-top-block">
-                  <h3 className="accent-heading"><Pill aria-hidden="true" /> Tratamiento actual</h3>
+                  <h3 className="accent-heading"><MedicationOutlinedIcon aria-hidden="true" /> Tratamiento actual</h3>
                   <textarea name="treatment" rows={3} placeholder="Describa el tratamiento actual del paciente..." />
                 </section>
               </div>
             </div>
 
             <section className="history-section habits-section">
-              <h3><BriefcaseMedical aria-hidden="true" /> Hábitos psicobiológicos</h3>
+              <h3><LineStyleOutlinedIcon aria-hidden="true" /> Hábitos psicobiológicos</h3>
               <div className="habit-options">
                 {habits.map(({ key, label }) => (
                   <label className="habit-option" key={key}>
@@ -279,7 +310,7 @@ export default function NewClinicalHistoryModal({
             <section className="clinical-findings-ecg-container">
               <div className="history-section findings-section">
                 <h3><ClipboardList aria-hidden="true" /> Hallazgos detallados</h3>
-                <textarea name="findings" rows={7} placeholder="Escriba los hallazgos de la consulta..." />
+                <textarea name="findings" rows={7} defaultValue={DEFAULT_FINDINGS} placeholder="Escriba los hallazgos de la consulta..." />
               </div>
 
               <div className="history-section ecg-section">
@@ -294,15 +325,21 @@ export default function NewClinicalHistoryModal({
                   <h4><HeartPulse aria-hidden="true" /> ECG ingreso</h4>
                   <div className="ecg-entry-row">
                     <span>R /</span>
-                    <input name="ecg_rate" type="number" min="1" max="300" aria-label="Frecuencia cardíaca ECG" inputMode="numeric" />
+                    <input name="ecg_rate" type="number" min="1" max="300" aria-label="Frecuencia cardíaca ECG" inputMode="numeric" placeholder="--" />
                     <span>lpm</span>
-                    {ecgMeasurements.map(({ key, label }) => (
+                    {ecgMeasurements.map(({ key, label, unit }) => (
                       <span className="ecg-entry-measurement" key={key}>
                         <span aria-hidden="true">/</span>
-                        <input name={`ecg_${key}`} aria-label={label} inputMode="decimal" />
+                        <span className="ecg-entry-unit-box">
+                          <input
+                            name={`ecg_${key}`}
+                            aria-label={`${label} en ${unit === '"' ? 'segundos' : 'grados'}`}
+                            inputMode="decimal"
+                            placeholder={unit}
+                          />
+                        </span>
                       </span>
                     ))}
-                    <span>°</span>
                   </div>
                   <label className="ecg-trace-field">Trazo:
                     <select name="ecg_trace" defaultValue="">
