@@ -1,6 +1,6 @@
 import './style.scss';
-import { useEffect } from 'react';
-import { ChevronRight, Plus, X } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { ArrowLeft, ChevronRight, Plus, X } from 'lucide-react';
 
 export interface PreoperativeEvaluation {
   id: number;
@@ -39,8 +39,13 @@ export default function PreoperativeHistoryModal({
   onAddEvaluation,
   onViewDetail,
 }: PreoperativeHistoryModalProps) {
+  const [selectedEvaluation, setSelectedEvaluation] = useState<PreoperativeEvaluation | null>(null);
+
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) {
+      setSelectedEvaluation(null);
+      return;
+    }
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') onClose();
@@ -66,7 +71,9 @@ export default function PreoperativeHistoryModal({
       >
         <header className="preoperative-history-header">
           <div className="title-row">
-            <h2 id="preoperative-history-title">Historial de Valoraciones Preoperatorias</h2>
+            <h2 id="preoperative-history-title">
+              {selectedEvaluation ? 'Detalle de Valoración Preoperatoria' : 'Historial de Valoraciones Preoperatorias'}
+            </h2>
             <button
               type="button"
               className="close-button"
@@ -91,7 +98,24 @@ export default function PreoperativeHistoryModal({
           </div>
         </header>
 
-        <div className="preoperative-history-body">
+        {selectedEvaluation ? (
+          <div className="preoperative-history-body evaluation-detail">
+            <button type="button" className="back-link" onClick={() => setSelectedEvaluation(null)}>
+              <ArrowLeft size={16} />
+              Volver al historial
+            </button>
+            <div className="detail-card">
+              <div className="evaluation-field">
+                <span className="field-label">Fecha</span>
+                <strong>{formatDate(selectedEvaluation.date)}</strong>
+              </div>
+              <div className="evaluation-field">
+                <span className="field-label">Intervención</span>
+                <span className="field-value">{selectedEvaluation.intervention}</span>
+              </div>
+            </div>
+          </div>
+        ) : <div className="preoperative-history-body">
           <p className="records-count">
             Mostrando {total} {total === 1 ? 'evaluación registrada' : 'evaluaciones registradas'}
           </p>
@@ -118,7 +142,10 @@ export default function PreoperativeHistoryModal({
                     type="button"
                     className="detail-link"
                     aria-label={`Ver detalle de la valoración del ${formatDate(evaluation.date)}`}
-                    onClick={() => onViewDetail?.(evaluation)}
+                    onClick={() => {
+                      onViewDetail?.(evaluation);
+                      setSelectedEvaluation(evaluation);
+                    }}
                   >
                     Ver detalle
                     <ChevronRight size={16} strokeWidth={2} />
@@ -127,16 +154,24 @@ export default function PreoperativeHistoryModal({
               ))}
             </ul>
           )}
-        </div>
+        </div>}
 
         <footer className="preoperative-history-footer">
-          <button type="button" className="secondary-button" onClick={onClose}>
-            Cancelar
-          </button>
-          <button type="button" className="primary-button" onClick={onAddEvaluation}>
-            <Plus size={17} strokeWidth={2.5} />
-            Agregar valoración
-          </button>
+          {selectedEvaluation ? (
+            <button type="button" className="secondary-button" onClick={onClose}>
+              Cerrar
+            </button>
+          ) : (
+            <>
+              <button type="button" className="secondary-button" onClick={onClose}>
+                Cancelar
+              </button>
+              <button type="button" className="primary-button" onClick={onAddEvaluation}>
+                <Plus size={17} strokeWidth={2.5} />
+                Agregar valoración
+              </button>
+            </>
+          )}
         </footer>
       </div>
     </div>
