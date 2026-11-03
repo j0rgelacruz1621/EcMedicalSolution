@@ -104,6 +104,13 @@
       flex: 0 0 17px;
       color: #800020;
     }
+
+    // Los iconos de MUI renderizan dentro de un <span> con font-size propio;
+    // se igualan al tamaño y color de los svg de lucide.
+    .MuiSvgIcon-root {
+      font-size: 17px;
+      color: #800020;
+    }
   }
 
   h3.accent-heading {
@@ -176,6 +183,13 @@
 
 .history-top-block h3.accent-heading {
   font-size: 16px;
+}
+
+// El icono de MedicationOutlined (MUI) vive dentro de h3.accent-heading,
+// fuera del selector .history-section h3 svg; se le da el mismo rojo.
+h3.accent-heading .MuiSvgIcon-root {
+  font-size: 17px;
+  color: #800020;
 }
 
 .personal-history-scroll {
@@ -252,9 +266,11 @@
     text-transform: uppercase;
   }
 
-  svg {
+  svg,
+  .MuiSvgIcon-root {
     width: 15px;
     height: 15px;
+    font-size: 15px;
     color: #800020;
   }
 }
@@ -446,11 +462,28 @@
     gap: 7px;
   }
 
-  .ecg-entry-measurement input {
+  // El símbolo vive dentro del recuadro vía placeholder: centrado y tenue
+  // cuando está vacío, desaparece al escribir el número.
+  .ecg-entry-unit-box {
+    display: inline-flex;
+  }
+
+  .ecg-entry-unit-box input {
     width: 48px;
     min-height: 34px;
     padding: 5px !important;
     text-align: center;
+
+    &::placeholder {
+      color: #9ca3af;
+      opacity: 1;
+    }
+  }
+
+  .ecg-entry-unit-box input::-webkit-outer-spin-button,
+  .ecg-entry-unit-box input::-webkit-inner-spin-button {
+    appearance: none;
+    margin: 0;
   }
 }
 
