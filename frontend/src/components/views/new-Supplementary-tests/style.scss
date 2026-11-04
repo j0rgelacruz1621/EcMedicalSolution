@@ -43,7 +43,20 @@
 .exam-list { min-height: 0; padding: 0 0.8px 16px; overflow-y: auto; scrollbar-color: #b6bcc9 transparent; }
 .exam-card { margin-bottom: 20px; padding: 16px 13.6px 14.4px; border: 1px solid #cbd0dc; border-radius: 7px; background: #fff; }
 .exam-card h3 { margin: 0 0 16px; color: #970018; font-size: 14.4px; }
+.custom-exam-card { padding: 16px 13.6px 14.4px; }
+.custom-exam-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
+.custom-exam-heading h3 { margin: 0; }
+.remove-custom-exam { display: inline-flex; align-items: center; gap: 5px; padding: 4px; border: 0; background: transparent; color: #626979; font: inherit; font-size: 12px; cursor: pointer; }
+.remove-custom-exam:hover { color: #970018; }
+.custom-exam-name { display: grid; gap: 5.6px; margin-bottom: 16px; color: #343944; font-size: 12.8px; }
+.custom-exam-name input { min-height: 42px; padding: 0 12px; border: 1px solid #cbd0dc; border-radius: 7px; outline-color: #970018; color: #191c1e; font: inherit; font-size: 12.8px; }
+.custom-exam-name input::placeholder { color: #78808e; }
+.add-custom-exam { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; min-height: 52px; margin-bottom: 16px; border: 1px dashed #970018; border-radius: 7px; background: #fffafa; color: #970018; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
+.add-custom-exam:hover { background: #fff1f2; }
 .exam-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12.8px; }
+.exam-fields .exam-observations { grid-column: 1; }
+.exam-fields-serology { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.exam-fields-serology .exam-observations { grid-column: auto; }
 .exam-fields label { display: grid; gap: 5.6px; color: #343944; font-size: 12.8px; }
 .exam-fields input { min-height: 42px; padding: 0 12px; border: 1px solid #cbd0dc; border-radius: 7px; outline-color: #970018; color: #191c1e; font: inherit; font-size: 12.8px; }
 .exam-fields input::placeholder { color: #78808e; }
@@ -70,6 +83,10 @@
 	.exam-search { width: 100%; }
 	.exam-list { overflow: visible; }
 	.exam-fields { grid-template-columns: 1fr; }
+	.exam-fields-serology { grid-template-columns: 1fr; }
+	.custom-exam-heading { align-items: flex-start; }
+	.custom-exam-heading h3 { line-height: 1.4; }
+	.remove-custom-exam { flex-shrink: 0; }
 	.new-supplementary-footer { min-height: 74px; padding: 15px 16px; }
 	.new-supplementary-footer button { flex: 1; min-width: 0; }
 }
