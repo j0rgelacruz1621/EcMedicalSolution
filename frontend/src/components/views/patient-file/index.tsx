@@ -11,6 +11,8 @@ import PrescriptionPreviewModal from '../../modals/prescription-preview';
 import ClinicalTimelineModal from '../../modals/clinical-timeline';
 import ClinicalStudiesModal from '../../modals/Clinica-trials';
 import SupplementaryTestsModal from '../../modals/Supplementary-tests';
+import ChestXrayHistoryModal from '../../modals/chest-xray-history';
+import NewChestXrayModal, { type ChestXrayRecord } from '../../modals/new-chest-xray';
 import PreoperativeHistoryModal, {
   samplePreoperativeEvaluations,
   type PreoperativeEvaluation,
@@ -82,6 +84,9 @@ export default function PatientFileView() {
   const [isClinicalStudiesOpen, setIsClinicalStudiesOpen] = useState(false);
   const [isSupplementaryTestsOpen, setIsSupplementaryTestsOpen] = useState(false);
   const [isNewSupplementaryTestsOpen, setIsNewSupplementaryTestsOpen] = useState(false);
+  const [isChestXrayHistoryOpen, setIsChestXrayHistoryOpen] = useState(false);
+  const [isNewChestXrayOpen, setIsNewChestXrayOpen] = useState(false);
+  const [chestXrayRecords, setChestXrayRecords] = useState<ChestXrayRecord[]>([]);
   const [vitalsHistory, setVitalsHistory] = useState<PatientVitals[]>([]);
   const [appointments, setAppointments] = useState<{ date?: string; time?: string; reason?: string }[]>([]);
   const [calendarMonth, setCalendarMonth] = useState(() => new Date());
@@ -430,6 +435,10 @@ export default function PatientFileView() {
                     setIsSupplementaryTestsOpen(true);
                   }
 
+                  if (tab === 'RX Tórax') {
+                    setIsChestXrayHistoryOpen(true);
+                  }
+
                   if (tab === 'Preoperatoria') {
                     setIsPreoperativeHistoryOpen(true);
                   }
@@ -611,6 +620,31 @@ export default function PatientFileView() {
           setIsNewSupplementaryTestsOpen(true);
         }}
       />
+
+      <ChestXrayHistoryModal
+        isOpen={isChestXrayHistoryOpen}
+        patientName={patientName}
+        records={chestXrayRecords}
+        onClose={() => setIsChestXrayHistoryOpen(false)}
+        onAdd={() => {
+          setIsChestXrayHistoryOpen(false);
+          setIsNewChestXrayOpen(true);
+        }}
+      />
+
+      {isNewChestXrayOpen && (
+        <NewChestXrayModal
+          patientName={patientName}
+          onClose={() => setIsNewChestXrayOpen(false)}
+          onSave={(record) => {
+            setChestXrayRecords((current) => [
+              { ...record, id: Math.max(0, ...current.map((item) => item.id)) + 1 },
+              ...current,
+            ]);
+            setIsNewChestXrayOpen(false);
+          }}
+        />
+      )}
 
       <PreoperativeHistoryModal
         isOpen={isPreoperativeHistoryOpen}
