@@ -61,3 +61,8 @@ export async function updateDoctor(id: number, doctorData: Partial<DoctorRequest
   const response = await apiClient.patch<Doctor>(`/doctors/${id}`, doctorData);
   return response.data;
 }
+/** GET /doctors/:id — Detalle de un médico. */
+export async function getDoctorById(id: number) {
+  const response = await apiClient.get<Doctor>(`/doctors/${id}`);
+  return response.data;
+}

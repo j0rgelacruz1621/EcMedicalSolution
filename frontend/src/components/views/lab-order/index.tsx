@@ -4,15 +4,23 @@ import { Bell, CircleHelp, Save, Search, Trash2 } from 'lucide-react'
 import LeftSideBar from '../../left-sideBar'
 import { getPatients, type Patient } from '../../../services/patients/patient-services'
 import { getDoctor, type Doctor } from '../../../services/doctors/doctor-services'
+import {
+  createLaboratoryOrder,
+  getLaboratoryCategories,
+  type LaboratoryCategory,
+  type LaboratoryOrder,
+} from '../../../services/laboratory/laboratory-services'
 import './style.scss'
 
-const laboratoryAreas = [
-  { name: 'HEMATOLOGÍA', exams: ['Hematología completa', 'Contaje de plaquetas', 'Hb. y Hto', 'Grupo sanguíneo y Factor RH', 'VSG'] },
-  { name: 'COAGULACIÓN', exams: ['Tiempo de protrombina (TP)', 'Tiempo parcial de tromboplastina (TPT)', 'INR', 'Fibrinógeno'] },
-  { name: 'QUÍMICA', exams: ['Glicemia', 'Creatinina', 'Perfil lipídico', 'Hemoglobina glicosilada (HbA1c)', 'Ácido úrico', 'Transaminasas'] },
-  { name: 'SEROLOGÍA', exams: ['VDRL', 'HIV', 'Hepatitis B', 'Hepatitis C'] },
-  { name: 'HORMONALES', exams: ['TSH', 'T4 libre', 'Cortisol', 'Estradiol'] },
-  { name: 'ORINA Y HECES', exams: ['Uroanálisis', 'Examen de heces', 'Sangre oculta en heces'] },
+// Respaldo por si el catálogo del backend aún no tiene categorías creadas:
+// el usuario puede seguir ordenando exámenes como "personalizados" (custom_tests).
+const fallbackAreas = [
+  { name: 'HEMATOLOGÍA' },
+  { name: 'COAGULACIÓN' },
+  { name: 'QUÍMICA' },
+  { name: 'SEROLOGÍA' },
+  { name: 'HORMONALES' },
+  { name: 'ORINA Y HECES' },
 ]
 
 export default function LabOrderView() {
@@ -32,9 +40,12 @@ export default function LabOrderView() {
   const [search, setSearch] = useState('')
 
   const [patientId, setPatientId] = useState<number | null>(null)
-  const [selectedArea, setSelectedArea] = useState(laboratoryAreas[0].name)
+  const [categories, setCategories] = useState<LaboratoryCategory[]>([])
+  const [selectedArea, setSelectedArea] = useState<string>(fallbackAreas[0].name)
   const [selectedExams, setSelectedExams] = useState<string[]>([])
   const [indication, setIndication] = useState('')
+  const [isSaving, setIsSaving] = useState(false)
+  const [feedback, setFeedback] = useState<{ kind: 'ok' | 'error'; text: string } | null>(null)
 
   const activeDoctorName = doctor
     ? `${doctor.firstName} ${doctor.lastName}`
@@ -64,6 +75,14 @@ export default function LabOrderView() {
         .catch(() => undefined)
     }
 
+    getLaboratoryCategories()
+      .then(result => {
+        if (!active) return
+        setCategories(result)
+        if (result.length) setSelectedArea(result[0].name)
+      })
+      .catch(() => undefined)
+
     return () => {
       active = false
     }
@@ -79,7 +98,22 @@ export default function LabOrderView() {
     )
   }, [patients, search])
 
-  const area = laboratoryAreas.find(item => item.name === selectedArea) ?? laboratoryAreas[0]
+  // Con catálogo: exámenes reales del backend (se guardan como tests del catálogo).
+  // Sin catálogo: área de respaldo, los marcados van como custom_tests.
+  const area = useMemo(() => {
+    const category = categories.find(item => item.name === selectedArea)
+    if (category) {
+      return {
+        name: category.name,
+        hasCatalog: true,
+        exams: category.tests.map(test => ({
+          label: test.name,
+          catalog: { test_id: test.test_id, category_id: test.category_id },
+        })),
+      }
+    }
+    return { name: selectedArea, hasCatalog: false, exams: [] as { label: string; catalog?: { test_id: number; category_id: number } }[] }
+  }, [categories, selectedArea])
 
   const toggleExam = (exam: string) => {
     setSelectedExams(current =>
@@ -89,13 +123,51 @@ export default function LabOrderView() {
 
   const changeArea = (name: string) => {
     setSelectedArea(name)
-    const nextArea = laboratoryAreas.find(item => item.name === name)
-    const allowed = new Set(nextArea?.exams ?? [])
+    const nextExams = name === selectedArea ? area.exams.map(item => item.label) : []
+    const allowed = new Set(nextExams.length ? nextExams : [])
     setSelectedExams(current => current.filter(exam => allowed.has(exam)))
   }
 
   const selectedPatient = patients.find(patient => patient.id === patientId) ?? null
-  const canSave = Boolean(selectedPatient) && selectedExams.length > 0
+  const canSave = Boolean(selectedPatient) && selectedExams.length > 0 && doctorId > 0 && !isSaving
+
+  async function handleSave() {
+    if (!canSave || !selectedPatient) return
+    setFeedback(null)
+    setIsSaving(true)
+    try {
+      const today = new Date().toISOString().slice(0, 10)
+      const catalogTests = selectedExams
+        .map(exam => area.exams.find(item => item.label === exam)?.catalog)
+        .filter((item): item is { test_id: number; category_id: number } => Boolean(item))
+      const customTests = area.hasCatalog
+        ? []
+        : selectedExams.map(exam => ({ category_name: area.name, test_name: exam }))
+
+      const order = await createLaboratoryOrder({
+        patient_id: selectedPatient.id,
+        doctor_id: doctorId,
+        issue_date: today,
+        diagnosis: indication.trim() || undefined,
+        ...(catalogTests.length ? { tests: catalogTests } : {}),
+        ...(customTests.length ? { custom_tests: customTests } : {}),
+      })
+      setFeedback({
+        kind: 'ok',
+        text: `Orden #${order.id} guardada (${order.status}).`,
+      })
+      setSelectedExams([])
+      setIndication('')
+    } catch (error) {
+      const message =
+        error instanceof Error && error.message
+          ? error.message
+          : 'No se pudo guardar la orden.'
+      setFeedback({ kind: 'error', text: message })
+    } finally {
+      setIsSaving(false)
+    }
+  }
 
   return (
     <div className="lo-root">
@@ -127,14 +199,17 @@ export default function LabOrderView() {
             <aside className="lo-areas" aria-label="Áreas del laboratorio clínico">
               <h3>ÁREAS</h3>
               <nav>
-                {laboratoryAreas.map(item => (
+                {(categories.length
+                  ? categories.map(item => item.name)
+                  : fallbackAreas.map(item => item.name)
+                ).map(name => (
                   <button
-                    key={item.name}
+                    key={name}
                     type="button"
-                    className={item.name === selectedArea ? 'selected' : ''}
-                    onClick={() => changeArea(item.name)}
+                    className={name === selectedArea ? 'selected' : ''}
+                    onClick={() => changeArea(name)}
                   >
-                    {item.name}
+                    {name}
                   </button>
                 ))}
               </nav>
@@ -169,18 +244,33 @@ export default function LabOrderView() {
                 </select>
               </label>
 
-              <h3 className="lo-panel-title">Exámenes de {area.name.toLowerCase()}</h3>
+              <h3 className="lo-panel-title">
+                {area.hasCatalog
+                  ? `Exámenes de ${area.name.toLowerCase()}`
+                  : `${area.name} — sin catálogo del backend (se ordenan como exámenes personalizados)`}
+              </h3>
               <div className="lo-exams">
-                {area.exams.map(exam => (
-                  <label key={exam} className={`lo-exam${selectedExams.includes(exam) ? ' checked' : ''}`}>
-                    <input
-                      type="checkbox"
-                      checked={selectedExams.includes(exam)}
-                      onChange={() => toggleExam(exam)}
-                    />
-                    <span>{exam}</span>
-                  </label>
-                ))}
+                {area.exams.length === 0 ? (
+                  <p className="lo-empty">
+                    {area.hasCatalog
+                      ? 'No hay exámenes activos en esta categoría.'
+                      : 'No hay catálogo cargado. Agregue exámenes desde el panel de administración (SA).'}
+                  </p>
+                ) : (
+                  area.exams.map(exam => (
+                    <label
+                      key={exam.label}
+                      className={`lo-exam${selectedExams.includes(exam.label) ? ' checked' : ''}`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selectedExams.includes(exam.label)}
+                        onChange={() => toggleExam(exam.label)}
+                      />
+                      <span>{exam.label}</span>
+                    </label>
+                  ))
+                )}
               </div>
 
               <label className="lo-field">
@@ -209,12 +299,23 @@ export default function LabOrderView() {
                 </div>
               )}
 
+              {feedback && (
+                <p className={`lo-feedback${feedback.kind === 'error' ? ' lo-feedback--error' : ''}`} role="alert">
+                  {feedback.text}
+                </p>
+              )}
+
               <div className="lo-actions">
                 <button type="button" className="lo-btn lo-btn--ghost" onClick={() => navigate(`/reports${contextQuery}`)}>
                   Volver
                 </button>
-                <button type="button" className="lo-btn lo-btn--primary" disabled={!canSave}>
-                  <Save size={16} /> Guardar orden
+                <button
+                  type="button"
+                  className="lo-btn lo-btn--primary"
+                  disabled={!canSave}
+                  onClick={handleSave}
+                >
+                  <Save size={16} /> {isSaving ? 'Guardando…' : 'Guardar orden'}
                 </button>
               </div>
             </div>

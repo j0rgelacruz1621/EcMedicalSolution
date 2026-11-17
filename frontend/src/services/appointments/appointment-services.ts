@@ -88,3 +88,32 @@ export async function getNextAppointmentForPatient(
     );
   return last[0] ?? null;
 }
+
+export interface UpdateAppointmentRequest {
+  appointmentDate?: string;
+  startTime?: string;
+  endTime?: string;
+  status?: string;
+  reasonForVisit?: string;
+  type?: string;
+  officeId?: number;
+  medicalCenterId?: number;
+}
+
+/** GET /appointments/patient/:nationalId — Citas de un paciente por cédula (guest o registrado). */
+export async function getAppointmentsByPatientNationalId(nationalId: string) {
+  const response = await apiClient.get<Appointment[]>(`/appointments/patient/${nationalId}`);
+  return response.data;
+}
+
+/** PATCH /appointments/:id — Actualizar una cita (parcial o total). */
+export async function updateAppointment(id: number, payload: UpdateAppointmentRequest) {
+  const response = await apiClient.patch<Appointment>(`/appointments/${id}`, payload);
+  return response.data;
+}
+
+/** PATCH /appointments/:id/cancel — Cancelar una cita (borrado lógico). */
+export async function cancelAppointment(id: number) {
+  const response = await apiClient.patch<Appointment>(`/appointments/${id}/cancel`);
+  return response.data;
+}
