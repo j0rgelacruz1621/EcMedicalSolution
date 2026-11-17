@@ -21,3 +21,19 @@ export const loginUser = async (credentials: LoginRequest): Promise<LoginRespons
     throw new Error(message);
   }
 };
+export interface SessionResponse {
+  active: boolean
+  user: {
+    id: number
+    user_name: string
+    rol: string | null
+    application: string | null
+    doctorId?: number
+  }
+}
+
+/** GET /auth/session — Valida la sesión activa y devuelve el usuario con su rol. */
+export const getSession = async (): Promise<SessionResponse> => {
+  const response = await apiClient.get<SessionResponse>('/auth/session');
+  return response.data;
+};

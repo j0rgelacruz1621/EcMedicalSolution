@@ -4,6 +4,11 @@ import { Bell, CircleHelp, Printer, Save, Search } from 'lucide-react'
 import LeftSideBar from '../../left-sideBar'
 import { getPatients, type Patient } from '../../../services/patients/patient-services'
 import { getDoctor, type Doctor } from '../../../services/doctors/doctor-services'
+import {
+  createMedicalReport,
+  getMedicalReportDocument,
+  type MedicalReportDocument,
+} from '../../../services/medical-reports/medical-report-services'
 import './style.scss'
 
 const documentTypes = [
@@ -36,6 +41,9 @@ export default function MedicalCertificateView() {
   const [startDate, setStartDate] = useState(() => new Date().toISOString().slice(0, 10))
   const [reason, setReason] = useState('')
   const [observations, setObservations] = useState('')
+  const [isSaving, setIsSaving] = useState(false)
+  const [savedReport, setSavedReport] = useState<Awaited<ReturnType<typeof createMedicalReport>> | null>(null)
+  const [feedback, setFeedback] = useState<{ kind: 'ok' | 'error'; text: string } | null>(null)
 
   const activeDoctorName = doctor
     ? `${doctor.firstName} ${doctor.lastName}`
@@ -82,7 +90,107 @@ export default function MedicalCertificateView() {
 
   const selectedPatient = patients.find(patient => patient.id === patientId) ?? null
 
-  const canSave = Boolean(selectedPatient) && reason.trim().length > 0
+  const canSave = Boolean(selectedPatient) && reason.trim().length > 0 && doctorId > 0 && !isSaving
+
+  function buildPayload() {
+    const isRest = documentType === 'Informe de reposo médico'
+    const content = [
+      reason.trim(),
+      observations.trim() ? `Observaciones: ${observations.trim()}` : '',
+    ].filter(Boolean).join('\n')
+    const days = isRest && restDays ? Math.max(1, Math.round(Number(restDays))) : undefined
+    return {
+      patient_id: selectedPatient!.id,
+      doctor_id: doctorId,
+      type: isRest ? ('REPOSO_MEDICO' as const) : ('CONSTANCIA_ASISTENCIA' as const),
+      title: documentType,
+      content,
+      issue_date: new Date().toISOString().slice(0, 10),
+      ...(isRest && days
+        ? { rest_start_date: startDate, rest_days: days }
+        : {}),
+      diagnosis: reason.trim() || undefined,
+    }
+  }
+
+  async function handleSave() {
+    if (!canSave || !selectedPatient) return
+    setFeedback(null)
+    setIsSaving(true)
+    try {
+      const report = await createMedicalReport(buildPayload())
+      setSavedReport(report)
+      setFeedback({ kind: 'ok', text: `Informe #${report.id} guardado (${report.status}).` })
+    } catch (saveError) {
+      setFeedback({
+        kind: 'error',
+        text: saveError instanceof Error && saveError.message
+          ? saveError.message
+          : 'No se pudo guardar el informe.',
+      })
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  async function handlePrint() {
+    if (!savedReport) return
+    try {
+      const document = await getMedicalReportDocument(savedReport.id)
+      openPrintWindow(document)
+    } catch (printError) {
+      setFeedback({
+        kind: 'error',
+        text: printError instanceof Error && printError.message
+          ? printError.message
+          : 'No se pudo generar el documento.',
+      })
+    }
+  }
+
+  function openPrintWindow(document: MedicalReportDocument) {
+    const report = document.medical_report
+    const phoneList = document.footer.phones.join(' · ')
+    const win = window.open('', '_blank', 'width=800,height=1000')
+    if (!win) {
+      setFeedback({ kind: 'error', text: 'El navegador bloqueó la ventana de impresión.' })
+      return
+    }
+    win.document.write(`<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"/>
+      <title>${report.title} — ${report.issue_date}</title>
+      <style>
+        body { font-family: Arial, sans-serif; margin: 48px; color: #222; }
+        .header { display: flex; gap: 16px; align-items: center; margin-bottom: 32px; }
+        .header img { max-height: 90px; }
+        .doctor { font-weight: bold; }
+        h1 { font-size: 20px; border-bottom: 2px solid #222; padding-bottom: 8px; }
+        .row { margin: 10px 0; }
+        .label { font-weight: bold; }
+        .content { white-space: pre-wrap; margin: 20px 0; line-height: 1.5; }
+        footer { margin-top: 48px; font-size: 12px; color: #555; }
+        .signature { margin-top: 60px; border-top: 1px solid #222; width: 280px; padding-top: 6px; }
+        @media print { button { display: none; } }
+      </style></head><body>
+      <div class="header">
+        ${document.header.image_url ? `<img src="${document.header.image_url}" alt="membrete"/>` : ''}
+        <div>
+          <div class="doctor">${document.header.doctor_name}</div>
+          <div>${document.header.specialty ?? ''}</div>
+          <div>${document.header.medical_center_name ?? ''}</div>
+        </div>
+      </div>
+      <h1>${report.title}</h1>
+      <div class="row"><span class="label">Paciente:</span> ${selectedPatient?.firstName ?? ''} ${selectedPatient?.lastName ?? ''} (CI ${selectedPatient?.nationalId ?? ''})</div>
+      <div class="row"><span class="label">Fecha de emisión:</span> ${report.issue_date}</div>
+      ${report.rest_start_date ? `<div class="row"><span class="label">Reposo:</span> desde ${report.rest_start_date}${report.rest_end_date ? ` hasta ${report.rest_end_date}` : ''}${report.rest_days ? ` (${report.rest_days} día${report.rest_days > 1 ? 's' : ''})` : ''}</div>` : ''}
+      ${report.diagnosis ? `<div class="row"><span class="label">Diagnóstico:</span> ${report.diagnosis}</div>` : ''}
+      <div class="content">${report.content}</div>
+      <div class="signature">${document.header.doctor_name}<br/>${document.footer.license_number}${document.footer.cm_number ? ` — C.M. ${document.footer.cm_number}` : ''}</div>
+      <footer>${document.footer.address ?? ''} · Tel: ${phoneList} · ${document.footer.email}</footer>
+      <button onclick="window.print()">Imprimir / Guardar PDF</button>
+    </body></html>`)
+    win.document.close()
+  }
 
   return (
     <div className="mc-root">
@@ -185,6 +293,12 @@ export default function MedicalCertificateView() {
               </label>
             </div>
 
+            {feedback && (
+              <p className={`mc-feedback${feedback.kind === 'error' ? ' mc-feedback--error' : ''}`} role="alert">
+                {feedback.text}
+              </p>
+            )}
+
             {error && <p className="mc-error">{error}</p>}
 
             {selectedPatient && (
@@ -199,11 +313,21 @@ export default function MedicalCertificateView() {
               <button type="button" className="mc-btn mc-btn--ghost" onClick={() => navigate(`/reports${contextQuery}`)}>
                 Volver
               </button>
-              <button type="button" className="mc-btn mc-btn--outline" disabled={!canSave}>
+              <button
+                type="button"
+                className="mc-btn mc-btn--outline"
+                disabled={!savedReport}
+                onClick={handlePrint}
+              >
                 <Printer size={16} /> Imprimir
               </button>
-              <button type="button" className="mc-btn mc-btn--primary" disabled={!canSave}>
-                <Save size={16} /> Guardar informe
+              <button
+                type="button"
+                className="mc-btn mc-btn--primary"
+                disabled={!canSave}
+                onClick={handleSave}
+              >
+                <Save size={16} /> {isSaving ? 'Guardando…' : 'Guardar informe'}
               </button>
             </div>
           </div>

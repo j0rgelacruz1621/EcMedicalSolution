@@ -422,3 +422,28 @@
     width: 100%;
   }
 }
+.lo-feedback {
+  margin: 10px 0 0;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+  background: #e7f6ec;
+  color: #1c7c3d;
+  border: 1px solid #b4e0c3;
+
+  &--error {
+    background: #fdecec;
+    color: #b02a2a;
+    border-color: #f2c4c4;
+  }
+}
+
+.lo-empty {
+  margin: 0;
+  padding: 12px 14px;
+  font-size: 14px;
+  color: #6b7280;
+  background: #f9fafb;
+  border: 1px dashed #d1d5db;
+  border-radius: 8px;
+}

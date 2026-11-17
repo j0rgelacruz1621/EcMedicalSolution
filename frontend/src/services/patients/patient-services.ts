@@ -124,3 +124,21 @@ export async function updatePatient(
   );
   return response.data;
 }
+
+/** PUT /api/v1/patients/:id — Reemplazo total de un paciente. */
+export async function replacePatient(
+  id: number,
+  payload: CreatePatientRequest,
+): Promise<{ patient: Patient; vitals: PatientVitals | null }> {
+  const response = await apiClient.put<{ patient: Patient; vitals: PatientVitals | null }>(
+    `/api/v1/patients/${id}`,
+    payload,
+  );
+  return response.data;
+}
+
+/** DELETE /api/v1/patients/:id — Eliminar un paciente. */
+export async function deletePatient(id: number): Promise<{ patient: Patient }> {
+  const response = await apiClient.delete(`/api/v1/patients/${id}`);
+  return response.data;
+}
