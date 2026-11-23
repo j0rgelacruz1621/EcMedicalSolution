@@ -1,0 +1,293 @@
+.new-chest-xray-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1450;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(15, 23, 42, 0.42);
+  backdrop-filter: blur(2px);
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+
+  .new-chest-xray-modal {
+    display: flex;
+    flex-direction: column;
+    width: min(100%, 720px);
+    max-height: min(90vh, 680px);
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid #d1d5df;
+    border-radius: 0.75rem;
+    background: #fff;
+    color: #20242c;
+    box-shadow: 0 24px 60px rgba(17, 24, 39, 0.22);
+  }
+
+  .new-chest-xray-header {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid #cbd0dc;
+  }
+
+  .chest-xray-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+
+    h2 {
+      margin: 0;
+      color: #970018;
+      font-size: 1.35rem;
+      font-weight: 600;
+    }
+  }
+
+  .chest-xray-icon {
+    display: grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.5rem;
+    background: #970018;
+    color: #fff;
+  }
+
+  .chest-xray-context {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 0.25rem;
+    color: #4b5563;
+    font-size: 0.8rem;
+
+    span {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+  }
+
+  .chest-xray-close,
+  .chest-xray-remove-file {
+    display: grid;
+    flex-shrink: 0;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    border: 0;
+    border-radius: 0.375rem;
+    background: transparent;
+    color: #4b5563;
+    cursor: pointer;
+  }
+
+  .chest-xray-close:hover {
+    background: #f3f4f6;
+  }
+
+  .new-chest-xray-body {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 2rem;
+    min-height: 0;
+    padding: 1.25rem;
+    overflow-y: auto;
+  }
+
+  .chest-xray-findings,
+  .chest-xray-files {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.625rem;
+  }
+
+  .chest-xray-findings label,
+  .chest-xray-files h3 {
+    margin: 0;
+    color: #343944;
+    font-size: 0.85rem;
+    font-weight: 500;
+  }
+
+  .chest-xray-findings textarea {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 5rem;
+    margin: 0;
+    padding: 0.75rem 0.875rem;
+    border: 1px solid #cbd0dc;
+    border-radius: 0.5rem;
+    background: #fff;
+    color: #191c1e;
+    font: inherit;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    resize: vertical;
+  }
+
+  .chest-xray-findings textarea:focus,
+  .chest-xray-select-files:focus-visible,
+  .chest-xray-close:focus-visible,
+  .chest-xray-remove-file:focus-visible,
+  .new-chest-xray-footer button:focus-visible {
+    outline: 2px solid #970018;
+    outline-offset: 2px;
+  }
+
+  .chest-xray-files h3 {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+  }
+
+  .chest-xray-files h3 svg {
+    color: #0756a5;
+  }
+
+  .chest-xray-file-input {
+    display: none;
+  }
+
+  .chest-xray-select-files {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 2.25rem;
+    padding: 0 0.875rem;
+    border: 1px solid #cbd0dc;
+    border-radius: 0.45rem;
+    background: #fff;
+    color: #374151;
+    font: inherit;
+    font-size: 0.8rem;
+    cursor: pointer;
+  }
+
+  .chest-xray-file-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%;
+    margin: 0.25rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .chest-xray-file-card {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 0;
+    padding: 0.75rem 0.875rem;
+    border: 1px solid #dce0e7;
+    border-radius: 0.5rem;
+    background: #f0f1f3;
+
+    > svg {
+      flex-shrink: 0;
+      color: #008577;
+    }
+  }
+
+  .chest-xray-file-info {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+    gap: 0.15rem;
+
+    strong {
+      overflow: hidden;
+      color: #20242c;
+      font-size: 0.8rem;
+      font-weight: 500;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    small {
+      color: #6b7280;
+      font-size: 0.7rem;
+    }
+  }
+
+  .chest-xray-remove-file {
+    color: #970018;
+  }
+
+  .chest-xray-remove-file:hover {
+    background: #fee2e2;
+  }
+
+  .chest-xray-error {
+    margin: 0;
+    color: #b42318;
+    font-size: 0.8rem;
+  }
+
+  .new-chest-xray-footer {
+    display: flex;
+    flex-shrink: 0;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    border-top: 1px solid #cbd0dc;
+    background: #f2f3f5;
+  }
+
+  .new-chest-xray-footer button {
+    min-width: 7rem;
+    min-height: 2.5rem;
+    padding: 0 1rem;
+    border-radius: 0.45rem;
+    font: inherit;
+    font-size: 0.82rem;
+    cursor: pointer;
+  }
+
+  .chest-xray-cancel {
+    border: 1px solid #970018;
+    background: #fff;
+    color: #970018;
+  }
+
+  .chest-xray-save {
+    border: 1px solid #970018;
+    background: #970018;
+    color: #fff;
+  }
+
+  @media (max-width: 560px) {
+    padding: 0;
+    align-items: flex-end;
+
+    .new-chest-xray-modal {
+      width: 100%;
+      max-height: 94vh;
+      border-radius: 0.75rem 0.75rem 0 0;
+    }
+
+    .new-chest-xray-header,
+    .new-chest-xray-body,
+    .new-chest-xray-footer {
+      padding-right: 1rem;
+      padding-left: 1rem;
+    }
+
+    .new-chest-xray-body {
+      gap: 1.5rem;
+    }
+
+    .new-chest-xray-footer button {
+      flex: 1;
+    }
+  }
+}

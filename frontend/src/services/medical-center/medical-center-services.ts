@@ -5,6 +5,9 @@ export interface MedicalCenter {
   name: string
   address?: string | null
   phone?: string | null
+  schedule?: string | null
+  isActive?: boolean | null
+  createdAt?: string | null
   offices?: Office[]
 }
 
@@ -16,8 +19,10 @@ export interface Office {
   medicalCenter?: MedicalCenter
 }
 
-export async function getMedicalCenters() {
-  const response = await apiClient.get<MedicalCenter[]>('/medical-centers')
+export async function getMedicalCenters(includeInactive = false) {
+  const response = await apiClient.get<MedicalCenter[]>('/medical-centers', {
+    params: includeInactive ? { includeInactive: true } : undefined,
+  })
   return response.data
 }
 
@@ -26,8 +31,26 @@ export async function getOffices() {
   return response.data
 }
 
-export async function createMedicalCenter(payload: { name: string; address?: string; phone?: string }) {
+export type MedicalCenterPayload = {
+  name: string
+  address?: string
+  phone?: string
+  schedule?: string
+  isActive?: boolean
+}
+
+export async function createMedicalCenter(payload: MedicalCenterPayload) {
   const response = await apiClient.post<MedicalCenter>('/medical-centers', payload)
+  return response.data
+}
+
+export async function updateMedicalCenter(id: number, payload: Partial<MedicalCenterPayload>) {
+  const response = await apiClient.patch<MedicalCenter>(`/medical-centers/${id}`, payload)
+  return response.data
+}
+
+export async function deactivateMedicalCenter(id: number) {
+  const response = await apiClient.delete<MedicalCenter>(`/medical-centers/${id}`)
   return response.data
 }
 

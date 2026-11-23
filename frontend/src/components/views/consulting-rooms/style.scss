@@ -1,0 +1,730 @@
+.consulting-rooms-root {
+  display: flex;
+  min-height: 100%;
+  background: #f7f8fa;
+  color: #24252b;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+
+  > .lsb {
+    flex: 0 0 260px;
+  }
+
+  .lsb-nav a.active,
+  .lsb-nav a.active:hover {
+    background: #8d0017;
+    color: #fff;
+  }
+
+  .lsb-nav a.active .nav-icon {
+    color: #fff;
+  }
+
+  .dashboard-header {
+    grid-template-columns: max-content minmax(0, 1fr) max-content;
+    gap: 10px;
+    min-height: 56px;
+    padding: 8px 25px;
+    box-sizing: border-box;
+
+    h1 {
+      color: #8d0017;
+      font-size: 21px;
+      line-height: 28px;
+      letter-spacing: 0;
+      font-weight: 750;
+    }
+
+    .dashboard-header__center {
+      justify-self: start;
+    }
+
+    .dashboard-header__actions {
+      gap: 12px;
+    }
+  }
+}
+
+.consulting-rooms-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.consulting-rooms-header-user {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  line-height: 1.25;
+  white-space: nowrap;
+
+  span {
+    color: #2a2d34;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  small {
+    color: #737784;
+    font-size: 11px;
+  }
+}
+
+.consulting-rooms-active-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 25px;
+  padding: 4px 11px;
+  border: 1px solid #dfe2e7;
+  border-radius: 999px;
+  background: #f1f2f4;
+  color: #8d0017;
+  font-size: 13px;
+  line-height: 1;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.consulting-rooms-header-icon {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: #5e6980;
+  cursor: pointer;
+
+  &:hover {
+    background: #f3f4f7;
+    color: var(--primary-color);
+  }
+}
+
+.consulting-rooms-avatar {
+  width: 32px;
+  height: 32px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(146, 157, 168, 0.3);
+  border-radius: 50%;
+  background: #eef0f3;
+  color: var(--primary-color);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.consulting-rooms-content {
+  width: min(100%, 1320px);
+  margin: 0 auto;
+  padding: 30px 30px 44px;
+  box-sizing: border-box;
+}
+
+.consulting-rooms-intro {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 19px;
+  padding: 22px 24px;
+  border: 1px solid #e3e7ed;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 2px 5px rgba(24, 31, 45, 0.025);
+
+  h2 {
+    margin: 0 0 5px;
+    color: #252631;
+    font-size: 19px;
+    line-height: 1.25;
+    font-weight: 700;
+  }
+
+  p {
+    margin: 0;
+    color: #737784;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+}
+
+.consulting-rooms-primary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 43px;
+  padding: 0 18px;
+  border: 1px solid var(--primary-color);
+  border-radius: 9px;
+  background: var(--primary-color);
+  color: #fff;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 650;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 140ms ease, box-shadow 140ms ease;
+
+  &:hover {
+    background: #690019;
+    box-shadow: 0 5px 13px rgba(128, 0, 32, 0.18);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: wait;
+  }
+}
+
+.consulting-rooms-message,
+.consulting-rooms-error {
+  margin: 0 0 14px;
+  padding: 11px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.consulting-rooms-message {
+  border: 1px solid #b7dfca;
+  background: #effaf3;
+  color: #17653b;
+}
+
+.consulting-rooms-error {
+  border: 1px solid #d9c8cb;
+  background: #f3f4f6;
+  color: #a32036;
+}
+
+.consulting-rooms-kpis {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 19px;
+  margin-bottom: 22px;
+}
+
+.consulting-rooms-kpi {
+  min-height: 98px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 18px 20px;
+  box-sizing: border-box;
+  border: 1px solid #e8e9ed;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 2px 6px rgba(24, 31, 45, 0.035);
+
+  > div {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  small {
+    color: #777b86;
+    font-size: 11px;
+    font-weight: 750;
+    letter-spacing: 0.055em;
+  }
+
+  strong {
+    overflow-wrap: anywhere;
+    color: #292a32;
+    font-size: 14px;
+    line-height: 1.35;
+    font-weight: 700;
+  }
+
+  &:first-child strong {
+    color: var(--primary-color);
+    font-size: 22px;
+    line-height: 1;
+  }
+}
+
+.consulting-rooms-kpi-icon {
+  width: 46px;
+  height: 46px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+}
+
+.kpi-red { background: #eef0f3; color: var(--primary-color); }
+.kpi-green { background: #e8f5ee; color: #30865c; }
+.kpi-blue { background: #eaf1fb; color: #5273ad; }
+
+.consulting-rooms-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 0 0 21px;
+  padding: 14px 16px;
+  border: 1px solid #e3e7ed;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 2px 5px rgba(24, 31, 45, 0.025);
+}
+
+.consulting-rooms-search {
+  height: 41px;
+  flex: 1;
+  min-width: 160px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 12px;
+  border: 1px solid #dfe3eb;
+  border-radius: 7px;
+  background: #fff;
+  color: #858994;
+  box-sizing: border-box;
+
+  &:focus-within {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(128, 0, 32, 0.08);
+  }
+
+  input {
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: #292a32;
+    font: inherit;
+    font-size: 13px;
+  }
+}
+
+.consulting-rooms-status-filter {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: #666b76;
+  font-size: 12px;
+  white-space: nowrap;
+
+  select {
+    height: 41px;
+    min-width: 180px;
+    padding: 0 29px 0 13px;
+    border: 1px solid #dfe3eb;
+    border-radius: 7px;
+    background: #fff;
+    color: #3a3b43;
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+  }
+}
+
+.consulting-rooms-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 19px;
+}
+
+.consulting-room-card {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid #e7e8ec;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 2px 7px rgba(24, 31, 45, 0.035);
+}
+
+.consulting-room-card-body {
+  flex: 1;
+  padding: 19px 19px 17px;
+}
+
+.consulting-room-title {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 19px;
+
+  h3 {
+    margin: 0 0 6px;
+    color: #262731;
+    font-size: 16px;
+    line-height: 1.35;
+    font-weight: 750;
+  }
+}
+
+.consulting-room-icon {
+  width: 42px;
+  height: 42px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border-radius: 7px;
+  background: #eef0f3;
+  color: var(--primary-color);
+}
+
+.consulting-room-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 23px;
+  padding: 3px 9px;
+  border-radius: 4px;
+  background: #f0f1f3;
+  color: #555b66;
+  font-size: 11px;
+  font-weight: 700;
+
+  &.inactive {
+    background: #f1f1f2;
+    color: #71737a;
+  }
+}
+
+.consulting-room-info {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.consulting-room-info-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  color: #727680;
+  font-size: 13px;
+  line-height: 1.55;
+
+  > svg {
+    flex: 0 0 auto;
+    margin-top: 2px;
+    color: #858994;
+  }
+
+  strong {
+    display: block;
+    margin-bottom: 2px;
+    color: #484a54;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  p {
+    margin: 0;
+    color: #737784;
+    overflow-wrap: anywhere;
+  }
+
+  .consulting-room-office {
+    margin-top: 4px;
+    color: #777b86;
+    font-size: 12px;
+  }
+
+  .consulting-room-schedule {
+    white-space: pre-line;
+  }
+}
+
+.consulting-room-info-row.phone-row {
+  align-items: center;
+}
+
+.consulting-room-card-footer {
+  min-height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 18px;
+  border-top: 1px solid #edeef0;
+  background: #fdfdfd;
+  box-sizing: border-box;
+
+  small {
+    color: #868994;
+    font-size: 11px;
+  }
+
+  > div {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  button {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 0;
+    border: 0;
+    background: transparent;
+    color: #555964;
+    font: inherit;
+    font-size: 11px;
+    font-weight: 650;
+    cursor: pointer;
+
+    &:hover { color: var(--primary-color); }
+
+    &.delete-action { color: var(--primary-color); }
+  }
+}
+
+.consulting-rooms-empty {
+  padding: 36px 16px;
+  border: 1px dashed #d9dbe1;
+  border-radius: 10px;
+  color: #777b86;
+  background: #fff;
+  text-align: center;
+  font-size: 14px;
+}
+
+.consulting-room-form-overlay {
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  overflow-y: auto;
+  background: rgba(25, 27, 35, 0.48);
+  box-sizing: border-box;
+}
+
+.consulting-room-form {
+  width: min(100%, 540px);
+  max-height: min(92vh, 760px);
+  overflow-y: auto;
+  padding: 23px;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 18px 55px rgba(18, 19, 24, 0.24);
+  box-sizing: border-box;
+
+  > header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 19px;
+
+    h2 {
+      margin: 0;
+      color: var(--primary-color);
+      font-size: 20px;
+      line-height: 1.3;
+    }
+
+    button {
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      border: 0;
+      border-radius: 8px;
+      background: transparent;
+      color: #626671;
+      cursor: pointer;
+
+      &:hover { background: #f3f3f5; }
+    }
+  }
+
+  > label:not(.consulting-room-active-toggle) {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    margin-bottom: 15px;
+    color: #41434c;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  input:not([type='checkbox']),
+  textarea {
+    width: 100%;
+    min-height: 42px;
+    padding: 10px 12px;
+    border: 1px solid #dfe1e6;
+    border-radius: 8px;
+    outline: 0;
+    background: #fff;
+    color: #292a32;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 400;
+    box-sizing: border-box;
+
+    &:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(128, 0, 32, 0.08);
+    }
+  }
+
+  textarea {
+    resize: vertical;
+  }
+
+  > .consulting-rooms-error {
+    margin: 0 0 14px;
+  }
+
+  > footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding-top: 5px;
+
+    button {
+      min-height: 40px;
+      padding: 0 15px;
+      border-radius: 8px;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .form-cancel {
+      border: 1px solid #d7d9de;
+      background: #fff;
+      color: #4c4e57;
+    }
+  }
+}
+
+.consulting-room-active-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 15px;
+  color: #4c4e57;
+  font-size: 13px;
+  cursor: pointer;
+
+  input {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--primary-color);
+  }
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (max-width: 1050px) {
+  .consulting-rooms-kpis {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .consulting-rooms-kpi:last-child {
+    grid-column: 1 / -1;
+  }
+
+  .consulting-rooms-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .consulting-rooms-root {
+    flex-direction: column;
+  }
+
+  .consulting-rooms-root > .lsb {
+    width: auto;
+    height: auto;
+    min-height: auto;
+    flex-basis: auto;
+  }
+
+  .consulting-rooms-content {
+    padding: 22px 16px 30px;
+  }
+
+  .consulting-rooms-root .dashboard-header {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 10px 8px 14px;
+
+    .dashboard-header__center {
+      display: block;
+      justify-self: start;
+    }
+  }
+
+  .consulting-rooms-intro {
+    align-items: flex-start;
+    flex-direction: column;
+
+    h2 { font-size: 21px; }
+
+    .consulting-rooms-primary-button {
+      width: 100%;
+    }
+  }
+
+  .consulting-rooms-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .consulting-rooms-status-filter {
+    justify-content: space-between;
+
+    select { flex: 1; }
+  }
+}
+
+@media (max-width: 540px) {
+  .consulting-rooms-kpis {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .consulting-rooms-kpi:last-child {
+    grid-column: auto;
+  }
+
+  .consulting-rooms-kpi {
+    min-height: 88px;
+    padding: 15px;
+  }
+
+  .consulting-rooms-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .consulting-room-card-footer {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .consulting-room-form {
+    padding: 18px;
+  }
+}

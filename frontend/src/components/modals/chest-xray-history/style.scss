@@ -1,0 +1,191 @@
+.chest-xray-history-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1250;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(15, 23, 42, 0.42);
+  backdrop-filter: blur(2px);
+
+  .chest-xray-history-modal {
+    display: flex;
+    flex-direction: column;
+    width: min(100%, 720px);
+    max-height: 88vh;
+    overflow: hidden;
+    border: 1px solid #d1d5df;
+    border-radius: 0.75rem;
+    background: #fff;
+    box-shadow: 0 24px 60px rgba(17, 24, 39, 0.22);
+  }
+
+  .chest-xray-history-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid #cbd0dc;
+  }
+
+  .chest-xray-history-heading {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+
+    h2 {
+      margin: 0;
+      color: #970018;
+      font-size: 1.25rem;
+    }
+
+    p {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      margin: 0.25rem 0 0;
+      color: #4b5563;
+      font-size: 0.8rem;
+    }
+  }
+
+  .chest-xray-history-icon {
+    display: grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.5rem;
+    background: #970018;
+    color: #fff;
+  }
+
+  .chest-xray-history-close {
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    border: 0;
+    border-radius: 0.375rem;
+    background: transparent;
+    color: #4b5563;
+    cursor: pointer;
+  }
+
+  .chest-xray-history-body {
+    min-height: 8rem;
+    padding: 1.25rem;
+    overflow-y: auto;
+  }
+
+  .chest-xray-history-empty {
+    margin: 0;
+    padding: 2rem 1rem;
+    color: #6b7280;
+    text-align: center;
+  }
+
+  .chest-xray-history-list,
+  .chest-xray-history-files {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .chest-xray-history-record {
+    padding: 1rem;
+    border: 1px solid #d1d5df;
+    border-radius: 0.5rem;
+    background: #fafafa;
+
+    p {
+      margin: 0.75rem 0;
+      color: #343944;
+      font-size: 0.875rem;
+      line-height: 1.5;
+      white-space: pre-wrap;
+    }
+  }
+
+  .chest-xray-history-record-heading,
+  .chest-xray-history-record-heading span,
+  .chest-xray-history-files li {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .chest-xray-history-record-heading {
+    justify-content: space-between;
+    gap: 1rem;
+    color: #970018;
+
+    span {
+      color: #6b7280;
+      font-size: 0.75rem;
+    }
+  }
+
+  .chest-xray-history-files {
+    gap: 0.35rem;
+    padding-top: 0.65rem;
+    border-top: 1px solid #e5e7eb;
+
+    li {
+      color: #4b5563;
+      font-size: 0.8rem;
+    }
+  }
+
+  .chest-xray-history-footer {
+    display: flex;
+    justify-content: flex-end;
+    padding: 1rem 1.25rem;
+    border-top: 1px solid #cbd0dc;
+
+    button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      min-height: 2.5rem;
+      padding: 0 1rem;
+      border: 0;
+      border-radius: 0.45rem;
+      background: #970018;
+      color: #fff;
+      font: inherit;
+      font-size: 0.82rem;
+      cursor: pointer;
+    }
+  }
+
+  .chest-xray-history-close:focus-visible,
+  .chest-xray-history-footer button:focus-visible {
+    outline: 2px solid #970018;
+    outline-offset: 2px;
+  }
+
+  @media (max-width: 560px) {
+    align-items: flex-end;
+    padding: 0;
+
+    .chest-xray-history-modal {
+      max-height: 92vh;
+      border-radius: 0.75rem 0.75rem 0 0;
+    }
+
+    .chest-xray-history-record-heading {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .chest-xray-history-footer button {
+      width: 100%;
+    }
+  }
+}
